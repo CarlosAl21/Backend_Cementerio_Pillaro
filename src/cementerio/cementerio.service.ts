@@ -1,0 +1,66 @@
+import { Injectable } from '@nestjs/common';
+import { CreateCementerioDto } from './dto/create-cementerio.dto';
+import { UpdateCementerioDto } from './dto/update-cementerio.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Cementerio } from './entities/cementerio.entity';
+import { Repository } from 'typeorm';
+
+@Injectable()
+export class CementerioService {
+  constructor(@InjectRepository (Cementerio) private readonly cementerioRepository: Repository<Cementerio>) {
+    console.log('CementerioService initialized');
+  }
+  async create(createCementerioDto: CreateCementerioDto) {
+    try {
+      const cementerio = this.cementerioRepository.create(createCementerioDto);
+      return await this.cementerioRepository.save(cementerio);
+    } catch (error) {
+      console.log(error);
+      return {error: error, mensaje: 'Error en la creacion'};
+    }
+  }
+
+  findAll() {
+    return this.cementerioRepository.find();
+  }
+
+  async findOne(id: string) {
+    try {
+      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      if (!cementerio) {
+        return { mensaje: 'No se encontro el cementerio' };
+      }
+      return cementerio;
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la busqueda' };
+    }
+  }
+
+  async update(id: string, updateCementerioDto: UpdateCementerioDto) {
+    try {
+      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      if (!cementerio) {
+        return { mensaje: 'No se encontro el cementerio' };
+      }
+      this.cementerioRepository.merge(cementerio, updateCementerioDto);
+      return await this.cementerioRepository.save(cementerio);
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la actualizacion' };
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      if (!cementerio) {
+        return { mensaje: 'No se encontro el cementerio' };
+      }
+      return await this.cementerioRepository.remove(cementerio);
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la eliminacion' };
+    }
+  }
+}
