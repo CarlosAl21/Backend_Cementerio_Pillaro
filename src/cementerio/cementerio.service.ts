@@ -3,7 +3,7 @@ import { CreateCementerioDto } from './dto/create-cementerio.dto';
 import { UpdateCementerioDto } from './dto/update-cementerio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cementerio } from './entities/cementerio.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class CementerioService {
@@ -61,6 +61,19 @@ export class CementerioService {
     } catch (error) {
       console.log(error);
       return { error: error, mensaje: 'Error en la eliminacion' };
+    }
+  }
+
+  async findByName(name: string) {
+    try {
+       const cementerio = await this.cementerioRepository.findOne({where: {nombre: Like(`%${name}%`)} });
+      if (!cementerio) {
+        return { mensaje: 'No se encontro el cementerio' };
+      }
+      return cementerio;
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la busqueda' };
     }
   }
 }

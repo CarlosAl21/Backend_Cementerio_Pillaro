@@ -16,6 +16,9 @@ export class User {
     cedula: string;
 
     @Column({ type: 'varchar', length: 100 })
+    email: string;
+
+    @Column({ type: 'varchar', length: 100 })
     nombre: string;
 
     @Column({ type: 'varchar', length: 100 })

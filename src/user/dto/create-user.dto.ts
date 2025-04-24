@@ -10,6 +10,9 @@ export class CreateUserDto {
     cedula: string;
 
     @IsString()
+    email: string;
+
+    @IsString()
     nombre: string;
 
     @IsString()
