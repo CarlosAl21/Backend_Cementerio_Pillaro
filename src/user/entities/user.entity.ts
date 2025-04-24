@@ -33,7 +33,7 @@ export class User {
     @Column({ type: 'varchar', length: 100 })
     fecha_creacion: string;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: 'varchar', length: 100 , nullable: true })
     fecha_modificacion: string;
 
     @Column({ type: 'varchar', length: 100 })

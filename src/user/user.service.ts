@@ -131,7 +131,7 @@ export class UserService {
   }
 
   async validateUser(username: string, pass: string): Promise<User|any> {
-    const user = await this.userRepository.findOne({ where: { cedula: username, password: pass } });
+    const user = await this.userRepository.findOne({ where: { cedula: username} });
     if (user && (await bcrypt.compare(pass, user.password))) {
       return user;
     }

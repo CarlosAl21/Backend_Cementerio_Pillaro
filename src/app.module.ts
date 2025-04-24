@@ -25,7 +25,7 @@ import { Cementerio } from './cementerio/entities/cementerio.entity';
         User,
         Cementerio,
       ],
-      synchronize: true,
+      synchronize: true, // Solo para desarrollo, no usar en producción
     }),
     UserModule, 
     CementerioModule, 

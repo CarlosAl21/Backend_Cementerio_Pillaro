@@ -1,5 +1,5 @@
 import { User } from "src/user/entities/user.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('Cementerio')
 export class Cementerio {
@@ -24,17 +24,20 @@ export class Cementerio {
     @Column({ type: 'varchar', length: 100 })
     fecha_creacion: string;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: 'varchar', length: 100, nullable: true })
     fecha_modificacion: string;
 
     @OneToMany(() => User, (user) => user.id_cementerio_pert)
     usuarios: User[];
 
-    beforeInsert() {
+    @BeforeInsert()
+    async FechaCreacion() {
         this.fecha_creacion = new Date().toISOString();
         this.estado = 'Activo';
     }
-    beforeUpdate() {
+
+    @BeforeUpdate()
+    async beforeUpdate() {
         this.fecha_modificacion = new Date().toISOString();
     }
     
