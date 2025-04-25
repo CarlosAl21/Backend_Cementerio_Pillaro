@@ -1,10 +1,8 @@
 import { PartialType } from '@nestjs/swagger';
 import { CreateExumacionDto } from './create-exumacion.dto';
+import { IsString } from 'class-validator';
 
 export class UpdateExumacionDto extends PartialType(CreateExumacionDto) {
-    aprobado?: boolean;
-  aprobadoPor?: string;
-  nuevoLugar?: string;
-  fechaExhumacion?: Date;
-  horaExhumacion?: string;
+  @IsString()
+  id_exumacion?: number | undefined;
 }
