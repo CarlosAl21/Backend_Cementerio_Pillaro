@@ -8,5 +8,6 @@ import { InhumacionesController } from './inhumaciones.controller';
   imports: [TypeOrmModule.forFeature([Inhumacion])], // Registra la entidad Inhumacion aquí
   providers: [InhumacionesService],
   controllers: [InhumacionesController],
+  exports: [InhumacionesService], // Exporta el servicio si es necesario en otros módulos
 })
 export class InhumacionesModule {}

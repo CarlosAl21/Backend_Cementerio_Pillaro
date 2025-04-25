@@ -1,11 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Nicho } from 'src/nicho/entities/nicho.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn } from 'typeorm';
 @Entity('inhumaciones')
 export class Inhumacion {
   @PrimaryGeneratedColumn('uuid')
   id_inhumacion: string;
 
-  @Column()
-  id_nicho: string;
+  @ManyToOne(() => Nicho, (nicho) => nicho.inhumaciones)
+  @JoinColumn({ name: 'id_nicho' })
+  id_nicho: Nicho;
 
   @Column()
   id_fallecido: string;

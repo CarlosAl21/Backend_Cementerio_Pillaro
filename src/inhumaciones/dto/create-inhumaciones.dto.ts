@@ -1,9 +1,11 @@
 import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { Nicho } from "src/nicho/entities/nicho.entity";
+import { DeepPartial } from "typeorm";
 
 export class CreateInhumacionDto {
     @IsString()
     @IsNotEmpty()
-    id_nicho: string;
+    id_nicho: DeepPartial <Nicho>;
 
     @IsString()
     @IsNotEmpty()

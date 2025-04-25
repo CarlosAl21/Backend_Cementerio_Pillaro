@@ -12,6 +12,8 @@ import { Nicho } from './nicho/entities/nicho.entity';
 import { Exumacion } from './exumacion/entities/exumacion.entity';
 import { NichoModule } from './nicho/nicho.module';
 import { ExumacionModule } from './exumacion/exumacion.module';
+import { Inhumacion } from './inhumaciones/entities/inhumacion.entity';
+import { InhumacionesModule } from './inhumaciones/inhumaciones.module';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { ExumacionModule } from './exumacion/exumacion.module';
         Cementerio,
         Nicho,
         Exumacion,
+        Inhumacion,
       ],
       synchronize: true, // Solo para desarrollo, no usar en producción
     }),
@@ -38,6 +41,7 @@ import { ExumacionModule } from './exumacion/exumacion.module';
     AuthModule,
     NichoModule,
     ExumacionModule,
+    InhumacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
