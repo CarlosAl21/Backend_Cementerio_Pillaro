@@ -1,22 +1,34 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { NichoModule } from './nicho/nicho.module';
+import { UserModule } from './user/user.module';
+import { CementerioModule } from './cementerio/cementerio.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './user/entities/user.entity';
+import { Cementerio } from './cementerio/entities/cementerio.entity';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({isGlobal: true}),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      username: 'postgres',
-      password: 'stacolegio5',
-      database: 'cementerio',
+      type: process.env.DB_TYPE as any,
+      host: process.env.DB_HOST,
+      port: +(process.env.DB_PORT || 5432),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      schema: process.env.DB_SCHEMA, // Asegúrate de que esta línea esté correcta
       autoLoadEntities: true,
-      synchronize: true,
+      entities: [
+        User,
+        Cementerio,
+      ],
+      synchronize: true, // Solo para desarrollo, no usar en producción
     }),
-    NichoModule,
+    UserModule, 
+    CementerioModule, 
+    AuthModule
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
