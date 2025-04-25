@@ -31,11 +31,6 @@ export class CreateNichoDto {
   @IsNotEmpty()
   tipo: string;
 
-  @ApiProperty({ example: 'Disponible', description: 'Estado del nicho' })
-  @IsString()
-  @IsNotEmpty()
-  estado: string;
-
   @ApiProperty({ example: '2023-01-01', description: 'Fecha de construcción' })
   @IsDateString()
   @IsNotEmpty()

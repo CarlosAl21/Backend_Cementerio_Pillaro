@@ -1,10 +1,10 @@
 // src/nichos/entities/nicho.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 
 @Entity('nichos')
 export class Nicho {
-  @PrimaryGeneratedColumn({ name: 'id_nicho' })
-  idNicho: number;
+  @PrimaryGeneratedColumn('uuid')
+  idNicho: string;
 
   @Column({ type: 'int', name: 'id_cementerio' })
   idCementerio: number;
@@ -30,12 +30,28 @@ export class Nicho {
   @Column({ type: 'text', nullable: true })
   observaciones?: string;
 
-  @CreateDateColumn({ name: 'fecha_creacion' })
-  fechaCreacion: Date;
-
-  @UpdateDateColumn({ name: 'fecha_actualizacion' })
-  fechaActualizacion: Date;
-
   @Column({ type: 'int', name: 'numero_pisos' })
   numeroPisos: number;
+
+  @CreateDateColumn({ type: 'date' })
+  fechaCreacion: Date;
+
+  @UpdateDateColumn({ type: 'date', nullable: true })
+  fechaActualizacion: Date;
+
+  @BeforeInsert()
+  async setFechaCreacion() {
+    this.fechaCreacion = new Date();
+  }
+
+  @BeforeInsert()
+  async estadoDefault() {
+    this.estado = 'Activo';
+  }
+
+  @BeforeUpdate()
+  async setFechaActualizacion() {
+    this.fechaActualizacion = new Date();
+  }
+
 }
