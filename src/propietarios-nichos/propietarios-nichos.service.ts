@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePropietariosNichoDto } from './dto/create-propietarios-nicho.dto';
-import { UpdatePropietariosNichoDto } from './dto/update-propietarios-nicho.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreatePropietarioNichoDto } from './dto/create-propietarios-nicho.dto';
+import { UpdatePropietarioNichoDto } from './dto/update-propietarios-nicho.dto';
+import { PropietarioNicho } from './entities/propietarios-nicho.entity';
+
 
 @Injectable()
 export class PropietariosNichosService {
-  create(createPropietariosNichoDto: CreatePropietariosNichoDto) {
-    return 'This action adds a new propietariosNicho';
+  constructor(
+    @InjectRepository(PropietarioNicho)
+    private propietarioRepo: Repository<PropietarioNicho>,
+  ) {}
+
+  create(dto: CreatePropietarioNichoDto): Promise<PropietarioNicho> {
+    return this.propietarioRepo.save(dto);
   }
 
-  findAll() {
-    return `This action returns all propietariosNichos`;
+  findAll(): Promise<PropietarioNicho[]> {
+    return this.propietarioRepo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} propietariosNicho`;
+  async findOne(id: number): Promise<PropietarioNicho> {
+    const propietario = await this.propietarioRepo.findOneBy({ id_propietario_nicho: id });
+    if (!propietario) {
+      throw new Error(`PropietarioNicho with id ${id} not found`);
+    }
+    return propietario;
   }
 
-  update(id: number, updatePropietariosNichoDto: UpdatePropietariosNichoDto) {
-    return `This action updates a #${id} propietariosNicho`;
+  async update(id: number, dto: UpdatePropietarioNichoDto): Promise<PropietarioNicho> {
+    await this.propietarioRepo.update(id, dto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} propietariosNicho`;
+  async remove(id: number): Promise<void> {
+    await this.propietarioRepo.delete(id);
   }
 }

@@ -7,7 +7,7 @@ export class PropietarioNicho {
 
   @Column() id_persona: number;
 
-  // id de nicho sin relacion directa hasta que se pueda unir
+  // id de nicho sin relacion directa hasta que se pueda unir 
   @Column() id_nicho: number;
 
   @Column({ type: 'date' }) fecha_adquisicion: Date;

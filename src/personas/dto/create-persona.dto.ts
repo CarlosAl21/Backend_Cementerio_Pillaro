@@ -1,4 +1,5 @@
 export class CreatePersonaDto {
+  /*datos de la bd*/
     cedula: string;
     nombres: string;
     apellidos: string;

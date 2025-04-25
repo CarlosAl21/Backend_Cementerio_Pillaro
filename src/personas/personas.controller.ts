@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PersonasService } from './personas.service';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
+import { Persona } from './entities/persona.entity';
 
 @Controller('personas')
 export class PersonasController {
@@ -16,6 +17,13 @@ export class PersonasController {
   findAll() {
     return this.personasService.findAll();
   }
+
+  @Get('search')
+async search(@Query() query): Promise<Persona[]> {
+  const { cedula, nombres } = query;
+  return this.personasService.findBy(cedula, nombres);
+}
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {

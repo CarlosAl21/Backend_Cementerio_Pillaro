@@ -9,12 +9,12 @@ import { PropietariosNichosModule } from './propietarios-nichos/propietarios-nic
 
 @Module({
   imports: [
-   
+   /* CONEXION HACIA LA BD  */
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost', 
       port: 5432,
-      username: 'root',
+      username: 'postgres',
       password: 'root',
       database: 'pillaro',
       autoLoadEntities: true, 

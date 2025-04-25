@@ -1,26 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-
+import { Persona } from './entities/persona.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 @Injectable()
 export class PersonasService {
-  create(createPersonaDto: CreatePersonaDto) {
-    return 'This action adds a new persona';
+  constructor(
+    @InjectRepository(Persona)
+    private personaRepo: Repository<Persona>,
+  ) {}
+
+  create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
+    return this.personaRepo.save(createPersonaDto);
   }
 
-  findAll() {
-    return `This action returns all personas`;
+  findAll(): Promise<Persona[]> {
+    return this.personaRepo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} persona`;
+  async findOne(id: number): Promise<Persona> {
+    const persona = await this.personaRepo.findOneBy({ id_persona: id });
+    if (!persona) {
+      throw new Error(`Persona with id ${id} not found`);
+    }
+    return persona;
   }
 
-  update(id: number, updatePersonaDto: UpdatePersonaDto) {
-    return `This action updates a #${id} persona`;
+  // METODO DE BUSQUEDA POR CEDULA O NOMBRES
+  async findBy(cedula?: string, nombres?: string): Promise<Persona[]> {
+    const query = this.personaRepo.createQueryBuilder('persona');
+  
+    // EN CASO QUE NO ENCUENTRE NINGUN PARAMETRO DEVUELVE TODOS LOS REGISTROS
+    if (!cedula && !nombres) {
+      return this.personaRepo.find();
+    }
+  
+    // BUSQUEDA POR CEDULA
+    if (cedula) {
+      query.andWhere('persona.cedula = :cedula', { cedula });
+    }
+  
+    // BUSQUEDA POR NOMBRES 
+    if (nombres) {
+      query.andWhere('persona.nombres LIKE :nombres', { nombres: `%${nombres}%` });
+    }
+  
+    return query.getMany();
+  }
+  
+  
+//ACTUALIZACION DE REGISTROS
+  async update(id: number, dto: UpdatePersonaDto): Promise<Persona> {
+    await this.personaRepo.update(id, dto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} persona`;
+  async remove(id: number): Promise<void> {
+    await this.personaRepo.delete(id);
   }
 }
+
