@@ -1,20 +1,21 @@
+import { CreateInhumacionDto } from './dto/create-inhumaciones.dto';
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inhumacion } from './entities/inhumacion.entity';
+import { UpdateInhumacionDto } from './dto/update-inhumacione.dto';
 
 @Injectable()
 export class InhumacionesService {
   constructor(
-    @InjectRepository(Inhumacion)
-    private readonly repo: Repository<Inhumacion>,
+    @InjectRepository(Inhumacion) private readonly repo: Repository<Inhumacion>,
   ) {}
 
   // Crear inhumación
-  async create(data: Partial<Inhumacion>) {
+  async create(CreateInhumacionDto: CreateInhumacionDto) {
     try {
-      const inhumacion = this.repo.create(data);  // Crea la instancia de la entidad con los datos
-      return await this.repo.save(inhumacion);    // Guarda la entidad en la base de datos
+      const inhumacion = this.repo.create(CreateInhumacionDto);
+      return await this.repo.save(inhumacion);
     } catch (error) {
       console.error('Error al crear inhumación:', error);
       throw new InternalServerErrorException(error.message || 'No se pudo crear la inhumación');
@@ -23,32 +24,32 @@ export class InhumacionesService {
 
   // Obtener todas las inhumaciones
   async findAll() {
-    try {
-      return await this.repo.find();
-    } catch (error) {
-      console.error('Error al listar inhumaciones:', error);
-      throw new InternalServerErrorException(error.message || 'No se pudo obtener la lista de inhumaciones');
-    }
+    return await this.repo.find();
   }
 
   // Obtener una inhumación por ID
-  async findOne(id: number) {
-    const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
-    if (!inhumacion) {
-      throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
+  async findOne(id: string) {
+    try {
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      if (!inhumacion) {
+        throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
+      }
+      return inhumacion;
+    } catch (error) {
+      console.error('Error al obtener inhumación:', error);
+      throw new InternalServerErrorException(error.message || 'No se pudo obtener la inhumación');
     }
-    return inhumacion;
   }
 
   // Actualizar una inhumación
-  async update(id: number, data: Partial<Inhumacion>) {
-    const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
-    if (!inhumacion) {
-      throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
-    }
+  async update(id: string, updateInhumacionDto: UpdateInhumacionDto) {
     try {
-      // Desestructuramos el objeto de inhumacion original y los datos nuevos
-      return await this.repo.save({ ...inhumacion, ...data });
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      if (!inhumacion) {
+        throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
+      }
+      await this.repo.merge(inhumacion, updateInhumacionDto);
+      return await this.repo.save(inhumacion);
     } catch (error) {
       console.error('Error al actualizar inhumación:', error);
       throw new InternalServerErrorException(error.message || 'No se pudo actualizar la inhumación');
@@ -56,14 +57,13 @@ export class InhumacionesService {
   }
 
   // Eliminar una inhumación
-  async remove(id: number) {
-    const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
-    if (!inhumacion) {
-      throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
-    }
+  async remove(id: string) {
     try {
-      await this.repo.remove(inhumacion);
-      return { message: 'Inhumación eliminada correctamente' };
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      if (!inhumacion) {
+        throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
+      }
+      return await this.repo.remove(inhumacion);
     } catch (error) {
       console.error('Error al eliminar inhumación:', error);
       throw new InternalServerErrorException(error.message || 'No se pudo eliminar la inhumación');

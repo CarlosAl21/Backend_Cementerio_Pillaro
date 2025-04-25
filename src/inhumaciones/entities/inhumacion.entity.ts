@@ -1,26 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 @Entity('inhumaciones')
 export class Inhumacion {
-  @PrimaryGeneratedColumn()
-  id_inhumacion: number;
+  @PrimaryGeneratedColumn('uuid')
+  id_inhumacion: string;
 
   @Column()
-  id_nicho: number;
+  id_nicho: string;
 
   @Column()
-  id_fallecido: number;
+  id_fallecido: string;
 
   @Column('date')
   fecha_inhumacion: string;
 
   @Column('time')
   hora_inhumacion: string;
-
-  @Column('date')
-  fecha_creacion: string;
-
-  @Column('date')
-  fecha_actualizacion: string;
 
   @Column()
   solicitante: string;
@@ -36,5 +30,29 @@ export class Inhumacion {
 
   @Column()
   codigo_inhumacion: string;
+
+  @Column('date')
+  fecha_creacion: string;
+
+  @Column('date', { nullable: true })
+  fecha_actualizacion: string;
+
+
+  @BeforeInsert()
+  async setFechaCreacion() {
+    this.fecha_creacion = new Date().toISOString().split('T')[0];
+  }
+
+  @BeforeInsert()
+  async estadoDefault() {
+    if (!this.estado) {
+      this.estado = 'Pendiente';
+    }
+  }
+
+  @BeforeUpdate()
+  async setFechaActualizacion() {
+    this.fecha_actualizacion = new Date().toISOString().split('T')[0];
+  }
 }
 
