@@ -10,6 +10,7 @@ import {
   IsObject
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { Nicho } from 'src/nicho/entities/nicho.entity';
 
 class RequisitoDto {
   @IsBoolean()
@@ -38,7 +39,7 @@ export class CreateExumacionDto {
   fallecido_id: string;
 
   @IsString()
-  nicho_original_id: string;
+  nicho_original_id: Nicho;
 
   @IsString()
   @IsOptional()

@@ -4,12 +4,14 @@ import { IsString } from 'class-validator';
 import { IsInt } from 'class-validator';
 import { IsDateString } from 'class-validator';
 import { IsOptional } from 'class-validator';
+import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
+import { DeepPartial } from 'typeorm';
 
 export class CreateNichoDto {
   @ApiProperty({ example: 1, description: 'ID del cementerio al que pertenece el nicho' })
   @IsInt()
   @IsNotEmpty()
-  idCementerio: number;
+  idCementerio: DeepPartial<Cementerio>;
 
   @ApiProperty({ example: 'A', description: 'Sector del nicho' })
   @IsString()

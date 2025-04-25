@@ -1,12 +1,10 @@
-// src/exhumacion/entities/exhumacion.entity.ts
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { Persona } from '../../persona/entities/persona.entity';
-import { Nicho } from '../../nicho/entities/nicho.entity';
+import { Nicho } from 'src/nicho/entities/nicho.entity';
 
 @Entity()
 export class Exumacion {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   codigo: string; // Ej: 002-2025-CMC-EXH
@@ -15,21 +13,19 @@ export class Exumacion {
   metodoSolicitud: string;
 
   // Relación con solicitante
-  @ManyToOne(() => Persona)
-  @JoinColumn()
-  solicitante: Persona;
+  @Column()
+  solicitante: string;
 
   @Column()
   parentesco: string;
 
   // Relación con fallecido
-  @ManyToOne(() => Persona)
-  @JoinColumn()
-  fallecido: Persona;
+  @Column()
+  fallecido: string;
 
   // Relación con nicho original
-  @ManyToOne(() => Nicho)
-  @JoinColumn()
+  @ManyToOne(() => Nicho, (nicho) => nicho.exumaciones)
+  @JoinColumn({ name: 'id_nicho' })
   nichoOriginal: Nicho;
 
   // Datos de nueva sepultura

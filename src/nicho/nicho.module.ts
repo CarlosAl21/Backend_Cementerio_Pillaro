@@ -8,5 +8,6 @@ import { Nicho } from './entities/nicho.entity';
   imports:[TypeOrmModule.forFeature([Nicho])],
   controllers: [NichosController],
   providers: [NichoService],
+  exports: [NichoService]
 })
 export class NichoModule {}

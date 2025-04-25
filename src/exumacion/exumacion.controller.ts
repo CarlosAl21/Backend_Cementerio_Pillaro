@@ -20,21 +20,21 @@ export class ExumacionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.exumacionService.findOne(+id);
+    return this.exumacionService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateExumacionDto: UpdateExumacionDto) {
-    return this.exumacionService.update(+id, updateExumacionDto);
+    return this.exumacionService.update(id, updateExumacionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.exumacionService.remove(+id);
+    return this.exumacionService.remove(id);
   }
 
   @Get(':id/formulario')
   generarFormulario(@Param('id') id: string) {
-    return this.exumacionService.generarFormularioExumacion(+id);
+    return this.exumacionService.generarFormularioExumacion(id);
   }
 }

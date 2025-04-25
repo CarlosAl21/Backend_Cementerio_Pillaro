@@ -21,16 +21,16 @@ export class NichosController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.nichosService.findOne(+id);
+    return this.nichosService.findOne(id);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateDto: UpdateNichoDto) {
-    return this.nichosService.update(+id, updateDto);
+    return this.nichosService.update(id, updateDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.nichosService.remove(+id);
+    return this.nichosService.remove(id);
   }
 }

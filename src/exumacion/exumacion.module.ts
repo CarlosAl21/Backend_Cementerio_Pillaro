@@ -1,20 +1,17 @@
 // src/exhumacion/exhumacion.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Exhumacion } from './entities/exhumacion.entity';
-import { ExhumacionService } from './exhumacion.service';
-import { ExhumacionController } from './exhumacion.controller';
-import { PersonaModule } from '../persona/persona.module';
-import { NichoModule } from '../nicho/nicho.module';
+import { Exumacion } from './entities/exumacion.entity';
+import { ExumacionController } from './exumacion.controller';
+import { ExumacionService } from './exumacion.service';
+import { Nicho } from '../nicho/entities/nicho.entity'; // Asegúrate de que la ruta sea correcta
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Exhumacion]),
-    PersonaModule,
-    NichoModule
+    TypeOrmModule.forFeature([Exumacion, Nicho]),
   ],
-  controllers: [ExhumacionController],
-  providers: [ExhumacionService],
-  exports: [ExhumacionService]
+  controllers: [ExumacionController],
+  providers: [ExumacionService],
+  exports: [ExumacionService]
 })
 export class ExumacionModule {}
