@@ -1,11 +1,3 @@
-import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
-import { CementerioModule } from './cementerio/cementerio.module';
-import { AuthModule } from './auth/auth.module';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './user/entities/user.entity';
-import { Cementerio } from './cementerio/entities/cementerio.entity';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Nicho } from './nicho/entities/nicho.entity';
@@ -14,6 +6,8 @@ import { NichoModule } from './nicho/nicho.module';
 import { ExumacionModule } from './exumacion/exumacion.module';
 import { Inhumacion } from './inhumaciones/entities/inhumacion.entity';
 import { InhumacionesModule } from './inhumaciones/inhumaciones.module';
+import { PersonasModule } from './personas/personas.module';
+import { PropietariosNichosModule } from './propietarios-nichos/propietarios-nichos.module';
 
 @Module({
   imports: [
