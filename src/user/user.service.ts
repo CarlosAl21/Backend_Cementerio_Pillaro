@@ -1,0 +1,153 @@
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Like, Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+
+@Injectable()
+export class UserService {
+  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {
+    console.log('UserService initialized');
+  }
+
+  private validarCedula(cedula: string): boolean {
+    if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
+    const provincia = parseInt(cedula.substring(0, 2), 10);
+    if (provincia < 1 || provincia > 24) return false; // Provincia válida (01-24)
+
+    const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    let suma = 0;
+
+    for (let i = 0; i < 9; i++) {
+      let valor = parseInt(cedula[i]) * coeficientes[i];
+      if (valor >= 10) valor -= 9;
+      suma += valor;
+    }
+
+    const digitoVerificador = (10 - (suma % 10)) % 10;
+    return digitoVerificador === parseInt(cedula[9]);
+  }
+
+  /**
+   * Validar un RUC ecuatoriano
+   */
+  private validarRuc(ruc: string): boolean {
+    if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
+    if (!ruc.endsWith('001')) return false; // Debe terminar en 001
+    return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
+  }
+
+  private validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    try {
+      const { cedula, email } = createUserDto;
+
+      // Validar que el campo cedula_ruc esté presente
+      if (!cedula) {
+        return { error: 'Debe ingresar una cédula o un RUC' };
+      }
+
+      // Validar si es cédula o RUC
+      const esCedula = this.validarCedula(cedula);
+      const esRuc = this.validarRuc(cedula);
+
+      if (!esCedula && !esRuc) {
+        return {
+          error: 'El número ingresado no es una cédula ni un RUC válido',
+        };
+      }
+      if (
+        await this.userRepository.findOne({
+          where: { cedula: createUserDto.cedula },
+        })
+      ) {
+        return { error: 'El usuario ya existe' };
+      }
+
+      // Validar que el email tenga formato correcto
+      if (!email || !this.validarEmail(email)) {
+        return { error: 'Debe ingresar un correo electrónico válido' };
+      }
+
+      // Crear y guardar el usuario si todo es correcto
+      const Usuario = this.userRepository.create(
+        createUserDto,
+      );
+      return await this.userRepository.save(Usuario);
+    } catch (error) {
+      console.error(error);
+      return { error: error.message };
+    }
+  }
+
+  findAll() {
+    return this.userRepository.find();
+  }
+
+  async findOne(id: string) {
+    try {
+      const user = await this.userRepository.findOne({where: {id_user: id} });
+      if (!user) {
+        return { error: 'User not found' };
+      }
+      return user;
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la busqueda' };
+    }
+  }
+
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+      const user = await this.userRepository.findOne({where: {id_user: id} });
+      if (!user) {
+        return { error: 'User not found' };
+      }
+      this.userRepository.merge(user, updateUserDto);
+      return await this.userRepository.save(user);
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la actualizacion' };
+    }
+  }
+
+  async remove(id: string) {
+    try {
+      const user = await this.userRepository.findOne({where: {id_user: id} });
+      if (!user) {
+        return { error: 'User not found' };
+      }
+      return await this.userRepository.remove(user);
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la eliminacion' };
+    }
+  }
+
+  async validateUser(username: string, pass: string): Promise<User|any> {
+    const user = await this.userRepository.findOne({ where: { cedula: username} });
+    if (user && (await bcrypt.compare(pass, user.password))) {
+      return user;
+    }
+    return null;
+  }
+
+  async findByCedula(cedula: string) {
+    try {
+      const user = await this.userRepository.findOne({ where: { cedula: cedula } });
+      if (!user) {
+        return { error: 'User not found' };
+      }
+      return user;
+    } catch (error) {
+      console.log(error);
+      return { error: error, mensaje: 'Error en la busqueda' };
+    }
+  }
+}
