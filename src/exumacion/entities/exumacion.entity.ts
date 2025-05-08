@@ -1,10 +1,15 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, In } from 'typeorm';
 import { Nicho } from 'src/nicho/entities/nicho.entity';
+import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 
 @Entity()
 export class Exumacion {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id_exhumacion: string;
+
+  @ManyToOne(() => Inhumacion, (inhumacion) => inhumacion.exumaciones)
+  @JoinColumn({ name: 'id_inhumacion' })
+  id_inhumacion: Inhumacion;
 
   @Column({ unique: true })
   codigo: string; // Ej: 002-2025-CMC-EXH
@@ -38,29 +43,23 @@ export class Exumacion {
   @Column({ type: 'time' })
   horaExhumacion: string;
 
-  @Column({ type: 'date' })
-  fechaFallecimiento: Date;
-
-  @Column({ type: 'date' })
-  fechaInhumacion: Date;
-
   @Column({ default: false })
   aprobado: boolean;
 
   @Column({ nullable: true })
   aprobadoPor?: string;
 
-  @Column({ type: 'json', nullable: true })
-  requisitos: {
-    certificadoDefuncion: { cumple: boolean; observacion?: string };
-    certificadoInhumacion: { cumple: boolean; observacion?: string };
-    copiaCI: { cumple: boolean; observacion?: string };
-    tituloPropiedad: { cumple: boolean; observacion?: string };
-    certificadoMunicipal: { cumple: boolean; observacion?: string };
-    tiempoMinimo: { cumple: boolean; observacion?: string };
-    ordenJudicial: { cumple: boolean; observacion?: string };
-    pago: { cumple: boolean; observacion?: string };
-  };
+  // @Column({ type: 'json', nullable: true })
+  // requisitos: {
+  //   certificadoDefuncion: { cumple: boolean; observacion?: string };
+  //   certificadoInhumacion: { cumple: boolean; observacion?: string };
+  //   copiaCI: { cumple: boolean; observacion?: string };
+  //   tituloPropiedad: { cumple: boolean; observacion?: string };
+  //   certificadoMunicipal: { cumple: boolean; observacion?: string };
+  //   tiempoMinimo: { cumple: boolean; observacion?: string };
+  //   ordenJudicial: { cumple: boolean; observacion?: string };
+  //   pago: { cumple: boolean; observacion?: string };
+  // };
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   fechaSolicitud: Date;

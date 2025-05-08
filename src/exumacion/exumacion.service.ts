@@ -53,7 +53,7 @@ export class ExumacionService {
 
   async findOne(id: string) {
     const exumacion = await this.exumacionRepository.findOne({
-      where: { id },
+      where: { id_exhumacion: id },
       relations: ['solicitante', 'fallecido', 'nichoOriginal'],
     });
 

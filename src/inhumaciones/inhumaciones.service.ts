@@ -48,7 +48,7 @@ export class InhumacionesService {
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
-      await this.repo.merge(inhumacion, updateInhumacionDto);
+      this.repo.merge(inhumacion, updateInhumacionDto);
       return await this.repo.save(inhumacion);
     } catch (error) {
       console.error('Error al actualizar inhumación:', error);

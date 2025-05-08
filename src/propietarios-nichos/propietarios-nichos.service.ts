@@ -13,28 +13,57 @@ export class PropietariosNichosService {
     private propietarioRepo: Repository<PropietarioNicho>,
   ) {}
 
-  create(dto: CreatePropietarioNichoDto): Promise<PropietarioNicho> {
-    return this.propietarioRepo.save(dto);
+  async create(dto: CreatePropietarioNichoDto) {
+    try {
+      const propietario = this.propietarioRepo.create(dto);
+      return await this.propietarioRepo.save(propietario);
+    } catch (error) {
+      console.error('Error creating PropietarioNicho:', error);
+      throw new Error(`Error creating PropietarioNicho: ${error.message}`);
+    }
   }
 
-  findAll(): Promise<PropietarioNicho[]> {
+  findAll(){
     return this.propietarioRepo.find();
   }
 
-  async findOne(id: number): Promise<PropietarioNicho> {
-    const propietario = await this.propietarioRepo.findOneBy({ id_propietario_nicho: id });
-    if (!propietario) {
-      throw new Error(`PropietarioNicho with id ${id} not found`);
+  async findOne(id: string) {
+    try {
+      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
+      if (!propietario) {
+        throw new Error(`PropietarioNicho with id ${id} not found`);
+      }
+      return propietario;
+    } catch (error) {
+      console.error('Error finding PropietarioNicho:', error);
+      throw new Error(`Error finding PropietarioNicho: ${error.message}`);
     }
-    return propietario;
   }
 
-  async update(id: number, dto: UpdatePropietarioNichoDto): Promise<PropietarioNicho> {
-    await this.propietarioRepo.update(id, dto);
-    return this.findOne(id);
+  async update(id: string, dto: UpdatePropietarioNichoDto){
+    try {
+      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
+      if (!propietario) {
+        throw new Error(`PropietarioNicho with id ${id} not found`);
+      }
+      this.propietarioRepo.merge(propietario, dto);
+      return await this.propietarioRepo.save(propietario);
+    } catch (error) {
+      console.error('Error updating PropietarioNicho:', error);
+      throw new Error(`Error updating PropietarioNicho: ${error.message}`);
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.propietarioRepo.delete(id);
+  async remove(id: string){
+    try {
+      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
+      if (!propietario) {
+        throw new Error(`PropietarioNicho with id ${id} not found`);
+      }
+      return await this.propietarioRepo.delete(id);
+    } catch (error) {
+      console.error('Error removing PropietarioNicho:', error);
+      throw new Error(`Error removing PropietarioNicho: ${error.message}`);
+    }
   }
 }

@@ -20,16 +20,16 @@ export class PropietariosNichosController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.propietariosService.findOne(+id);
+    return this.propietariosService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePropietarioNichoDto) {
-    return this.propietariosService.update(+id, dto);
+    return this.propietariosService.update(id, dto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.propietariosService.remove(+id);
+    return this.propietariosService.remove(id);
   }
 }

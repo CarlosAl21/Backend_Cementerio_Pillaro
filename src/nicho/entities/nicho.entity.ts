@@ -3,6 +3,7 @@ import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Exumacion } from 'src/exumacion/entities/exumacion.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
+import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 
 @Entity('nichos')
 export class Nicho {
@@ -48,6 +49,9 @@ export class Nicho {
 
   @OneToMany(() => Inhumacion, (inhumacion) => inhumacion.id_nicho)
   inhumaciones: Inhumacion[];
+
+  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.nicho)
+  propietariosNicho: PropietarioNicho[];
 
   @BeforeInsert()
   async setFechaCreacion() {

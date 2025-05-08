@@ -11,53 +11,89 @@ export class PersonasService {
     private personaRepo: Repository<Persona>,
   ) {}
 
-  create(createPersonaDto: CreatePersonaDto): Promise<Persona> {
-    return this.personaRepo.save(createPersonaDto);
+  async create(createPersonaDto: CreatePersonaDto) {
+    try {
+      const persona = this.personaRepo.create(createPersonaDto);
+      return await this.personaRepo.save(persona);
+    } catch (error) {
+      console.error('Error creating persona:', error);
+      throw new Error('Error creating persona');
+      
+    }
   }
 
   findAll(): Promise<Persona[]> {
     return this.personaRepo.find();
   }
 
-  async findOne(id: number): Promise<Persona> {
-    const persona = await this.personaRepo.findOneBy({ id_persona: id });
-    if (!persona) {
-      throw new Error(`Persona with id ${id} not found`);
+  async findOne(id: string){
+    try {
+      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      if (!persona) {
+        throw new Error('Persona not found');
+      }
+      return persona;
+    } catch (error) {
+      console.error('Error finding persona:', error);
+      throw new Error('Error finding persona');
     }
-    return persona;
   }
 
   // METODO DE BUSQUEDA POR CEDULA O NOMBRES
   async findBy(cedula?: string, nombres?: string): Promise<Persona[]> {
-    const query = this.personaRepo.createQueryBuilder('persona');
-  
-    // EN CASO QUE NO ENCUENTRE NINGUN PARAMETRO DEVUELVE TODOS LOS REGISTROS
-    if (!cedula && !nombres) {
-      return this.personaRepo.find();
+    try {
+      const query = this.personaRepo.createQueryBuilder('persona');
+    
+      // EN CASO QUE NO ENCUENTRE NINGUN PARAMETRO DEVUELVE TODOS LOS REGISTROS
+      if (!cedula && !nombres) {
+        return this.personaRepo.find();
+      }
+    
+      // BUSQUEDA POR CEDULA
+      if (cedula) {
+        query.andWhere('persona.cedula = :cedula', { cedula });
+      }
+    
+      // BUSQUEDA POR NOMBRES 
+      if (nombres) {
+        query.andWhere('persona.nombres LIKE :nombres', { nombres: `%${nombres}%` });
+      }
+    
+      return query.getMany();
+    } catch (error) {
+      console.error('Error finding persona by cedula or nombres:', error);
+      throw new Error('Error finding persona by cedula or nombres');
+      
     }
-  
-    // BUSQUEDA POR CEDULA
-    if (cedula) {
-      query.andWhere('persona.cedula = :cedula', { cedula });
-    }
-  
-    // BUSQUEDA POR NOMBRES 
-    if (nombres) {
-      query.andWhere('persona.nombres LIKE :nombres', { nombres: `%${nombres}%` });
-    }
-  
-    return query.getMany();
   }
   
   
 //ACTUALIZACION DE REGISTROS
-  async update(id: number, dto: UpdatePersonaDto): Promise<Persona> {
-    await this.personaRepo.update(id, dto);
-    return this.findOne(id);
+  async update(id: string, dto: UpdatePersonaDto) {
+    try {
+      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      if (!persona) {
+        throw new Error('Persona not found');
+      }
+      this.personaRepo.merge(persona, dto);
+      return await this.personaRepo.save(persona);
+    } catch (error) {
+      console.error('Error updating persona:', error);
+      throw new Error('Error updating persona');
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.personaRepo.delete(id);
+  async remove(id: string){
+    try {
+      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      if (!persona) {
+        throw new Error('Persona not found');
+      }
+      return await this.personaRepo.remove(persona);
+    } catch (error) {
+      console.error('Error removing persona:', error);
+      throw new Error('Error removing persona');
+    }
   }
 }
 

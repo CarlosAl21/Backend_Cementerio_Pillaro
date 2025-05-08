@@ -1,5 +1,7 @@
+import { Exumacion } from 'src/exumacion/entities/exumacion.entity';
 import { Nicho } from 'src/nicho/entities/nicho.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn } from 'typeorm';
+import { Persona } from 'src/personas/entities/persona.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 @Entity('inhumaciones')
 export class Inhumacion {
   @PrimaryGeneratedColumn('uuid')
@@ -9,8 +11,9 @@ export class Inhumacion {
   @JoinColumn({ name: 'id_nicho' })
   id_nicho: Nicho;
 
-  @Column()
-  id_fallecido: string;
+  @ManyToOne(() => Persona, (persona) => persona.inhumaciones)
+  @JoinColumn({ name: 'id_fallecido' })
+  id_fallecido: Persona;
 
   @Column('date')
   fecha_inhumacion: string;
@@ -38,7 +41,9 @@ export class Inhumacion {
 
   @Column('date', { nullable: true })
   fecha_actualizacion: string;
-
+  
+  @OneToMany(() => Exumacion, (exumacion) => exumacion.id_inhumacion)
+  exumaciones: Exumacion[];
 
   @BeforeInsert()
   async setFechaCreacion() {

@@ -8,6 +8,16 @@ import { Inhumacion } from './inhumaciones/entities/inhumacion.entity';
 import { InhumacionesModule } from './inhumaciones/inhumaciones.module';
 import { PersonasModule } from './personas/personas.module';
 import { PropietariosNichosModule } from './propietarios-nichos/propietarios-nichos.module';
+import { UserModule } from './user/user.module';
+import { CementerioModule } from './cementerio/cementerio.module';
+import { AuthModule } from './auth/auth.module';
+import { User } from './user/entities/user.entity';
+import { Cementerio } from './cementerio/entities/cementerio.entity';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module } from '@nestjs/common';
+import { Persona } from './personas/entities/persona.entity';
+import { PropietarioNicho } from './propietarios-nichos/entities/propietarios-nicho.entity';
 
 @Module({
   imports: [
@@ -27,6 +37,8 @@ import { PropietariosNichosModule } from './propietarios-nichos/propietarios-nic
         Nicho,
         Exumacion,
         Inhumacion,
+        Persona,
+        PropietarioNicho,
       ],
       synchronize: true, // Solo para desarrollo, no usar en producción
     }),
@@ -36,6 +48,8 @@ import { PropietariosNichosModule } from './propietarios-nichos/propietarios-nic
     NichoModule,
     ExumacionModule,
     InhumacionesModule,
+    PersonasModule,
+    PropietariosNichosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
