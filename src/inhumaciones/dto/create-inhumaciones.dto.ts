@@ -1,37 +1,90 @@
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsString, IsOptional } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Nicho } from "src/nicho/entities/nicho.entity";
 import { Persona } from "src/personas/entities/persona.entity";
 import { DeepPartial } from "typeorm";
 
 export class CreateInhumacionDto {
+    @ApiProperty({
+        description: 'ID del nicho donde se realizará la inhumación',
+        example: '123e4567-e89b-12d3-a456-426614174000',
+        format: 'uuid',
+        required: true
+    })
     @IsString()
     @IsNotEmpty()
-    id_nicho: DeepPartial <Nicho>;
+    id_nicho: DeepPartial<Nicho>;
 
+    @ApiProperty({
+        description: 'ID del fallecido a inhumar',
+        example: '123e4567-e89b-12d3-a456-426614174001',
+        format: 'uuid',
+        required: true
+    })
     @IsNotEmpty()
-    id_fallecido: DeepPartial <Persona>;
+    id_fallecido: DeepPartial<Persona>;
 
+    @ApiProperty({
+        description: 'Fecha de inhumación (YYYY-MM-DD)',
+        example: '2023-06-15',
+        required: true
+    })
     @IsDate()
     @IsNotEmpty()
     fecha_inhumacion: string;
 
+    @ApiProperty({
+        description: 'Hora de inhumación (HH:MM)',
+        example: '14:30',
+        required: true
+    })
     @IsString()
     @IsNotEmpty()
     hora_inhumacion: string;
 
+    @ApiPropertyOptional({
+        description: 'Nombre del solicitante',
+        example: 'Juan Pérez',
+        required: false
+    })
     @IsString()
+    @IsOptional()
     solicitante: string;
 
+    @ApiPropertyOptional({
+        description: 'Nombre del responsable de la inhumación',
+        example: 'Carlos Gómez',
+        required: false
+    })
     @IsString()
+    @IsOptional()
     responsable_inhumacion: string;
 
+    @ApiPropertyOptional({
+        description: 'Observaciones adicionales',
+        example: 'Requiere traslado desde otro cementerio',
+        required: false
+    })
     @IsString()
+    @IsOptional()
     observaciones: string;
 
+    @ApiProperty({
+        description: 'Código único de inhumación',
+        example: 'INH-2023-001',
+        required: true
+    })
     @IsString()
+    @IsNotEmpty()
     codigo_inhumacion: string;
 
+    @ApiProperty({
+        description: 'Estado de la inhumación',
+        enum: ['Programada', 'Realizada', 'Cancelada', 'Pendiente'],
+        example: 'Programada',
+        required: true
+    })
     @IsString()
+    @IsNotEmpty()
     estado: string;
-
 }
