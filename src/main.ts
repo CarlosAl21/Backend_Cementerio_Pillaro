@@ -11,7 +11,7 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Tramites API')
+    .setTitle('Cementerios API')
     .setDescription('Documentacion de la API del Sistema de control de Cementerios en Pillaro\n\nDesarrollado por estudiantes de Software de Septimo Semestre\n\n**NOTA: Para poder realizar peticiones a la API, es necesario estar autenticado en algunos modulos de momento.**')
     .setVersion('1.0')
     .build();

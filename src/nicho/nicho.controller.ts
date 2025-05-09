@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch } from '@nestjs/common';
 import { NichoService } from './nicho.service';
 import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
@@ -48,7 +48,7 @@ export class NichosController {
     return this.nichosService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ summary: 'Actualizar un nicho' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ 

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Patch } from '@nestjs/common';
 import { InhumacionesService } from './inhumaciones.service';
 import { Inhumacion } from './entities/inhumacion.entity';
 import { UpdateInhumacionDto } from './dto/update-inhumacione.dto';
@@ -83,7 +83,7 @@ export class InhumacionesController {
     return this.service.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({ 
     summary: 'Actualizar inhumación', 
     description: 'Actualiza completamente la información de una inhumación existente' 
