@@ -5,15 +5,6 @@ import { DeepPartial } from "typeorm";
 
 export class CreateUserDto {
     @ApiProperty({
-        description: 'ID del cementerio al que pertenece el usuario',
-        example: '1',
-        type: String,
-        required: true
-    })
-    @IsString()
-    id_cementerio_pert: DeepPartial<Cementerio>;
-
-    @ApiProperty({
         description: 'Número de cédula del usuario',
         example: '1234567890',
         minLength: 10,

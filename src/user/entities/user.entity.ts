@@ -8,10 +8,6 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id_user: string;
 
-    // @ManyToOne(() => Cementerio, (cementerio) => cementerio.id_cementerio)
-    // @JoinColumn({ name: 'id_cementerio_pert' })
-    // id_cementerio_pert: Cementerio;
-
     @Column({ type: 'varchar', length: 100 })
     cedula: string;
 

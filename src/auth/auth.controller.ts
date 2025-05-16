@@ -35,16 +35,12 @@ export class AuthController {
         apellido: { type: 'string', example: 'Pérez' },
         password: { type: 'string', example: 'Password123' },
         rol: { type: 'string', example: 'user' },
-        id_cementerio_pert: { 
-          type: 'object',
-          example: { id: '123e4567-e89b-12d3-a456-426614174000' }
-        }
       }
     }
   })
   @ApiOkResponse({ description: 'Usuario registrado exitosamente' })
   @ApiBadRequestResponse({ description: 'Datos inválidos' })
-  async register(@Body() body: {cedula: string, email:string, nombre:string, apellido:string, password: string, rol:string, id_cementerio_pert: Cementerio}) {
+  async register(@Body() body: {cedula: string, email:string, nombre:string, apellido:string, password: string, rol:string}) {
     return this.userService.create(body);
   }
 
