@@ -80,17 +80,4 @@ export class CreateNichoDto {
   @IsOptional()
   @MaxLength(500, { message: 'Las observaciones no deben exceder los 500 caracteres' })
   observaciones?: string;
-
-  @ApiProperty({
-    description: 'Número de pisos del nicho',
-    example: 3,
-    minimum: 1,
-    maximum: 10,
-    required: true
-  })
-  @IsInt()
-  @IsNotEmpty()
-  @Min(1)
-  @Max(10)
-  numeroPisos: number;
 }

@@ -4,6 +4,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Exumacion } from 'src/exumacion/entities/exumacion.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 
 @Entity('nichos')
 export class Nicho {
@@ -35,9 +36,6 @@ export class Nicho {
   @Column({ type: 'text', nullable: true })
   observaciones?: string;
 
-  @Column({ type: 'int', name: 'numero_pisos' })
-  numeroPisos: number;
-
   @CreateDateColumn({ type: 'date' })
   fechaCreacion: Date;
 
@@ -52,6 +50,9 @@ export class Nicho {
 
   @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.nicho)
   propietariosNicho: PropietarioNicho[];
+
+  @OneToMany(() => HuecosNicho, (hueco) => hueco.idNicho)
+  huecos: HuecosNicho[];
 
   @BeforeInsert()
   async setFechaCreacion() {

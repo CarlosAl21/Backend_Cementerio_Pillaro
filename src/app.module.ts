@@ -18,6 +18,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { Persona } from './personas/entities/persona.entity';
 import { PropietarioNicho } from './propietarios-nichos/entities/propietarios-nicho.entity';
+import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
 
 @Module({
   imports: [
@@ -40,7 +41,7 @@ import { PropietarioNicho } from './propietarios-nichos/entities/propietarios-ni
         Persona,
         PropietarioNicho,
       ],
-      synchronize: true, // Solo para desarrollo, no usar en producción
+      synchronize: false, // Solo para desarrollo, no usar en producción
     }),
     UserModule, 
     CementerioModule, 
@@ -50,6 +51,7 @@ import { PropietarioNicho } from './propietarios-nichos/entities/propietarios-ni
     InhumacionesModule,
     PersonasModule,
     PropietariosNichosModule,
+    HuecosNichosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
