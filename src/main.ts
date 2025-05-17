@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(new ResponseInterceptor());
   app.enableCors({
     origin: '*',  // Permite todas las peticiones (puedes cambiarlo a un dominio específico)
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

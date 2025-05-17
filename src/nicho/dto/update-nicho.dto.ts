@@ -15,5 +15,5 @@ export class UpdateNichoDto extends PartialType(CreateNichoDto) {
   @IsString()
   @IsNotEmpty()
   @IsUUID()
-  idNicho: string;
+  id_nicho: string;
 }

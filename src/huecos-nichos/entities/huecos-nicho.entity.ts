@@ -7,31 +7,27 @@ import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-
 @Entity('huecos_nichos')
 export class HuecosNicho{
   @PrimaryGeneratedColumn('uuid')
-  idDetalleHueco: string;
+  id_detalle_hueco: string;
 
   @ManyToOne(() => Nicho, (nicho) => nicho.huecos, { eager: true })
-  @JoinColumn({ name: 'idNicho' })
-  idNicho: Nicho;
+  @JoinColumn({ name: 'id_nicho' })
+  id_nicho: Nicho;
 
-  @Column({ type: 'int', name: 'numHueco' })
-  numHueco: number;
+  @Column({ type: 'int', name: 'num_hueco' })
+  num_hueco: number;
 
   @Column({ length: 20 })
   estado: string;
   
   @CreateDateColumn({ type: 'date' })
-  fechaCreacion: Date;
+  fecha_creacion: Date;
 
   @UpdateDateColumn({ type: 'date', nullable: true })
-  fechaActualizacion: Date;
-
-  @ManyToOne(() => Persona, { nullable: true, eager: true }) 
-  @JoinColumn({ name: 'idFallecidoInhumado' })
-  idFallecidoInhumado: Persona;
+  fecha_actualizacion: Date;
 
   @BeforeInsert()
   async setFechaCreacion() {
-    this.fechaCreacion = new Date();
+    this.fecha_creacion = new Date();
   }
 
   @BeforeInsert()
@@ -41,7 +37,7 @@ export class HuecosNicho{
 
   @BeforeUpdate()
   async setFechaActualizacion() {
-    this.fechaActualizacion = new Date();
+    this.fecha_actualizacion = new Date();
   }
 
 }

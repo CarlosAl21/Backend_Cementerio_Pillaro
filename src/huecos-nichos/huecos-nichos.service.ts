@@ -21,18 +21,18 @@ export class HuecosNichosService {
    }
 
   async findOne(id: string): Promise<HuecosNicho> {
-    const hueco = await this.huecoRepository.findOne({ where: { idDetalleHueco: id } });
+    const hueco = await this.huecoRepository.findOne({ where: { id_detalle_hueco: id } });
     if (!hueco) {
       throw new NotFoundException(`Hueco con ID ${id} no encontrado`);
     }
     return hueco;
   }
 
-  async findByNicho(idNicho: string): Promise<HuecosNicho[]> {
+  async findByNicho(id_nicho: string): Promise<HuecosNicho[]> {
     return await this.huecoRepository.find({
       where: {
-        idNicho: {
-          idNicho,
+        id_nicho: {
+          id_nicho,
         },
       },
     });

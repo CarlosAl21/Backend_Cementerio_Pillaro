@@ -26,7 +26,7 @@ export class CementerioController {
   constructor(private readonly cementerioService: CementerioService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  //@UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear nuevo cementerio' })
   @ApiBody({ type: CreateCementerioDto })
   @ApiCreatedResponse({ 

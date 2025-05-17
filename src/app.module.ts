@@ -41,7 +41,7 @@ import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
         Persona,
         PropietarioNicho,
       ],
-      synchronize: false, // Solo para desarrollo, no usar en producción
+      synchronize: true, // Solo para desarrollo, no usar en producción
     }),
     UserModule, 
     CementerioModule, 

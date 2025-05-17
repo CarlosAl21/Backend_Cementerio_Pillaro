@@ -12,5 +12,5 @@ export class UpdateHuecosNichoDto extends PartialType(CreateHuecosNichoDto) {
   @IsString()
   @IsNotEmpty()
   @IsUUID()
-  idDetalleHueco: string;
+  id_detalle_hueco: string;
 }

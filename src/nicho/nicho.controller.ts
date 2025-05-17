@@ -16,13 +16,13 @@ export class NichosController {
     examples: {
       ejemplo1: {
         value: {
-          idCementerio: "123e4567-e89b-12d3-a456-426614174000",
+          id_cementerio: "123e4567-e89b-12d3-a456-426614174000",
           sector: "A",
           fila: "1",
           numero: "15",
           tipo: "Individual",
-          fechaConstruccion: "2023-01-01",
-          numeroPisos: 2
+          fecha_construccion: "2023-01-01",
+          numero_huecos: 2
         }
       }
     }

@@ -13,7 +13,7 @@ export class CreateHuecosNichoDto {
   })
   @IsNotEmpty()
   @IsUUID()
-  idNicho: DeepPartial<Nicho>;
+  id_nicho: DeepPartial<Nicho>;
 
   @ApiProperty({
     description: 'Número de hueco del nicho',
@@ -26,14 +26,5 @@ export class CreateHuecosNichoDto {
   @IsNotEmpty()
   @Min(1)
   @Max(2)
-  numeroHueco: number;
-
- @ApiProperty({
-        description: 'ID del fallecido inhumado',
-        example: '123e4567-e89b-12d3-a456-426614174001',
-        format: 'uuid',
-        required: true
-    })
-    @IsNotEmpty()
-    idFallecidoInhumado: DeepPartial<Persona>;
+  numero_hueco: number;
 }

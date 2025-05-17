@@ -16,10 +16,8 @@ export class HuecosNichosController {
       examples: {
         ejemplo1: {
           value: {
-            idDetalleHueco: "123e4567-e89b-12d3-a456-426614174000",
-            idNicho: "123e4567-e89b-12d3-a456-426614174001",
-            numeroHueco: 1,
-            idFallecidoInhumado: "123e4567-e89b-12d3-a456-426614174001",
+            id_nicho: "123e4567-e89b-12d3-a456-426614174001",
+            num_hueco: 1,
           }
         }
       }
@@ -45,13 +43,13 @@ export class HuecosNichosController {
     return this.huecosNichosService.findOne(id);
   }
 
-    @Get('por-nicho/:idNicho')
+  @Get('por-nicho/:idNicho')
   @ApiOperation({ summary: 'Obtener todos los huecos de un nicho por su ID' })
-  @ApiParam({ name: 'idNicho', example: '456e7890-f12a-45c6-b789-123456789abc' })
+  @ApiParam({ name: 'id_nicho', example: '456e7890-f12a-45c6-b789-123456789abc' })
   @ApiResponse({ status: 200, description: 'Lista de huecos del nicho' })
   @ApiResponse({ status: 404, description: 'No se encontraron huecos para el nicho dado' })
-  findByNicho(@Param('idNicho') idNicho: string): Promise<HuecosNicho[]> {
-    return this.huecosNichosService.findByNicho(idNicho);
+  findByNicho(@Param('id_nicho') id_nicho: string): Promise<HuecosNicho[]> {
+    return this.huecosNichosService.findByNicho(id_nicho);
   }
 
   @Patch(':id')
@@ -62,7 +60,7 @@ export class HuecosNichosController {
     examples: {
       ejemplo1: {
         value: {
-          idFallecidoInhumado: "123e4567-e89b-12d3-a456-426614174009",
+          id_fallecido_inhumado: "123e4567-e89b-12d3-a456-426614174009",
         }
       }
     }
