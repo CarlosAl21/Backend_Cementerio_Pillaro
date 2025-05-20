@@ -14,7 +14,7 @@ export class RequisitosInhumacionController {
 
   @Get()
   findAll() {
-    return this.requisitosInhumacionService.findAll();
+    return this.requisitosInhumacionService.findAll();  
   }
 
   @Get(':id')
