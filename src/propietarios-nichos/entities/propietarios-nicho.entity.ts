@@ -10,7 +10,7 @@ export class PropietarioNicho {
   @ManyToOne(() => Persona, (persona) => persona.propietarios_nichos)
   persona: Persona;
   // id de nicho sin relacion directa hasta que se pueda unir 
-  @ManyToOne(()=> Nicho, (nicho) => nicho.propietariosNicho)
+  @ManyToOne(()=> Nicho, (nicho) => nicho.propietarios_nicho)
   nicho: Nicho;
 
   @Column({ type: 'date' }) fecha_adquisicion: Date;

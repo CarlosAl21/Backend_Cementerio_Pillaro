@@ -1,0 +1,43 @@
+// src/huecos-nichos/entities/huecos-nicho.entity.ts
+import { Nicho } from 'src/nicho/entities/nicho.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Persona } from 'src/personas/entities/persona.entity';
+import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
+
+@Entity('huecos_nichos')
+export class HuecosNicho{
+  @PrimaryGeneratedColumn('uuid')
+  id_detalle_hueco: string;
+
+  @ManyToOne(() => Nicho, (nicho) => nicho.huecos, { eager: true })
+  @JoinColumn({ name: 'id_nicho' })
+  id_nicho: Nicho;
+
+  @Column({ type: 'int', name: 'num_hueco' })
+  num_hueco: number;
+
+  @Column({ length: 20 })
+  estado: string;
+  
+  @CreateDateColumn({ type: 'date' })
+  fecha_creacion: Date;
+
+  @UpdateDateColumn({ type: 'date', nullable: true })
+  fecha_actualizacion: Date;
+
+  @BeforeInsert()
+  async setFechaCreacion() {
+    this.fecha_creacion = new Date();
+  }
+
+  @BeforeInsert()
+  async estadoDefault() {
+    this.estado = 'Ocupado';
+  }
+
+  @BeforeUpdate()
+  async setFechaActualizacion() {
+    this.fecha_actualizacion = new Date();
+  }
+
+}

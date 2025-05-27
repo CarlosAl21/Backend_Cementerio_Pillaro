@@ -31,7 +31,7 @@ export class Cementerio {
     // @OneToMany(() => User, (user) => user.id_cementerio_pert)
     // usuarios: User[];
 
-    @OneToMany(() => Nicho, (nicho) => nicho.idCementerio)
+    @OneToMany(() => Nicho, (nicho) => nicho.id_cementerio)
     nichos: Nicho[];
 
     @BeforeInsert()

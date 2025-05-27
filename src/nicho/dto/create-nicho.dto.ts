@@ -12,7 +12,7 @@ export class CreateNichoDto {
   })
   @IsNotEmpty()
   @IsUUID()
-  idCementerio: DeepPartial<Cementerio>;
+  id_cementerio: DeepPartial<Cementerio>;
 
   @ApiProperty({
     description: 'Sector del nicho (ej. A, B, C)',
@@ -52,7 +52,7 @@ export class CreateNichoDto {
 
   @ApiProperty({
     description: 'Tipo de nicho',
-    enum: ['Individual', 'Familiar', 'Doble', 'Especial'],
+    enum: ['Bóveda', 'Nicho', 'Doble', 'Especial'],
     example: 'Individual',
     required: true
   })
@@ -69,7 +69,7 @@ export class CreateNichoDto {
   })
   @IsDateString()
   @IsNotEmpty()
-  fechaConstruccion: Date;
+  fecha_construccion: string;
 
   @ApiPropertyOptional({
     description: 'Observaciones adicionales sobre el nicho',
@@ -82,15 +82,16 @@ export class CreateNichoDto {
   observaciones?: string;
 
   @ApiProperty({
-    description: 'Número de pisos del nicho',
-    example: 3,
+    description: 'Cantidad de huecos del nicho',
+    example: 2,
     minimum: 1,
-    maximum: 10,
+    maximum: 2,
     required: true
   })
   @IsInt()
   @IsNotEmpty()
   @Min(1)
-  @Max(10)
-  numeroPisos: number;
+  @Max(2)
+  numero_huecos: number;
+
 }

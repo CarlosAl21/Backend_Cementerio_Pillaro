@@ -4,15 +4,16 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Exumacion } from 'src/exumacion/entities/exumacion.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 
 @Entity('nichos')
 export class Nicho {
   @PrimaryGeneratedColumn('uuid')
-  idNicho: string;
+  id_nicho: string;
 
   @ManyToOne(() => Cementerio, (cementerio) => cementerio.nichos, { eager: true })
   @JoinColumn({ name: 'id_cementerio' })
-  idCementerio: Cementerio;
+  id_cementerio: Cementerio;
 
   @Column({ length: 50 })
   sector: string;
@@ -29,20 +30,17 @@ export class Nicho {
   @Column({ length: 20 })
   estado: string;
 
-  @Column({ type: 'date', name: 'fecha_construccion' })
-  fechaConstruccion: Date;
+  @Column({ type: 'varchar', name: 'fecha_construccion'})
+  fecha_construccion: string;
 
   @Column({ type: 'text', nullable: true })
   observaciones?: string;
 
-  @Column({ type: 'int', name: 'numero_pisos' })
-  numeroPisos: number;
+  @CreateDateColumn({ type: 'varchar' })
+  fecha_creacion: string;
 
-  @CreateDateColumn({ type: 'date' })
-  fechaCreacion: Date;
-
-  @UpdateDateColumn({ type: 'date', nullable: true })
-  fechaActualizacion: Date;
+  @UpdateDateColumn({ type: 'varchar', nullable: true })
+  fecha_actualizacion: string;
 
   @OneToMany(() => Exumacion, (exumacion) => exumacion.nichoOriginal)
   exumaciones: Exumacion[];
@@ -51,11 +49,14 @@ export class Nicho {
   inhumaciones: Inhumacion[];
 
   @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.nicho)
-  propietariosNicho: PropietarioNicho[];
+  propietarios_nicho: PropietarioNicho[];
+
+  @OneToMany(() => HuecosNicho, (hueco) => hueco.id_nicho)
+  huecos: HuecosNicho[];
 
   @BeforeInsert()
   async setFechaCreacion() {
-    this.fechaCreacion = new Date();
+    this.fecha_creacion = new Date().toISOString();
   }
 
   @BeforeInsert()
@@ -65,7 +66,7 @@ export class Nicho {
 
   @BeforeUpdate()
   async setFechaActualizacion() {
-    this.fechaActualizacion = new Date();
+    this.fecha_actualizacion = new Date().toISOString();
   }
 
 }

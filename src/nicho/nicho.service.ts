@@ -21,7 +21,7 @@ private readonly nichoRepository: Repository<Nicho>
   }
 
   async findOne(id: string): Promise<Nicho> {
-    const nicho = await this.nichoRepository.findOne({ where: { idNicho: id } });
+    const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
     if (!nicho) {
       throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
     }

@@ -19,7 +19,7 @@ export class ExumacionService {
   async create(createExumacionDto: CreateExumacionDto) {
     // Verificar que las entidades relacionadas existan
     const nichoOriginal = await this.nichoRepository.findOne({
-      where: { idNicho: createExumacionDto.nicho_original_id.idNicho },
+      where: { id_nicho: createExumacionDto.nicho_original_id.id_nicho },
     });
 
     if (!nichoOriginal) {
