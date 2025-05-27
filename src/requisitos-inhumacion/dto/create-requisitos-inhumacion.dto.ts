@@ -5,8 +5,12 @@ import {
   IsOptional,
   IsDateString,
   IsInt,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
+import { Persona } from 'src/personas/entities/persona.entity';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 
 export enum MetodoSolicitud {
   ESCRITA = 'escrita',
@@ -15,8 +19,8 @@ export enum MetodoSolicitud {
 
 export class CreateRequisitosInhumacionDto {
      /* A) Datos institucionales */
-  @IsString()
-  cementerio: string;
+  @IsNotEmpty()
+  cementerio: Cementerio;
 
   @IsString()
   pantoneroACargo: string;
@@ -27,8 +31,8 @@ export class CreateRequisitosInhumacionDto {
   metodoSolicitud: MetodoSolicitud = MetodoSolicitud.ESCRITA;
 
   /* C) Solicitante (FK -> persona.id) */
-  @IsInt()
-  solicitanteId: number;
+  @IsNotEmpty()
+  solicitanteId: Persona;
 
   @IsString()
   @IsOptional()
@@ -42,16 +46,14 @@ export class CreateRequisitosInhumacionDto {
   @IsBoolean() copiaTituloPropiedadNicho: boolean;
 
   /* E) Datos de la fosa/nicho/sillio (FK -> fosa.id) */
-  @IsInt()
-  fosaId: number;
+  @IsNotEmpty()
+  id_hueco_nicho: HuecosNicho;
 
-  @IsString() propiedad: 'propio' | 'arrendado';
   @IsString() firmaAceptacionSepulcro: string;
 
   /* F) Fallecido (FK -> persona.id con estado=fallecido) */
-  @IsInt() fallecidoId: number;
-
-  @IsString() causaMuerte: string;
+  @IsNotEmpty() 
+  id_fallecido: Persona;
 
   @IsDateString() fechaInhumacion: Date;
 

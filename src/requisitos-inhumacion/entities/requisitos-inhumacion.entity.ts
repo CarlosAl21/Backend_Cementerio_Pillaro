@@ -1,15 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Persona } from './persona.entity';
-import { Fosa } from './fosa.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
+import { Persona } from 'src/personas/entities/persona.entity';
+import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
 
 @Entity()
 export class RequisitosInhumacion {
- @PrimaryGeneratedColumn()
-  id: number;
+ @PrimaryGeneratedColumn('uuid')
+  id_requsitoInhumacion: string;
 
   // A) Datos institucionales
-  @Column()
-  cementerio: string;
+  @ManyToOne(() => Cementerio, (cementerio) => cementerio.requisitos_inhumacion)
+  @JoinColumn({ name: 'id_cementerio' })
+  id_cementerio: Cementerio;
 
   @Column()
   pantoneroACargo: string;
@@ -19,8 +21,9 @@ export class RequisitosInhumacion {
   metodoSolicitud: string;
 
   // C) Datos del solicitante
-  @ManyToOne(() => Persona)
-  solicitante: Persona;
+  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion_solicitante)
+  @JoinColumn({ name: 'id_solicitante' })
+  id_solicitante: Persona;
 
   @Column({ nullable: true })
   observacionSolicitante: string;
@@ -42,21 +45,18 @@ export class RequisitosInhumacion {
   copiaTituloPropiedadNicho: boolean;
 
   // E) Datos del nicho/fosa/sillio
-  @ManyToOne(() => Fosa)
-  fosa: Fosa;
+  @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion)
+  @JoinColumn({ name: 'id_hueco_nicho' })
+  id_hueco_nicho: HuecosNicho;
 
-  @Column()
-  propiedad: string; // 'propio' o 'arrendado'
 
   @Column()
   firmaAceptacionSepulcro: string;
 
   // F) Datos del fallecido
-  @ManyToOne(() => Persona)
-  fallecido: Persona;
-
-  @Column()
-  causaMuerte: string;
+  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion)
+  @JoinColumn({ name: 'id_fallecido' })
+  id_fallecido: Persona;
 
   @Column()
   fechaInhumacion: Date;

@@ -19,6 +19,9 @@ import { Module } from '@nestjs/common';
 import { Persona } from './personas/entities/persona.entity';
 import { PropietarioNicho } from './propietarios-nichos/entities/propietarios-nicho.entity';
 import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
+import { RequisitosInhumacion } from './requisitos-inhumacion/entities/requisitos-inhumacion.entity';
+import { HuecosNicho } from './huecos-nichos/entities/huecos-nicho.entity';
+import { RequisitosInhumacionModule } from './requisitos-inhumacion/requisitos-inhumacion.module';
 
 @Module({
   imports: [
@@ -40,6 +43,8 @@ import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
         Inhumacion,
         Persona,
         PropietarioNicho,
+        RequisitosInhumacion,
+        HuecosNicho,
       ],
       synchronize: true, // Solo para desarrollo, no usar en producción
     }),
@@ -52,6 +57,7 @@ import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
     PersonasModule,
     PropietariosNichosModule,
     HuecosNichosModule,
+    RequisitosInhumacionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

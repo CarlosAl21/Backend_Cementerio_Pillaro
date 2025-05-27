@@ -1,5 +1,6 @@
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
+import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, BeforeUpdate, In } from 'typeorm';
 
 @Entity('personas')
@@ -26,6 +27,12 @@ export class Persona {
 
   @OneToMany(() => Inhumacion, (inhumacion) => inhumacion.id_fallecido)
   inhumaciones: Inhumacion[];
+  
+  @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_fallecido)
+  requisitos_inhumacion: RequisitosInhumacion[];
+
+  @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_solicitante)
+  requisitos_inhumacion_solicitante: RequisitosInhumacion[];
 
   @BeforeInsert()
   async setFechaCreacion() {

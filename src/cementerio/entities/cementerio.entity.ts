@@ -1,4 +1,5 @@
 import { Nicho } from "src/nicho/entities/nicho.entity";
+import { RequisitosInhumacion } from "src/requisitos-inhumacion/entities/requisitos-inhumacion.entity";
 import { User } from "src/user/entities/user.entity";
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -33,6 +34,9 @@ export class Cementerio {
 
     @OneToMany(() => Nicho, (nicho) => nicho.id_cementerio)
     nichos: Nicho[];
+
+    @OneToMany(() => RequisitosInhumacion, (requisito) => requisito.id_cementerio)
+    requisitos_inhumacion: RequisitosInhumacion[];
 
     @BeforeInsert()
     async FechaCreacion() {

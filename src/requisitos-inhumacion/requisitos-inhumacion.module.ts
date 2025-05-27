@@ -1,17 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RequisitosInhumacion } from '../entities/requisito-inhumacion.entity';
-import { Persona } from '../entities/persona.entity';
-import { Fosa } from '../entities/fosa.entity';
 import { RequisitosInhumacionService } from './requisitos-inhumacion.service';
 import { RequisitosInhumacionController } from './requisitos-inhumacion.controller';
+import { RequisitosInhumacion } from './entities/requisitos-inhumacion.entity';
+import { Persona } from 'src/personas/entities/persona.entity';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
+import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RequisitoInhumacion, Persona, Fosa]),
+    TypeOrmModule.forFeature([RequisitosInhumacion, Persona, HuecosNicho, Cementerio]),
   ],
   controllers: [RequisitosInhumacionController],
   providers: [RequisitosInhumacionService],
-  exports: [RequisitoInhumacionService],
+  exports: [RequisitosInhumacionService],
 })
 export class RequisitosInhumacionModule {}
