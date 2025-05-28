@@ -19,16 +19,16 @@ export class RequisitosInhumacionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.requisitosInhumacionService.findOne(+id);
+    return this.requisitosInhumacionService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRequisitosInhumacionDto: UpdateRequisitosInhumacionDto) {
-    return this.requisitosInhumacionService.update(+id, updateRequisitosInhumacionDto);
+    return this.requisitosInhumacionService.update(id, updateRequisitosInhumacionDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.requisitosInhumacionService.remove(+id);
+    return this.requisitosInhumacionService.remove(id);
   }
 }

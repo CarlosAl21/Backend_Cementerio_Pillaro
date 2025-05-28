@@ -1,3 +1,4 @@
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
@@ -33,6 +34,9 @@ export class Persona {
 
   @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_solicitante)
   requisitos_inhumacion_solicitante: RequisitosInhumacion[];
+
+  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_persona)
+  huecos_nichos: HuecosNicho[];
 
   @BeforeInsert()
   async setFechaCreacion() {
