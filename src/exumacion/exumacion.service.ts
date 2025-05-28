@@ -51,7 +51,7 @@ export class ExumacionService {
   async findAll() {
     try {
       return await this.exumacionRepository.find({
-        relations: ['solicitante', 'fallecido', 'nichoOriginal'],
+        relations: ['id_inhumacion', 'id_nicho'],
       });
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener las exhumaciones');
@@ -62,7 +62,7 @@ export class ExumacionService {
     try {
       const exumacion = await this.exumacionRepository.findOne({
         where: { id_exhumacion: id },
-        relations: ['solicitante', 'fallecido', 'nichoOriginal'],
+        relations: ['id_inhumacion', 'id_nicho'],
       });
 
       if (!exumacion) {

@@ -23,12 +23,12 @@ export class PropietariosNichosService {
   }
 
   findAll(){
-    return this.propietarioRepo.find();
+    return this.propietarioRepo.find({relations: ['id_nicho', 'id_persona']});
   }
 
   async findOne(id: string) {
     try {
-      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
+      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id },relations: ['id_nicho', 'id_persona'] });
       if (!propietario) {
         throw new NotFoundException(`PropietarioNicho with id ${id} not found`);
       }

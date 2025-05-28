@@ -24,7 +24,7 @@ export class RequisitosInhumacionService {
 
   async findAll() {
     try {
-      return await this.repo.find({ relations: ['solicitante', 'fosa', 'fallecido'] });
+      return await this.repo.find({ relations: ['id_cementerio', 'id_solicitante', 'id_hueco_nicho', 'id_fallecido'] });
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los requisitos');
     }
@@ -34,7 +34,7 @@ export class RequisitosInhumacionService {
     try {
       const record = await this.repo.findOne({
         where: { id_requsitoInhumacion: id },
-        relations: ['solicitante', 'fosa', 'fallecido'],
+        relations: ['id_cementerio', 'id_solicitante', 'id_hueco_nicho', 'id_fallecido'],
       });
       if (!record)
         throw new NotFoundException(`Requisito ${id} no encontrado`);

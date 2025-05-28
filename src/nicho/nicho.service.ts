@@ -22,7 +22,7 @@ private readonly nichoRepository: Repository<Nicho>
 
   async findAll(): Promise<Nicho[]> {
     try {
-      return await this.nichoRepository.find();
+      return await this.nichoRepository.find({relations: ['id_cementerio']});
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los nichos');
     }
@@ -30,7 +30,7 @@ private readonly nichoRepository: Repository<Nicho>
 
   async findOne(id: string): Promise<Nicho> {
     try {
-      const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
+      const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id }, relations: ['id_cementerio'] });
       if (!nicho) {
         throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
       }

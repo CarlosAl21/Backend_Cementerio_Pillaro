@@ -24,7 +24,8 @@ export class InhumacionesService {
   // Obtener todas las inhumaciones
   async findAll() {
     try {
-      return await this.repo.find();
+      return await this.repo.find({
+        relations: ['id_nicho', 'id_fallecido'],});
     } catch (error) {
       throw new InternalServerErrorException(error.message || 'No se pudieron obtener las inhumaciones');
     }

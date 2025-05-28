@@ -22,7 +22,8 @@ export class HuecosNichosService {
 
   async findAll(): Promise<HuecosNicho[]> {
     try {
-      return await this.huecoRepository.find();
+      return await this.huecoRepository.find({
+        relations: ['id_nicho', 'id_persona'],});
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los huecos');
     }
@@ -30,7 +31,7 @@ export class HuecosNichosService {
 
   async findOne(id: string): Promise<HuecosNicho> {
     try {
-      const hueco = await this.huecoRepository.findOne({ where: { id_detalle_hueco: id } });
+      const hueco = await this.huecoRepository.findOne({ where: { id_detalle_hueco: id }, relations: ['id_nicho', 'id_persona'] });
       if (!hueco) {
         throw new NotFoundException(`Hueco con ID ${id} no encontrado`);
       }
