@@ -23,7 +23,7 @@ export class Persona {
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
 
-  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.persona)
+  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.id_persona)
   propietarios_nichos: PropietarioNicho[];
 
   @OneToMany(() => Inhumacion, (inhumacion) => inhumacion.id_fallecido)

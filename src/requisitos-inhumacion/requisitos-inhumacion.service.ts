@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RequisitosInhumacion } from './entities/requisitos-inhumacion.entity';
@@ -12,34 +12,61 @@ export class RequisitosInhumacionService {
     private repo: Repository<RequisitosInhumacion>,
   ) {}
 
-  create(dto: CreateRequisitosInhumacionDto) {
-    const entity = this.repo.create(dto);
-    return this.repo.save(entity);
+  async create(dto: CreateRequisitosInhumacionDto) {
+    try {
+      const entity = this.repo.create(dto);
+      return await this.repo.save(entity);
+    } catch (error) {
+      // Puedes personalizar el control de errores según la lógica de negocio
+      throw new InternalServerErrorException('Error al crear el requisito');
+    }
   }
 
-  findAll() {
-    return this.repo.find({ relations: ['solicitante', 'fosa', 'fallecido'] });
+  async findAll() {
+    try {
+      return await this.repo.find({ relations: ['solicitante', 'fosa', 'fallecido'] });
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los requisitos');
+    }
   }
 
   async findOne(id: string) {
-    const record = await this.repo.findOne({
-      where: { id_requsitoInhumacion: id },
-      relations: ['solicitante', 'fosa', 'fallecido'],
-    });
-    if (!record)
-      throw new NotFoundException(`Requisito ${id} no encontrado`);
-    return record;
+    try {
+      const record = await this.repo.findOne({
+        where: { id_requsitoInhumacion: id },
+        relations: ['solicitante', 'fosa', 'fallecido'],
+      });
+      if (!record)
+        throw new NotFoundException(`Requisito ${id} no encontrado`);
+      return record;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al buscar el requisito');
+    }
   }
 
   async update(id: string, dto: UpdateRequisitosInhumacionDto) {
-    await this.repo.update(id, dto);
-    return this.findOne(id);
+    try {
+      const updateResult = await this.repo.update(id, dto);
+      if (!updateResult.affected) {
+        throw new NotFoundException(`Requisito ${id} no encontrado`);
+      }
+      return this.findOne(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al actualizar el requisito');
+    }
   }
 
   async remove(id: string) {
-    const res = await this.repo.delete(id);
-    if (!res.affected)
-      throw new NotFoundException(`Requisito ${id} no encontrado`);
-    return { deleted: true };
+    try {
+      const res = await this.repo.delete(id);
+      if (!res.affected)
+        throw new NotFoundException(`Requisito ${id} no encontrado`);
+      return { deleted: true };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al eliminar el requisito');
+    }
   }
 }

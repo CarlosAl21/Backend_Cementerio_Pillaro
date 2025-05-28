@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Nicho } from './entities/nicho.entity';
@@ -12,32 +12,55 @@ private readonly nichoRepository: Repository<Nicho>
   constructor() {}
 
   async create(createNichoDto: CreateNichoDto): Promise<Nicho> {
-    const nicho = this.nichoRepository.create(createNichoDto);
-    return await this.nichoRepository.save(nicho);
+    try {
+      const nicho = this.nichoRepository.create(createNichoDto);
+      return await this.nichoRepository.save(nicho);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al crear el nicho');
+    }
   }
 
   async findAll(): Promise<Nicho[]> {
-    return await this.nichoRepository.find();
+    try {
+      return await this.nichoRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los nichos');
+    }
   }
 
   async findOne(id: string): Promise<Nicho> {
-    const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
-    if (!nicho) {
-      throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
+    try {
+      const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
+      if (!nicho) {
+        throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
+      }
+      return nicho;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al buscar el nicho');
     }
-    return nicho;
   }
 
   async update(id: string, updateDto: UpdateNichoDto): Promise<Nicho> {
-    const nicho = await this.findOne(id);
-    Object.assign(nicho, updateDto);
-    return await this.nichoRepository.save(nicho);
+    try {
+      const nicho = await this.findOne(id);
+      Object.assign(nicho, updateDto);
+      return await this.nichoRepository.save(nicho);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al actualizar el nicho');
+    }
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.nichoRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
+    try {
+      const result = await this.nichoRepository.delete(id);
+      if (result.affected === 0) {
+        throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
+      }
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al eliminar el nicho');
     }
   }
 }

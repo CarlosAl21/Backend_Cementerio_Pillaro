@@ -29,9 +29,6 @@ export class Cementerio {
     @Column({ type: 'varchar', length: 100, nullable: true })
     fecha_modificacion: string;
 
-    // @OneToMany(() => User, (user) => user.id_cementerio_pert)
-    // usuarios: User[];
-
     @OneToMany(() => Nicho, (nicho) => nicho.id_cementerio)
     nichos: Nicho[];
 

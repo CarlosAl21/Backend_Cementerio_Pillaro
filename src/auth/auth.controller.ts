@@ -23,6 +23,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
   @ApiBody({
     description: 'Datos de registro',

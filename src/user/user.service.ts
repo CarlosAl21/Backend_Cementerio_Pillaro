@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -48,58 +48,63 @@ export class UserService {
     try {
       const { cedula, email } = createUserDto;
 
-      // Validar que el campo cedula_ruc esté presente
       if (!cedula) {
-        return { error: 'Debe ingresar una cédula o un RUC' };
+        throw new BadRequestException('Debe ingresar una cédula o un RUC');
       }
 
-      // Validar si es cédula o RUC
       const esCedula = this.validarCedula(cedula);
       const esRuc = this.validarRuc(cedula);
 
       if (!esCedula && !esRuc) {
-        return {
-          error: 'El número ingresado no es una cédula ni un RUC válido',
-        };
+        throw new BadRequestException('El número ingresado no es una cédula ni un RUC válido');
       }
       if (
         await this.userRepository.findOne({
           where: { cedula: createUserDto.cedula },
         })
       ) {
-        return { error: 'El usuario ya existe' };
+        throw new ConflictException('El usuario ya existe');
       }
 
-      // Validar que el email tenga formato correcto
       if (!email || !this.validarEmail(email)) {
-        return { error: 'Debe ingresar un correo electrónico válido' };
+        throw new BadRequestException('Debe ingresar un correo electrónico válido');
       }
 
-      // Crear y guardar el usuario si todo es correcto
       const Usuario = this.userRepository.create(
         createUserDto,
       );
       return await this.userRepository.save(Usuario);
     } catch (error) {
-      console.error(error);
-      return { error: error.message };
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(error.message);
     }
   }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userRepository.find().then(users =>
+      users.map(({ password, ...rest }) => rest)
+    );
   }
 
   async findOne(id: string) {
     try {
       const user = await this.userRepository.findOne({where: {id_user: id} });
       if (!user) {
-        return { error: 'User not found' };
+        throw new NotFoundException('User not found');
       }
-      return user;
+      // Excluir la contraseña
+      const { password, ...rest } = user;
+      return rest;
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la busqueda' };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error en la busqueda');
     }
   }
 
@@ -107,13 +112,15 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({where: {id_user: id} });
       if (!user) {
-        return { error: 'User not found' };
+        throw new NotFoundException('User not found');
       }
       this.userRepository.merge(user, updateUserDto);
       return await this.userRepository.save(user);
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la actualizacion' };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error en la actualizacion');
     }
   }
 
@@ -121,33 +128,43 @@ export class UserService {
     try {
       const user = await this.userRepository.findOne({where: {id_user: id} });
       if (!user) {
-        return { error: 'User not found' };
+        throw new NotFoundException('User not found');
       }
       return await this.userRepository.remove(user);
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la eliminacion' };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error en la eliminacion');
     }
   }
 
   async validateUser(username: string, pass: string): Promise<User|any> {
-    const user = await this.userRepository.findOne({ where: { cedula: username} });
-    if (user && (await bcrypt.compare(pass, user.password))) {
-      return user;
+    try {
+      const user = await this.userRepository.findOne({ where: { cedula: username} });
+      if (user && (await bcrypt.compare(pass, user.password))) {
+        return user;
+      }
+      return null;
+    } catch (error) {
+      throw new InternalServerErrorException('Error en la validación de usuario');
     }
-    return null;
   }
 
   async findByCedula(cedula: string) {
     try {
       const user = await this.userRepository.findOne({ where: { cedula: cedula } });
       if (!user) {
-        return { error: 'User not found' };
+        throw new NotFoundException('User not found');
       }
-      return user;
+      // Excluir la contraseña
+      const { password, ...rest } = user;
+      return rest;
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la busqueda' };
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error en la busqueda');
     }
   }
 }
