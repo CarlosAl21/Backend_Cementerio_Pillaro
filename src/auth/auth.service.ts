@@ -53,7 +53,7 @@ export class AuthService {
 
     async login(user: any) {
         try {
-            const payload = { username: user.cedula, sub: user.id_user, rol: user.rol };
+            const payload = { user_id: user.id_user, cedula: user.cedula, nombre: user.nombre, apellido: user.apellido, rol: user.rol };
             const token = this.jwtService.sign(payload);
             // Guardar sesión en la lista de sesiones activas
             if (!this.activeSessions.has(user.cedula_ruc)) {
