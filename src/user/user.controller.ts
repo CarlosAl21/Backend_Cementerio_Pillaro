@@ -27,7 +27,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Obtener todos los usuarios', description: 'Requiere rol de administrador' })
   @ApiOkResponse({ description: 'Lista de usuarios obtenida correctamente', type: [CreateUserDto] })
   findAll() {
@@ -35,7 +35,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Obtener un usuario por ID' })
   @ApiParam({ name: 'id', description: 'ID del usuario', type: String })
   @ApiOkResponse({ description: 'Usuario encontrado', type: CreateUserDto })
@@ -45,7 +45,7 @@ export class UserController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo usuario', description: 'Requiere rol de administrador' })
   @ApiBody({ type: CreateUserDto })
   @ApiCreatedResponse({ description: 'Usuario creado exitosamente', type: CreateUserDto })
@@ -55,7 +55,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un usuario existente' })
   @ApiParam({ name: 'id', description: 'ID del usuario a actualizar', type: String })
   @ApiBody({ type: UpdateUserDto })
@@ -66,7 +66,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un usuario', description: 'Requiere rol de administrador' })
   @ApiParam({ name: 'id', description: 'ID del usuario a eliminar', type: String })
   @ApiOkResponse({ description: 'Usuario eliminado exitosamente' })
@@ -76,7 +76,7 @@ export class UserController {
   }
   
   @Get('cedula/:cedula')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Buscar usuario por cédula' })
   @ApiParam({ name: 'cedula', description: 'Número de cédula del usuario', type: String })
   @ApiOkResponse({ description: 'Usuario encontrado', type: CreateUserDto })

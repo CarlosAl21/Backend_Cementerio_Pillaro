@@ -12,7 +12,7 @@ export class RequisitosInhumacionController {
   constructor(private readonly requisitosInhumacionService: RequisitosInhumacionService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación' })
   @ApiBody({
     type: CreateRequisitosInhumacionDto,
@@ -52,7 +52,7 @@ export class RequisitosInhumacionController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiBody({
@@ -74,7 +74,7 @@ export class RequisitosInhumacionController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiResponse({ status: 200, description: 'Requisito eliminado correctamente.' })

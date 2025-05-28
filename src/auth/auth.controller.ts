@@ -1,5 +1,5 @@
 import { UserService } from './../user/user.service';
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -23,7 +23,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Registrar nuevo usuario' })
   @ApiBody({
     description: 'Datos de registro',
@@ -70,13 +70,13 @@ export class AuthController {
   async login(@Body() body: { cedula: string, password: string }) {
     const user = await this.userService.validateUser(body.cedula, body.password);
     if (!user) {
-      return { error: 'Usuario o contraseña incorrectos' };
+      throw new BadRequestException('Usuario o contraseña incorrectos');
     }
     return this.authService.login(user);
   }
 
   @Post('logout')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cerrar sesión' })
   @ApiOkResponse({ description: 'Sesión cerrada correctamente' })
@@ -87,7 +87,7 @@ export class AuthController {
   }
 
   @Post('profile')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener perfil de usuario' })
   @ApiOkResponse({ description: 'Perfil de usuario' })

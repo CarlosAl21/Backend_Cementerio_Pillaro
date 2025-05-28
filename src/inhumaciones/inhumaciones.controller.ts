@@ -25,7 +25,7 @@ export class InhumacionesController {
   constructor(private readonly service: InhumacionesService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Crear nueva inhumación', 
     description: 'Registra una nueva inhumación en el sistema' 
@@ -87,7 +87,7 @@ export class InhumacionesController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Actualizar inhumación', 
     description: 'Actualiza completamente la información de una inhumación existente' 
@@ -120,7 +120,7 @@ export class InhumacionesController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Eliminar inhumación', 
     description: 'Elimina permanentemente un registro de inhumación' 

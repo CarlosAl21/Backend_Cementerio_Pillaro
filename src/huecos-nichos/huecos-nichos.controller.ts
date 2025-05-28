@@ -12,7 +12,7 @@ export class HuecosNichosController {
   constructor(private readonly huecosNichosService: HuecosNichosService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo hueco para el nicho' })
   @ApiBody({ 
     type: CreateHuecosNichoDto,
@@ -56,7 +56,7 @@ export class HuecosNichosController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un hueco' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ 
@@ -76,7 +76,7 @@ export class HuecosNichosController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un hueco' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'Hueco eliminado' })
