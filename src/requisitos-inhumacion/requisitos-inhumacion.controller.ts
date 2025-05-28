@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { RequisitosInhumacionService } from './requisitos-inhumacion.service';
 import { CreateRequisitosInhumacionDto } from './dto/create-requisitos-inhumacion.dto';
 import { UpdateRequisitosInhumacionDto } from './dto/update-requisitos-inhumacion.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('Requisitos Inhumacion')
 @Controller('requisitos-inhumacion')
@@ -10,6 +12,7 @@ export class RequisitosInhumacionController {
   constructor(private readonly requisitosInhumacionService: RequisitosInhumacionService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación' })
   @ApiBody({
     type: CreateRequisitosInhumacionDto,
@@ -49,6 +52,7 @@ export class RequisitosInhumacionController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiBody({
@@ -70,6 +74,7 @@ export class RequisitosInhumacionController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiResponse({ status: 200, description: 'Requisito eliminado correctamente.' })

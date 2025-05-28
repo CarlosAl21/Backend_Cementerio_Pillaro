@@ -86,7 +86,9 @@ export class UserService {
   }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userRepository.find().then(users =>
+      users.map(({ password, ...rest }) => rest)
+    );
   }
 
   async findOne(id: string) {
@@ -95,7 +97,9 @@ export class UserService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return user;
+      // Excluir la contraseña
+      const { password, ...rest } = user;
+      return rest;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -153,7 +157,9 @@ export class UserService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return user;
+      // Excluir la contraseña
+      const { password, ...rest } = user;
+      return rest;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;

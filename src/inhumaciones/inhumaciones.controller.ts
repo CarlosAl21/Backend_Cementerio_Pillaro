@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Patch, UseGuards } from '@nestjs/common';
 import { InhumacionesService } from './inhumaciones.service';
 import { Inhumacion } from './entities/inhumacion.entity';
 import { UpdateInhumacionDto } from './dto/update-inhumacione.dto';
@@ -15,6 +15,8 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiBearerAuth()
 @ApiTags('Inhumaciones')
@@ -23,6 +25,7 @@ export class InhumacionesController {
   constructor(private readonly service: InhumacionesService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Crear nueva inhumación', 
     description: 'Registra una nueva inhumación en el sistema' 
@@ -84,6 +87,7 @@ export class InhumacionesController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Actualizar inhumación', 
     description: 'Actualiza completamente la información de una inhumación existente' 
@@ -116,6 +120,7 @@ export class InhumacionesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ 
     summary: 'Eliminar inhumación', 
     description: 'Elimina permanentemente un registro de inhumación' 

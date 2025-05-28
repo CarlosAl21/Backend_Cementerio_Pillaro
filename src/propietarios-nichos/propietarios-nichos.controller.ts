@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { PropietariosNichosService } from './propietarios-nichos.service';
 import { CreatePropietarioNichoDto } from './dto/create-propietarios-nicho.dto';
 import { UpdatePropietarioNichoDto } from './dto/update-propietarios-nicho.dto';
@@ -13,6 +13,8 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('Propietarios de Nichos') // Agrupa los endpoints en Swagger UI
 @Controller('propietarios-nichos')
@@ -20,6 +22,7 @@ export class PropietariosNichosController {
   constructor(private readonly propietariosService: PropietariosNichosService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear nuevo propietario de nicho', description: 'Registra una nueva relación de propiedad de nicho' })
   @ApiBody({ type: CreatePropietarioNichoDto })
   @ApiCreatedResponse({ 
@@ -54,6 +57,7 @@ export class PropietariosNichosController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar propietario de nicho', description: 'Actualiza parcialmente un registro de propietario de nicho' })
   @ApiParam({ name: 'id', description: 'ID del propietario de nicho a actualizar', type: String })
   @ApiBody({ type: UpdatePropietarioNichoDto })
@@ -68,6 +72,7 @@ export class PropietariosNichosController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar propietario de nicho', description: 'Elimina permanentemente un registro de propietario de nicho' })
   @ApiParam({ name: 'id', description: 'ID del propietario de nicho a eliminar', type: String })
   @ApiOkResponse({ description: 'Propietario de nicho eliminado exitosamente' })
