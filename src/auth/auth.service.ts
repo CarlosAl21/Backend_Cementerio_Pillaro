@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 
@@ -39,31 +39,42 @@ export class AuthService {
     }
 
     async validateUser(username: string, pass: string): Promise<any> {
-        const user = await this.userService.validateUser(username, pass);
-        
-        if (user) {
-            const { password, ...result } = user;
-            return result;
+        try {
+            const user = await this.userService.validateUser(username, pass);
+            if (user) {
+                const { password, ...result } = user;
+                return result;
+            }
+            return null;
+        } catch (error) {
+            throw new InternalServerErrorException('Error al validar usuario');
         }
-        return null;
     }
 
     async login(user: any) {
-        const payload = { username: user.cedula, sub: user.id_user, rol: user.rol };
-        const token = this.jwtService.sign(payload);
-        // Guardar sesión en la lista de sesiones activas
-        if (!this.activeSessions.has(user.cedula_ruc)) {
-            this.activeSessions.set(user.cedula_ruc, []);
-        }
-        this.activeSessions.get(user.cedula_ruc)?.push(token);
+        try {
+            const payload = { username: user.cedula, sub: user.id_user, rol: user.rol };
+            const token = this.jwtService.sign(payload);
+            // Guardar sesión en la lista de sesiones activas
+            if (!this.activeSessions.has(user.cedula_ruc)) {
+                this.activeSessions.set(user.cedula_ruc, []);
+            }
+            this.activeSessions.get(user.cedula_ruc)?.push(token);
 
-        return { access_token: token };
+            return { access_token: token };
+        } catch (error) {
+            throw new InternalServerErrorException('Error al iniciar sesión');
+        }
     }
     
     async logout(cedula_ruc: string, token: string) {
-        const tokens = this.activeSessions.get(cedula_ruc);
-        if (tokens) {
-            this.activeSessions.set(cedula_ruc, tokens.filter(t => t !== token));
+        try {
+            const tokens = this.activeSessions.get(cedula_ruc);
+            if (tokens) {
+                this.activeSessions.set(cedula_ruc, tokens.filter(t => t !== token));
+            }
+        } catch (error) {
+            throw new InternalServerErrorException('Error al cerrar sesión');
         }
     }
 

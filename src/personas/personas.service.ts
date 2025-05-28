@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Persona } from './entities/persona.entity';
@@ -16,9 +16,7 @@ export class PersonasService {
       const persona = this.personaRepo.create(createPersonaDto);
       return await this.personaRepo.save(persona);
     } catch (error) {
-      console.error('Error creating persona:', error);
-      throw new Error('Error creating persona');
-      
+      throw new InternalServerErrorException('Error creating persona');
     }
   }
 
@@ -30,12 +28,12 @@ export class PersonasService {
     try {
       const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
       if (!persona) {
-        throw new Error('Persona not found');
+        throw new NotFoundException('Persona not found');
       }
       return persona;
     } catch (error) {
-      console.error('Error finding persona:', error);
-      throw new Error('Error finding persona');
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error finding persona');
     }
   }
 
@@ -43,43 +41,32 @@ export class PersonasService {
   async findBy(cedula?: string, nombres?: string): Promise<Persona[]> {
     try {
       const query = this.personaRepo.createQueryBuilder('persona');
-    
-      // EN CASO QUE NO ENCUENTRE NINGUN PARAMETRO DEVUELVE TODOS LOS REGISTROS
       if (!cedula && !nombres) {
         return this.personaRepo.find();
       }
-    
-      // BUSQUEDA POR CEDULA
       if (cedula) {
         query.andWhere('persona.cedula = :cedula', { cedula });
       }
-    
-      // BUSQUEDA POR NOMBRES 
       if (nombres) {
         query.andWhere('persona.nombres LIKE :nombres', { nombres: `%${nombres}%` });
       }
-    
       return query.getMany();
     } catch (error) {
-      console.error('Error finding persona by cedula or nombres:', error);
-      throw new Error('Error finding persona by cedula or nombres');
-      
+      throw new InternalServerErrorException('Error finding persona by cedula or nombres');
     }
   }
-  
-  
-//ACTUALIZACION DE REGISTROS
+
   async update(id: string, dto: UpdatePersonaDto) {
     try {
       const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
       if (!persona) {
-        throw new Error('Persona not found');
+        throw new NotFoundException('Persona not found');
       }
       this.personaRepo.merge(persona, dto);
       return await this.personaRepo.save(persona);
     } catch (error) {
-      console.error('Error updating persona:', error);
-      throw new Error('Error updating persona');
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error updating persona');
     }
   }
 
@@ -87,12 +74,12 @@ export class PersonasService {
     try {
       const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
       if (!persona) {
-        throw new Error('Persona not found');
+        throw new NotFoundException('Persona not found');
       }
       return await this.personaRepo.remove(persona);
     } catch (error) {
-      console.error('Error removing persona:', error);
-      throw new Error('Error removing persona');
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error removing persona');
     }
   }
 }
