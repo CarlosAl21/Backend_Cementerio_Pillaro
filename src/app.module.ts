@@ -33,7 +33,6 @@ import { RequisitosInhumacionModule } from './requisitos-inhumacion/requisitos-i
       username: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      schema: process.env.DB_SCHEMA, // Asegúrate de que esta línea esté correcta
       autoLoadEntities: true,
       entities: [
         User,
