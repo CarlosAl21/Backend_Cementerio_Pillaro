@@ -11,7 +11,7 @@ export class Nicho {
   @PrimaryGeneratedColumn('uuid')
   id_nicho: string;
 
-  @ManyToOne(() => Cementerio, (cementerio) => cementerio.nichos, { eager: true })
+  @ManyToOne(() => Cementerio, (cementerio) => cementerio.nichos)
   @JoinColumn({ name: 'id_cementerio' })
   id_cementerio: Cementerio;
 
@@ -48,7 +48,7 @@ export class Nicho {
   @OneToMany(() => Inhumacion, (inhumacion) => inhumacion.id_nicho)
   inhumaciones: Inhumacion[];
 
-  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.nicho)
+  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.id_nicho)
   propietarios_nicho: PropietarioNicho[];
 
   @OneToMany(() => HuecosNicho, (hueco) => hueco.id_nicho)

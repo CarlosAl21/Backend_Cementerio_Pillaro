@@ -17,14 +17,18 @@ export class InhumacionesService {
       const inhumacion = this.repo.create(CreateInhumacionDto);
       return await this.repo.save(inhumacion);
     } catch (error) {
-      console.error('Error al crear inhumación:', error);
       throw new InternalServerErrorException(error.message || 'No se pudo crear la inhumación');
     }
   }
 
   // Obtener todas las inhumaciones
   async findAll() {
-    return await this.repo.find();
+    try {
+      return await this.repo.find({
+        relations: ['id_nicho', 'id_fallecido'],});
+    } catch (error) {
+      throw new InternalServerErrorException(error.message || 'No se pudieron obtener las inhumaciones');
+    }
   }
 
   // Obtener una inhumación por ID
@@ -36,7 +40,7 @@ export class InhumacionesService {
       }
       return inhumacion;
     } catch (error) {
-      console.error('Error al obtener inhumación:', error);
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(error.message || 'No se pudo obtener la inhumación');
     }
   }
@@ -51,7 +55,7 @@ export class InhumacionesService {
       this.repo.merge(inhumacion, updateInhumacionDto);
       return await this.repo.save(inhumacion);
     } catch (error) {
-      console.error('Error al actualizar inhumación:', error);
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(error.message || 'No se pudo actualizar la inhumación');
     }
   }
@@ -65,7 +69,7 @@ export class InhumacionesService {
       }
       return await this.repo.remove(inhumacion);
     } catch (error) {
-      console.error('Error al eliminar inhumación:', error);
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(error.message || 'No se pudo eliminar la inhumación');
     }
   }

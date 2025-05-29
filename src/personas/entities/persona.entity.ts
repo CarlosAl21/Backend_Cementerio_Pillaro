@@ -1,3 +1,4 @@
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
@@ -22,7 +23,7 @@ export class Persona {
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
 
-  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.persona)
+  @OneToMany(() => PropietarioNicho, (propietarioNicho) => propietarioNicho.id_persona)
   propietarios_nichos: PropietarioNicho[];
 
   @OneToMany(() => Inhumacion, (inhumacion) => inhumacion.id_fallecido)
@@ -33,6 +34,9 @@ export class Persona {
 
   @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_solicitante)
   requisitos_inhumacion_solicitante: RequisitosInhumacion[];
+
+  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_persona)
+  huecos_nichos: HuecosNicho[];
 
   @BeforeInsert()
   async setFechaCreacion() {

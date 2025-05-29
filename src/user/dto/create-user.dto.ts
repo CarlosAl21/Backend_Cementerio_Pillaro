@@ -1,4 +1,4 @@
-import { IsString, IsEmail, Length } from "class-validator";
+import { IsString, IsEmail, Length, IsOptional } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Cementerio } from "src/cementerio/entities/cementerio.entity";
 import { DeepPartial } from "typeorm";
@@ -53,4 +53,13 @@ export class CreateUserDto {
     @IsString()
     @Length(8, 100)
     password: string;
+
+    @ApiProperty({
+        description: 'Rol del usuario (opcional)',
+        example: 'admin',
+        required: false
+    })
+    @IsOptional()
+    @IsString()
+    rol?: string;
 }

@@ -26,7 +26,7 @@ export class CementerioController {
   constructor(private readonly cementerioService: CementerioService) {}
 
   @Post()
-  //@UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear nuevo cementerio' })
   @ApiBody({ type: CreateCementerioDto })
   @ApiCreatedResponse({ 
@@ -82,7 +82,7 @@ export class CementerioController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar cementerio' })
   @ApiParam({ 
     name: 'id', 
@@ -102,7 +102,7 @@ export class CementerioController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar cementerio' })
   @ApiParam({ 
     name: 'id', 

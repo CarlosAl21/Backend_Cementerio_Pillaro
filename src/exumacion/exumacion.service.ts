@@ -1,5 +1,5 @@
 // src/exhumacion/exhumacion.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Exumacion } from './entities/exumacion.entity';
@@ -17,25 +17,28 @@ export class ExumacionService {
   ) {}
 
   async create(createExumacionDto: CreateExumacionDto) {
-    // Verificar que las entidades relacionadas existan
-    const nichoOriginal = await this.nichoRepository.findOne({
-      where: { id_nicho: createExumacionDto.nicho_original_id.id_nicho },
-    });
+    try {
+      const nichoOriginal = await this.nichoRepository.findOne({
+        where: { id_nicho: createExumacionDto.nicho_original_id.id_nicho },
+      });
 
-    if (!nichoOriginal) {
-      throw new NotFoundException('Nicho original no encontrado');
+      if (!nichoOriginal) {
+        throw new NotFoundException('Nicho original no encontrado');
+      }
+
+      const codigo = this.generarCodigoExumacion();
+
+      const exumacion = this.exumacionRepository.create({
+        ...createExumacionDto,
+        codigo,
+        nichoOriginal,
+      });
+
+      return await this.exumacionRepository.save(exumacion);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al crear la exhumación');
     }
-
-    // Generar código único
-    const codigo = this.generarCodigoExumacion();
-
-    const exumacion = this.exumacionRepository.create({
-      ...createExumacionDto,
-      codigo,
-      nichoOriginal,
-    });
-
-    return this.exumacionRepository.save(exumacion);
   }
 
   private generarCodigoExumacion(): string {
@@ -46,44 +49,65 @@ export class ExumacionService {
   }
 
   async findAll() {
-    return this.exumacionRepository.find({
-      relations: ['solicitante', 'fallecido', 'nichoOriginal'],
-    });
+    try {
+      return await this.exumacionRepository.find({
+        relations: ['id_inhumacion', 'id_nicho'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener las exhumaciones');
+    }
   }
 
   async findOne(id: string) {
-    const exumacion = await this.exumacionRepository.findOne({
-      where: { id_exhumacion: id },
-      relations: ['solicitante', 'fallecido', 'nichoOriginal'],
-    });
+    try {
+      const exumacion = await this.exumacionRepository.findOne({
+        where: { id_exhumacion: id },
+        relations: ['id_inhumacion', 'id_nicho'],
+      });
 
-    if (!exumacion) {
-      throw new NotFoundException(`Exhumación con ID ${id} no encontrada`);
+      if (!exumacion) {
+        throw new NotFoundException(`Exhumación con ID ${id} no encontrada`);
+      }
+
+      return exumacion;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al obtener la exhumación');
     }
-
-    return exumacion;
   }
 
   async update(id: string, updateExumacionDto: UpdateExumacionDto) {
-    const exumacion = await this.findOne(id);
-
-    Object.assign(exumacion, updateExumacionDto);
-
-    return this.exumacionRepository.save(exumacion);
+    try {
+      const exumacion = await this.findOne(id);
+      Object.assign(exumacion, updateExumacionDto);
+      return await this.exumacionRepository.save(exumacion);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al actualizar la exhumación');
+    }
   }
 
   async remove(id: string) {
-    const exumacion = await this.findOne(id);
-    return this.exumacionRepository.remove(exumacion);
+    try {
+      const exumacion = await this.findOne(id);
+      return await this.exumacionRepository.remove(exumacion);
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al eliminar la exhumación');
+    }
   }
 
   async generarFormularioExumacion(id: string) {
-    const exumacion = await this.findOne(id);
-    
-    // Aquí puedes generar el PDF o HTML del formulario basado en la entidad
-    return {
-      ...exumacion,
-      // Puedes agregar formato específico para el formulario
-    };
+    try {
+      const exumacion = await this.findOne(id);
+      // Aquí puedes generar el PDF o HTML del formulario basado en la entidad
+      return {
+        ...exumacion,
+        // Puedes agregar formato específico para el formulario
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al generar el formulario de exhumación');
+    }
   }
 }

@@ -20,6 +20,10 @@ export class HuecosNicho{
   @Column({ length: 20 })
   estado: string;
 
+  @ManyToOne(() => Persona, (persona) => persona.huecos_nichos)
+  @JoinColumn({ name: 'id_persona' })
+  id_persona: Persona;
+
   @OneToMany(() => RequisitosInhumacion, (requisito) => requisito.id_hueco_nicho)
   requisitos_inhumacion: RequisitosInhumacion[];
   

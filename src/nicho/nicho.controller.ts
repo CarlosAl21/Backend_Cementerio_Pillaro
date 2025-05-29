@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch, UseGuards } from '@nestjs/common';
 import { NichoService } from './nicho.service';
 import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('nichos')
 @Controller('nichos')
@@ -10,6 +12,7 @@ export class NichosController {
   constructor(private readonly nichosService: NichoService) {}
 
   @Post()
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo nicho' })
   @ApiBody({ 
     type: CreateNichoDto,
@@ -49,6 +52,7 @@ export class NichosController {
   }
 
   @Patch(':id')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un nicho' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiBody({ 
@@ -70,6 +74,7 @@ export class NichosController {
   }
 
   @Delete(':id')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un nicho' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
   @ApiResponse({ status: 200, description: 'Nicho eliminado' })

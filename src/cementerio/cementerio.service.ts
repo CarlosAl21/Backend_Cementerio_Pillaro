@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { CreateCementerioDto } from './dto/create-cementerio.dto';
 import { UpdateCementerioDto } from './dto/update-cementerio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,8 +15,7 @@ export class CementerioService {
       const cementerio = this.cementerioRepository.create(createCementerioDto);
       return await this.cementerioRepository.save(cementerio);
     } catch (error) {
-      console.log(error);
-      return {error: error, mensaje: 'Error en la creacion'};
+      throw new InternalServerErrorException('Error en la creacion');
     }
   }
 
@@ -28,12 +27,12 @@ export class CementerioService {
     try {
       const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
       if (!cementerio) {
-        return { mensaje: 'No se encontro el cementerio' };
+        throw new NotFoundException('No se encontro el cementerio');
       }
       return cementerio;
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la busqueda' };
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error en la busqueda');
     }
   }
 
@@ -41,13 +40,13 @@ export class CementerioService {
     try {
       const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
       if (!cementerio) {
-        return { mensaje: 'No se encontro el cementerio' };
+        throw new NotFoundException('No se encontro el cementerio');
       }
       this.cementerioRepository.merge(cementerio, updateCementerioDto);
       return await this.cementerioRepository.save(cementerio);
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la actualizacion' };
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error en la actualizacion');
     }
   }
 
@@ -55,25 +54,25 @@ export class CementerioService {
     try {
       const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
       if (!cementerio) {
-        return { mensaje: 'No se encontro el cementerio' };
+        throw new NotFoundException('No se encontro el cementerio');
       }
       return await this.cementerioRepository.remove(cementerio);
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la eliminacion' };
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error en la eliminacion');
     }
   }
 
   async findByName(name: string) {
     try {
-       const cementerio = await this.cementerioRepository.findOne({where: {nombre: Like(`%${name}%`)} });
+      const cementerio = await this.cementerioRepository.findOne({where: {nombre: Like(`%${name}%`)} });
       if (!cementerio) {
-        return { mensaje: 'No se encontro el cementerio' };
+        throw new NotFoundException('No se encontro el cementerio');
       }
       return cementerio;
     } catch (error) {
-      console.log(error);
-      return { error: error, mensaje: 'Error en la busqueda' };
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error en la busqueda');
     }
   }
 }

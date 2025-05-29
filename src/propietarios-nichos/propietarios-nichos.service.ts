@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePropietarioNichoDto } from './dto/create-propietarios-nicho.dto';
@@ -18,25 +18,24 @@ export class PropietariosNichosService {
       const propietario = this.propietarioRepo.create(dto);
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
-      console.error('Error creating PropietarioNicho:', error);
-      throw new Error(`Error creating PropietarioNicho: ${error.message}`);
+      throw new InternalServerErrorException(`Error creating PropietarioNicho: ${error.message}`);
     }
   }
 
   findAll(){
-    return this.propietarioRepo.find();
+    return this.propietarioRepo.find({relations: ['id_nicho', 'id_persona']});
   }
 
   async findOne(id: string) {
     try {
-      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
+      const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id },relations: ['id_nicho', 'id_persona'] });
       if (!propietario) {
-        throw new Error(`PropietarioNicho with id ${id} not found`);
+        throw new NotFoundException(`PropietarioNicho with id ${id} not found`);
       }
       return propietario;
     } catch (error) {
-      console.error('Error finding PropietarioNicho:', error);
-      throw new Error(`Error finding PropietarioNicho: ${error.message}`);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(`Error finding PropietarioNicho: ${error.message}`);
     }
   }
 
@@ -44,13 +43,13 @@ export class PropietariosNichosService {
     try {
       const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
       if (!propietario) {
-        throw new Error(`PropietarioNicho with id ${id} not found`);
+        throw new NotFoundException(`PropietarioNicho with id ${id} not found`);
       }
       this.propietarioRepo.merge(propietario, dto);
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
-      console.error('Error updating PropietarioNicho:', error);
-      throw new Error(`Error updating PropietarioNicho: ${error.message}`);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(`Error updating PropietarioNicho: ${error.message}`);
     }
   }
 
@@ -58,12 +57,12 @@ export class PropietariosNichosService {
     try {
       const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });
       if (!propietario) {
-        throw new Error(`PropietarioNicho with id ${id} not found`);
+        throw new NotFoundException(`PropietarioNicho with id ${id} not found`);
       }
       return await this.propietarioRepo.delete(id);
     } catch (error) {
-      console.error('Error removing PropietarioNicho:', error);
-      throw new Error(`Error removing PropietarioNicho: ${error.message}`);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(`Error removing PropietarioNicho: ${error.message}`);
     }
   }
 }
