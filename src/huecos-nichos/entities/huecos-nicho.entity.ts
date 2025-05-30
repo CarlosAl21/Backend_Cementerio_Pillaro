@@ -20,7 +20,7 @@ export class HuecosNicho{
   @Column({ length: 20 })
   estado: string;
 
-  @ManyToOne(() => Persona, (persona) => persona.huecos_nichos)
+  @ManyToOne(() => Persona, (persona) => persona.huecos_nichos, { nullable: true })
   @JoinColumn({ name: 'id_persona' })
   id_persona: Persona;
 
