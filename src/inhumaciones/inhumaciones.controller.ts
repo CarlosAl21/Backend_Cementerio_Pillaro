@@ -39,6 +39,9 @@ export class InhumacionesController {
           id_fallecido: "123e4567-e89b-12d3-a456-426614174001",
           fecha_inhumacion: "2023-06-15",
           hora_inhumacion: "14:30",
+          solicitante: "Juan Pérez",
+          responsable_inhumacion: "Carlos Gómez",
+          observaciones: "Requiere traslado desde otro cementerio",
           codigo_inhumacion: "INH-2023-001",
           estado: "Programada"
         }
