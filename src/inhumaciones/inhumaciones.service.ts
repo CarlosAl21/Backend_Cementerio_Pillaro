@@ -34,7 +34,7 @@ export class InhumacionesService {
   // Obtener una inhumación por ID
   async findOne(id: string) {
     try {
-      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id }, relations: ['id_nicho', 'id_fallecido'] });
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
