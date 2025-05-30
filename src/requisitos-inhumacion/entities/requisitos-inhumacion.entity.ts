@@ -49,7 +49,6 @@ export class RequisitosInhumacion {
   @JoinColumn({ name: 'id_hueco_nicho' })
   id_hueco_nicho: HuecosNicho;
 
-
   @Column()
   firmaAceptacionSepulcro: string;
 

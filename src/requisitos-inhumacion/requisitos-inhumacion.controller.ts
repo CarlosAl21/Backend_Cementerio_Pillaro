@@ -20,12 +20,21 @@ export class RequisitosInhumacionController {
       ejemplo: {
         summary: 'Ejemplo de creación',
         value: {
-          // Ajusta los campos según tu DTO real
-          fecha: '2024-06-01',
-          solicitante: 'uuid-solicitante',
-          fosa: 'uuid-fosa',
-          fallecido: 'uuid-fallecido',
-          observaciones: 'Observaciones de ejemplo'
+          cementerio: { id_cementerio: 'uuid-cementerio'},
+          pantoneroACargo: 'Juan Pérez',
+          metodoSolicitud: 'escrita',
+          solicitanteId: { id_persona: 'uuid-solicitante' },
+          observacionSolicitante: 'Observaciones sobre el solicitante',
+          copiaCertificadoDefuncion: true,
+          informeEstadisticoINEC: true,
+          copiaCedula: true,
+          pagoTasaInhumacion: true,
+          copiaTituloPropiedadNicho: true,
+          id_hueco_nicho: { id_detalle_hueco: 'uuid-hueco-nicho' },
+          firmaAceptacionSepulcro: 'Firma digitalizada o nombre completo',
+          id_fallecido: { id_persona: 'uuid-fallecido'},
+          fechaInhumacion: '2024-06-01',
+          horaInhumacion: '14:30'
         }
       }
     }

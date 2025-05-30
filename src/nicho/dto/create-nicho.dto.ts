@@ -84,14 +84,10 @@ export class CreateNichoDto {
   @ApiProperty({
     description: 'Cantidad de huecos del nicho',
     example: 2,
-    minimum: 1,
-    maximum: 2,
     required: true
   })
   @IsInt()
   @IsNotEmpty()
-  @Min(1)
-  @Max(2)
-  numero_huecos: number;
+  num_huecos: number;
 
 }

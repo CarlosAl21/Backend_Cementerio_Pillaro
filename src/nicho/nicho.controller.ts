@@ -23,9 +23,9 @@ export class NichosController {
           sector: "A",
           fila: "1",
           numero: "15",
-          tipo: "Individual",
+          tipo: "Fosa",
           fecha_construccion: "2023-01-01",
-          numero_huecos: 2
+          num_huecos: 2
         }
       }
     }

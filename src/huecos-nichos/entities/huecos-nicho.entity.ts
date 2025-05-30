@@ -22,7 +22,7 @@ export class HuecosNicho{
 
   @ManyToOne(() => Persona, (persona) => persona.huecos_nichos, { nullable: true })
   @JoinColumn({ name: 'id_persona' })
-  id_persona: Persona;
+  id_fallecido: Persona;
 
   @OneToMany(() => RequisitosInhumacion, (requisito) => requisito.id_hueco_nicho)
   requisitos_inhumacion: RequisitosInhumacion[];
@@ -40,7 +40,7 @@ export class HuecosNicho{
 
   @BeforeInsert()
   async estadoDefault() {
-    this.estado = 'Ocupado';
+    this.estado = 'Disponible'; // Estado por defecto al crear un nuevo hueco
   }
 
   @BeforeUpdate()

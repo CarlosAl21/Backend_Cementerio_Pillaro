@@ -35,7 +35,7 @@ export class Persona {
   @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_solicitante)
   requisitos_inhumacion_solicitante: RequisitosInhumacion[];
 
-  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_persona)
+  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_fallecido)
   huecos_nichos: HuecosNicho[];
 
   @BeforeInsert()

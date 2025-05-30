@@ -30,6 +30,9 @@ export class Nicho {
   @Column({ length: 20 })
   estado: string;
 
+  @Column({ type: 'int', name: 'num_huecos' })
+  num_huecos: number;
+
   @Column({ type: 'varchar', name: 'fecha_construccion'})
   fecha_construccion: string;
 
