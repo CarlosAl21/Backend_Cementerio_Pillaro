@@ -103,7 +103,8 @@ export class CementerioSeeder {
               fecha_creacion: new Date().toISOString(),
               fecha_actualizacion: new Date().toISOString(),
               id_cementerio: cementerios[0],
-              propietarios_nicho: [propietarios[propietarioIndex]]
+              propietarios_nicho: [propietarios[propietarioIndex]],
+              num_huecos: numero
             });
           }
         }
@@ -125,7 +126,8 @@ export class CementerioSeeder {
               fecha_creacion: new Date().toISOString(),
               fecha_actualizacion: new Date().toDateString(),
               id_cementerio: cementerios[1],
-              propietarios_nicho: [propietarios[propietarioIndex]]
+              propietarios_nicho: [propietarios[propietarioIndex]],
+              num_huecos: numero
             });
           }
         }
