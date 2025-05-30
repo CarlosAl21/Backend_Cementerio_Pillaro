@@ -42,22 +42,22 @@ export class CreateInhumacionDto {
     @IsNotEmpty()
     hora_inhumacion: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Nombre del solicitante',
         example: 'Juan Pérez',
-        required: false
+        required: true
     })
     @IsString()
-    @IsOptional()
+    @IsNotEmpty()
     solicitante: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Nombre del responsable de la inhumación',
         example: 'Carlos Gómez',
-        required: false
+        required: true
     })
     @IsString()
-    @IsOptional()
+    @IsNotEmpty()
     responsable_inhumacion: string;
 
     @ApiPropertyOptional({

@@ -27,7 +27,7 @@ export class Inhumacion {
   @Column()
   responsable_inhumacion: string;
 
-  @Column()
+  @Column({ type: 'text', nullable: true })
   observaciones: string;
 
   @Column()
