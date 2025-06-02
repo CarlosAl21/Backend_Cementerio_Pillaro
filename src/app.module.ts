@@ -45,7 +45,7 @@ import { RequisitosInhumacionModule } from './requisitos-inhumacion/requisitos-i
         RequisitosInhumacion,
         HuecosNicho,
       ],
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+      // ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
       synchronize: true, // Solo para desarrollo, no usar en producción
     }),
     UserModule, 
