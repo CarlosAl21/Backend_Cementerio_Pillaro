@@ -44,14 +44,14 @@ export class HuecosNichosService {
 
   async findByNicho(id_nicho: string): Promise<HuecosNicho[]> {
     try {
-      return await this.huecoRepository.find({
-        where: {
-          id_nicho: {
-            id_nicho,
-          },
-        },
-      });
+      return await this.huecoRepository
+        .createQueryBuilder('hueco')
+        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
+        .leftJoinAndSelect('hueco.id_fallecido', 'fallecido')
+        .where('nicho.id_nicho = :id_nicho', { id_nicho })
+        .getMany();
     } catch (error) {
+      console.log('Error en findByNicho:', error);
       throw new InternalServerErrorException('Error al buscar huecos por nicho');
     }
   }
