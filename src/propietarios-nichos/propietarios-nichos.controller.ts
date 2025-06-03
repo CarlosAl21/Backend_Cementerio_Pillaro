@@ -56,6 +56,17 @@ export class PropietariosNichosController {
     return this.propietariosService.findOne(id);
   }
 
+  @Get('por-nicho/:idNicho')
+  @ApiOperation({ summary: 'Obtener propietarios de nicho por ID de nicho', description: 'Obtiene todos los registros de propietarios de nicho por ID de nicho' })
+  @ApiParam({ name: 'idNicho', description: 'ID del nicho', type: String })
+  @ApiOkResponse({ 
+    description: 'Lista de propietarios de nicho obtenida exitosamente',
+    type: [CreatePropietarioNichoDto]
+  })
+  findByNicho(@Param('idNicho') idNicho: string) {
+    return this.propietariosService.findByNicho(idNicho);
+  }
+
   @Patch(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar propietario de nicho', description: 'Actualiza parcialmente un registro de propietario de nicho' })

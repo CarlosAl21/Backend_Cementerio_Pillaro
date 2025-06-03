@@ -39,6 +39,20 @@ export class PropietariosNichosService {
     }
   }
 
+  async findByNicho(idNicho: string){
+    try {
+      return await this.propietarioRepo
+        .createQueryBuilder('propietario')
+        .leftJoinAndSelect('propietario.id_nicho', 'nicho')
+        .leftJoinAndSelect('propietario.id_persona', 'persona')
+        .where('nicho.id_nicho = :idNicho', { idNicho })
+        .getMany();
+    } catch (error) {
+      console.log('Error en findByNicho:', error);
+      throw new InternalServerErrorException('Error al buscar propietarios por nicho');
+    }
+  }
+
   async update(id: string, dto: UpdatePropietarioNichoDto){
     try {
       const propietario = await this.propietarioRepo.findOne({ where: { id_propietario_nicho: id } });

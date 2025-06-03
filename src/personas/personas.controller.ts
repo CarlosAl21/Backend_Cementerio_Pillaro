@@ -49,16 +49,14 @@ export class PersonasController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Buscar personas', description: 'Busca personas por cédula o nombres' })
-  @ApiQuery({ name: 'cedula', required: false, description: 'Número de cédula para filtrar' })
-  @ApiQuery({ name: 'nombres', required: false, description: 'Nombres para filtrar (búsqueda parcial)' })
+  @ApiOperation({ summary: 'Buscar personas', description: 'Busca personas por cédula, nombres o apellidos. Si no se proporciona query, devuelve todas las personas.' })
+  @ApiQuery({ name: 'query', required: false, description: 'Término de búsqueda (cédula, nombres o apellidos)' })
   @ApiOkResponse({ 
     description: 'Resultados de la búsqueda',
     type: [Persona]
   })
-  async search(@Query() query): Promise<Persona[]> {
-    const { cedula, nombres } = query;
-    return this.personasService.findBy(cedula, nombres);
+  async search(@Query('query') query?: string): Promise<Persona[]> {
+    return this.personasService.findBy(query);
   }
 
   @Get(':id')

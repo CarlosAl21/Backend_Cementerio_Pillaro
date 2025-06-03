@@ -38,21 +38,23 @@ export class PersonasService {
   }
 
   // METODO DE BUSQUEDA POR CEDULA O NOMBRES
-  async findBy(cedula?: string, nombres?: string): Promise<Persona[]> {
+  async findBy(query?: string): Promise<Persona[]> {
     try {
-      const query = this.personaRepo.createQueryBuilder('persona');
-      if (!cedula && !nombres) {
+      if (!query) {
         return this.personaRepo.find();
       }
-      if (cedula) {
-        query.andWhere('persona.cedula = :cedula', { cedula });
-      }
-      if (nombres) {
-        query.andWhere('persona.nombres LIKE :nombres', { nombres: `%${nombres}%` });
-      }
-      return query.getMany();
+
+      const searchTerm = `%${query}%`;
+      
+      return await this.personaRepo
+        .createQueryBuilder('persona')
+        .where(
+          '(persona.cedula ILIKE :searchTerm OR persona.nombres ILIKE :searchTerm OR persona.apellidos ILIKE :searchTerm)',
+          { searchTerm }
+        )
+        .getMany();
     } catch (error) {
-      throw new InternalServerErrorException('Error finding persona by cedula or nombres');
+      throw new InternalServerErrorException('Error al buscar personas');
     }
   }
 
