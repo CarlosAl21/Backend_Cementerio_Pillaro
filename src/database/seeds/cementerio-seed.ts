@@ -232,7 +232,7 @@ export class CementerioSeeder {
         if (index < huecosOcupados.length) {
           const hueco = huecosOcupados[index];
             inhumaciones.push({
-            fecha_inhumacion: new Date(persona.fecha_defuncion.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            fecha_inhumacion: new Date(persona.fecha_defuncion.getTime() + 24 * 60 * 60 * 1000),
             hora_inhumacion: new Date(persona.fecha_defuncion.getTime() + 24 * 60 * 60 * 1000 + 10 * 60 * 60 * 1000).toISOString().split('T')[1]?.substring(0, 8) ?? '10:00:00',
             solicitante: `Familia ${persona.apellidos.split(' ')[0]}`,
             responsable_inhumacion: 'Funeraria San Pedro',

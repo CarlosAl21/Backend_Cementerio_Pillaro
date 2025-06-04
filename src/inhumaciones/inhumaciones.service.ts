@@ -4,11 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inhumacion } from './entities/inhumacion.entity';
 import { UpdateInhumacionDto } from './dto/update-inhumacione.dto';
+import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 
 @Injectable()
 export class InhumacionesService {
   constructor(
     @InjectRepository(Inhumacion) private readonly repo: Repository<Inhumacion>,
+    @InjectRepository(HuecosNicho) private readonly huecosNichoRepo: Repository<HuecosNicho>,
   ) {}
 
   // Crear inhumación
@@ -53,7 +55,19 @@ export class InhumacionesService {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
       this.repo.merge(inhumacion, updateInhumacionDto);
-      return await this.repo.save(inhumacion);
+      const saveInhumacion = await this.repo.save(inhumacion);
+      
+      if(saveInhumacion.estado === 'completado') {
+        const huecoNicho = await this.huecosNichoRepo.findOne({ where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco} });
+        if (!huecoNicho) {
+          throw new NotFoundException('Hueco Nicho no encontrado');
+        }
+        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'ocupado' });
+        const savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
+
+        return { saveInhumacion, savedHuecoNicho };
+      }
+      return saveInhumacion;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(error.message || 'No se pudo actualizar la inhumación');
