@@ -26,17 +26,6 @@ export class RequisitosInhumacionService {
 
   async create(dto: CreateRequisitosInhumacionDto) {
     try {
-      // Validación de datos antes de crear la entidad
-      if (
-        !dto.id_cementerio ||
-        !dto.id_solicitante ||
-        !dto.id_hueco_nicho ||
-        !dto.id_fallecido
-      ) {
-        throw new BadRequestException(
-          'Faltan datos obligatorios para crear el requisito',
-        );
-      }
       const huecoNicho = await this.huecosNichoRepo.findOne({where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco}})
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
@@ -51,18 +40,13 @@ export class RequisitosInhumacionService {
       const savedEntity = await this.repo.save(entity);
 
       if (
-        savedEntity.copiaCedula == false ||
-        savedEntity.copiaCertificadoDefuncion == false ||
-        savedEntity.informeEstadisticoINEC == false ||
-        savedEntity.pagoTasaInhumacion == false ||
-        savedEntity.copiaTituloPropiedadNicho == false
+        savedEntity.copiaCedula == true &&
+        savedEntity.copiaCertificadoDefuncion == true &&
+        savedEntity.informeEstadisticoINEC == true &&
+        savedEntity.pagoTasaInhumacion == true &&
+        savedEntity.copiaTituloPropiedadNicho == true
       ) {
-        throw new BadRequestException(
-          'Faltan requisitos obligatorios para completar la solicitud de inhumación',
-        );
-      }
-
-      // Obtener año actual
+        // Obtener año actual
       const year = new Date().getFullYear();
       // Contar cuántas inhumaciones existen este año
       const count = await this.inhumacionRepo
@@ -91,6 +75,8 @@ export class RequisitosInhumacionService {
         id_requisitos_inhumacion: savedEntity,
       });
       const savedInhumacion = await this.inhumacionRepo.save(inhumacion);
+      return {savedEntity, savedInhumacion};
+      }
       
       return savedEntity;
     } catch (error) {
