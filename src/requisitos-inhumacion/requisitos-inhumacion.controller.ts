@@ -299,10 +299,6 @@ export class RequisitosInhumacionController {
         ? urlObject.pathname.slice(1)
         : urlObject.pathname;
 
-      // Log para depuración
-      console.log('Bucket:', bucket);
-      console.log('Key:', key);
-
       const command = new GetObjectCommand({
         Bucket: bucket,
         Key: key,
