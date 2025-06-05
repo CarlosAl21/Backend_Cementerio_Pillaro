@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException } from '@nestjs/common';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Persona } from './entities/persona.entity';
@@ -38,24 +38,52 @@ export class PersonasService {
     return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
   }
 
+  private validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   async create(createPersonaDto: CreatePersonaDto) {
     try {
       // Validar cédula o RUC
       if (!createPersonaDto.cedula || !this.validarCedula(createPersonaDto.cedula)) {
-        throw new NotFoundException('Cédula inválida');
+        throw new BadRequestException('Cédula inválida');
       }
       if (createPersonaDto.tipo === 'RUC' && !this.validarRuc(createPersonaDto.cedula)) {
-        throw new NotFoundException('RUC inválido');
+        throw new BadRequestException('RUC inválido');
       }
       // Verificar si ya existe una persona con la misma cédula
       const existingPersona = await this.personaRepo.findOne({ where: { cedula: createPersonaDto.cedula } });
       if (existingPersona) {
-        throw new NotFoundException('Ya existe una persona con esta cédula');
+        throw new ConflictException('Ya existe una persona con esta cédula');
       }
+      // Validar email
+      if (createPersonaDto.correo && !this.validarEmail(createPersonaDto.correo)) {
+        throw new BadRequestException('Correo electrónico inválido');
+      }
+      // Validar fecha de nacimiento
+      if (createPersonaDto.fecha_nacimiento && new Date(createPersonaDto.fecha_nacimiento) >= new Date()) {
+        throw new BadRequestException('La fecha de nacimiento no puede ser futura');
+      }
+      // Validar fecha de defunción
+      if (createPersonaDto.fecha_defuncion) {
+        const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
+        const fechaDefuncion = new Date(createPersonaDto.fecha_defuncion);
+        if (fechaDefuncion < fechaNacimiento) {
+          throw new BadRequestException('La fecha de defunción no puede ser anterior a la fecha de nacimiento');
+        }
+      }
+      
       // Crear y guardar la nueva persona
       const persona = this.personaRepo.create(createPersonaDto);
       return await this.personaRepo.save(persona);
     } catch (error) {
+      if (
+              error instanceof BadRequestException ||
+              error instanceof ConflictException
+            ) {
+              throw error;
+            }
       throw new InternalServerErrorException('Error creating persona');
     }
   }
