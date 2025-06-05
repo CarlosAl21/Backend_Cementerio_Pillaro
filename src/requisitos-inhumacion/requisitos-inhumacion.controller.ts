@@ -11,6 +11,12 @@ import {
   BadRequestException,
   ParseUUIDPipe,
   Inject,
+  HttpException,
+  HttpStatus,
+  Query,
+  Res,
+  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { RequisitosInhumacionService } from './requisitos-inhumacion.service';
 import { CreateRequisitosInhumacionDto } from './dto/create-requisitos-inhumacion.dto';
@@ -23,10 +29,17 @@ import {
   ApiParam,
   ApiConsumes,
   ApiBadRequestResponse,
+  ApiQuery,
+  ApiProduces,
 } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { v4 as uuid } from 'uuid';
+import { Response } from 'express';
 
 @ApiTags('Requisitos Inhumacion')
 @Controller('requisitos-inhumacion')
@@ -80,7 +93,7 @@ export class RequisitosInhumacionController {
     return this.requisitosInhumacionService.findAll();
   }
 
-  @Get(':id')
+  @Get('/requisito/:id')
   @ApiOperation({ summary: 'Obtener un requisito de inhumación por ID' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiResponse({ status: 200, description: 'Requisito encontrado.' })
@@ -137,7 +150,7 @@ export class RequisitosInhumacionController {
   })
   @ApiParam({
     name: 'id',
-    description: 'ID del requisito de inhumación',
+    description: 'ID del requisito de inhumación (UUID)',
     type: String,
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
@@ -186,6 +199,16 @@ export class RequisitosInhumacionController {
 
     const uploadedUrls: string[] = [];
 
+    const bucket = process.env.AWS_BUCKET_NAME;
+    const region = process.env.AWS_REGION;
+
+    if (!bucket || !region) {
+      throw new HttpException(
+        'Variables de entorno AWS_BUCKET_NAME o AWS_REGION no están definidas.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
     for (const file of files.pdfs) {
       if (file.mimetype !== 'application/pdf') {
         throw new BadRequestException(
@@ -195,17 +218,25 @@ export class RequisitosInhumacionController {
 
       const key = `requisitos/${id}/${uuid()}-${file.originalname}`;
 
-      const command = new PutObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      });
+      try {
+        const command = new PutObjectCommand({
+          Bucket: bucket,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        });
 
-      await this.s3Client.send(command);
+        await this.s3Client.send(command);
 
-      const url = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-      uploadedUrls.push(url);
+        const url = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+        uploadedUrls.push(url);
+      } catch (error) {
+        console.error('Error al subir a S3:', error);
+        throw new HttpException(
+          'Error al subir archivo a S3',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
     }
 
     await this.requisitosInhumacionService.attachPdfUrls(id, uploadedUrls);
@@ -214,5 +245,84 @@ export class RequisitosInhumacionController {
       message: 'PDFs subidos exitosamente',
       urls: uploadedUrls,
     };
+  }
+
+  @Get('descargar-pdf')
+  @ApiOperation({ summary: 'Descargar un PDF desde S3 por URL' })
+  @ApiQuery({
+    name: 'url',
+    description:
+      'URL completa del archivo PDF en S3 (codificada con encodeURIComponent)',
+    required: true,
+    example: encodeURIComponent(
+      'https://cementerio-archivos.s3.us-east-2.amazonaws.com/requisitos/uuid/uuid-file.pdf',
+    ),
+    type: String,
+  })
+  @ApiProduces('application/pdf')
+  @ApiResponse({
+    status: 200,
+    description: 'PDF descargado exitosamente.',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'La URL del PDF es requerida.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se pudo descargar el PDF desde S3.',
+  })
+  async descargarPdf(@Query('url') url: string, @Res() res: Response) {
+    if (!url) {
+      throw new BadRequestException('La URL del PDF es requerida.');
+    }
+
+    const bucket = process.env.AWS_BUCKET_NAME;
+    if (!bucket) {
+      throw new InternalServerErrorException(
+        'Configuración del bucket AWS no encontrada.',
+      );
+    }
+
+    try {
+      // Decodifica la URL recibida
+      const decodedUrl = decodeURIComponent(url);
+
+      // Parsear la URL para obtener solo el path, que es la key de S3
+      const urlObject = new URL(decodedUrl);
+
+      // El key en S3 es el path sin la primera barra '/'
+      const key = urlObject.pathname.startsWith('/')
+        ? urlObject.pathname.slice(1)
+        : urlObject.pathname;
+
+      // Log para depuración
+      console.log('Bucket:', bucket);
+      console.log('Key:', key);
+
+      const command = new GetObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      });
+
+      const data = await this.s3Client.send(command);
+
+      // Extraer nombre de archivo desde el key
+      const filename = key.split('/').pop();
+
+      res.setHeader('Content-Type', data.ContentType as string);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${filename}"`,
+      );
+
+      (data.Body as NodeJS.ReadableStream).pipe(res);
+    } catch (error) {
+      console.error('Error real:', error);
+      throw new NotFoundException('No se pudo descargar el PDF desde S3.');
+    }
   }
 }

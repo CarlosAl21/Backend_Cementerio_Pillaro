@@ -174,4 +174,4 @@ export class RequisitosInhumacionService {
       throw new InternalServerErrorException('Error al asociar los PDFs al requisito');
     }
   }
-}
+} 
