@@ -9,7 +9,7 @@ export class Persona {
   @PrimaryGeneratedColumn('uuid')
   id_persona: string;
 
-  @Column({ type: 'varchar', length: 100 }) cedula: string;
+  @Column({ type: 'varchar', length: 100, unique: true}) cedula: string;
   @Column({ type: 'varchar', length: 100 }) nombres: string;
   @Column() apellidos: string;
   @Column({ type: 'date' }) fecha_nacimiento: Date;

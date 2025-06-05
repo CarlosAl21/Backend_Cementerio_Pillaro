@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { Persona } from 'src/personas/entities/persona.entity';
 import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
+import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 
 @Entity()
 export class RequisitosInhumacion {
@@ -56,10 +57,16 @@ export class RequisitosInhumacion {
   @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion)
   @JoinColumn({ name: 'id_fallecido' })
   id_fallecido: Persona;
+  
+  @OneToOne(() => Inhumacion, (inhumacion) => inhumacion.id_requisitos_inhumacion)
+  inhumacion: Inhumacion;
 
   @Column()
   fechaInhumacion: Date;
 
   @Column()
   horaInhumacion: string;
+
+  @Column('simple-array', { nullable: true })
+  pdfUrls: string[];
 }
