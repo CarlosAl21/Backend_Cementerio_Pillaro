@@ -26,7 +26,7 @@ export class RequisitosInhumacionService {
 
   async create(dto: CreateRequisitosInhumacionDto) {
     try {
-      const huecoNicho = await this.huecosNichoRepo.findOne({where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco}})
+      const huecoNicho = await this.huecosNichoRepo.findOne({where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco}, relations: ['id_nicho']});
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
       }
@@ -38,7 +38,6 @@ export class RequisitosInhumacionService {
       }
       const entity = this.repo.create(dto);
       const savedEntity = await this.repo.save(entity);
-
       if (
         savedEntity.copiaCedula == true &&
         savedEntity.copiaCertificadoDefuncion == true &&
@@ -46,6 +45,7 @@ export class RequisitosInhumacionService {
         savedEntity.pagoTasaInhumacion == true &&
         savedEntity.copiaTituloPropiedadNicho == true
       ) {
+        
         // Obtener año actual
       const year = new Date().getFullYear();
       // Contar cuántas inhumaciones existen este año
@@ -58,9 +58,9 @@ export class RequisitosInhumacionService {
       // Formatear el código correlativo
       const secuencial = String(count + 1).padStart(3, '0');
       const codigo_inhumacion = `${secuencial}-${year}`;
-
       const inhumacion = this.inhumacionRepo.create({
-        id_nicho: savedEntity.id_hueco_nicho.id_nicho,
+        
+        id_nicho: huecoNicho.id_nicho,
         id_fallecido: savedEntity.id_fallecido,
         fecha_inhumacion: savedEntity.fechaInhumacion,
         hora_inhumacion: savedEntity.horaInhumacion,
