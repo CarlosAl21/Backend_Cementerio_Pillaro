@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException } from '@nestjs/common';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Persona } from './entities/persona.entity';
@@ -11,11 +11,79 @@ export class PersonasService {
     private personaRepo: Repository<Persona>,
   ) {}
 
+  private validarCedula(cedula: string): boolean {
+    if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
+    const provincia = parseInt(cedula.substring(0, 2), 10);
+    if (provincia < 1 || provincia > 24) return false; // Provincia válida (01-24)
+
+    const coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+    let suma = 0;
+
+    for (let i = 0; i < 9; i++) {
+      let valor = parseInt(cedula[i]) * coeficientes[i];
+      if (valor >= 10) valor -= 9;
+      suma += valor;
+    }
+
+    const digitoVerificador = (10 - (suma % 10)) % 10;
+    return digitoVerificador === parseInt(cedula[9]);
+  }
+
+  /**
+   * Validar un RUC ecuatoriano
+   */
+  private validarRuc(ruc: string): boolean {
+    if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
+    if (!ruc.endsWith('001')) return false; // Debe terminar en 001
+    return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
+  }
+
+  private validarEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+
   async create(createPersonaDto: CreatePersonaDto) {
     try {
+      // Validar cédula o RUC
+      if (!createPersonaDto.cedula || !this.validarCedula(createPersonaDto.cedula)) {
+        throw new BadRequestException('Cédula inválida');
+      }
+      if (createPersonaDto.tipo === 'RUC' && !this.validarRuc(createPersonaDto.cedula)) {
+        throw new BadRequestException('RUC inválido');
+      }
+      // Verificar si ya existe una persona con la misma cédula
+      const existingPersona = await this.personaRepo.findOne({ where: { cedula: createPersonaDto.cedula } });
+      if (existingPersona) {
+        throw new ConflictException('Ya existe una persona con esta cédula');
+      }
+      // Validar email
+      if (createPersonaDto.correo && !this.validarEmail(createPersonaDto.correo)) {
+        throw new BadRequestException('Correo electrónico inválido');
+      }
+      // Validar fecha de nacimiento
+      if (createPersonaDto.fecha_nacimiento && new Date(createPersonaDto.fecha_nacimiento) >= new Date()) {
+        throw new BadRequestException('La fecha de nacimiento no puede ser futura');
+      }
+      // Validar fecha de defunción
+      if (createPersonaDto.fecha_defuncion) {
+        const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
+        const fechaDefuncion = new Date(createPersonaDto.fecha_defuncion);
+        if (fechaDefuncion < fechaNacimiento) {
+          throw new BadRequestException('La fecha de defunción no puede ser anterior a la fecha de nacimiento');
+        }
+      }
+      
+      // Crear y guardar la nueva persona
       const persona = this.personaRepo.create(createPersonaDto);
       return await this.personaRepo.save(persona);
     } catch (error) {
+      if (
+              error instanceof BadRequestException ||
+              error instanceof ConflictException
+            ) {
+              throw error;
+            }
       throw new InternalServerErrorException('Error creating persona');
     }
   }

@@ -50,14 +50,14 @@ export class InhumacionesService {
   // Actualizar una inhumación
   async update(id: string, updateInhumacionDto: UpdateInhumacionDto) {
     try {
-      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id }, relations: ['id_requisitos_inhumacion', 'id_requisitos_inhumacion.id_hueco_nicho'] });
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
       this.repo.merge(inhumacion, updateInhumacionDto);
       const saveInhumacion = await this.repo.save(inhumacion);
       
-      if(saveInhumacion.estado === 'completado') {
+      if(saveInhumacion.estado === 'Completado') {
         const huecoNicho = await this.huecosNichoRepo.findOne({ where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco} });
         if (!huecoNicho) {
           throw new NotFoundException('Hueco Nicho no encontrado');

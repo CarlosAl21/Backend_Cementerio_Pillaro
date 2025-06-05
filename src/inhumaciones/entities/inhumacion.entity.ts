@@ -3,16 +3,17 @@ import { Nicho } from 'src/nicho/entities/nicho.entity';
 import { Persona } from 'src/personas/entities/persona.entity';
 import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+
 @Entity('inhumaciones')
 export class Inhumacion {
   @PrimaryGeneratedColumn('uuid')
   id_inhumacion: string;
 
-  @ManyToOne(() => Nicho, (nicho) => nicho.inhumaciones)
+  @ManyToOne(() => Nicho, (nicho) => nicho.inhumaciones, { eager: true })
   @JoinColumn({ name: 'id_nicho' })
   id_nicho: Nicho;
 
-  @ManyToOne(() => Persona, (persona) => persona.inhumaciones)
+  @ManyToOne(() => Persona, (persona) => persona.inhumaciones, { eager: true })
   @JoinColumn({ name: 'id_fallecido' })
   id_fallecido: Persona;
 
@@ -37,7 +38,7 @@ export class Inhumacion {
   @Column()
   codigo_inhumacion: string;
 
-  @OneToOne(() => RequisitosInhumacion, (requisitos) => requisitos.inhumacion,)
+  @OneToOne(() => RequisitosInhumacion, (requisitos) => requisitos.inhumacion)
   @JoinColumn({ name: 'id_requisitos_inhumacion' })
   id_requisitos_inhumacion: RequisitosInhumacion;
 
