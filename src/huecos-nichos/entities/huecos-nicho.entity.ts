@@ -2,7 +2,6 @@
 import { Nicho } from 'src/nicho/entities/nicho.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert, BeforeUpdate, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Persona } from 'src/personas/entities/persona.entity';
-import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
 
 @Entity('huecos_nichos')
@@ -10,7 +9,7 @@ export class HuecosNicho{
   @PrimaryGeneratedColumn('uuid')
   id_detalle_hueco: string;
 
-  @ManyToOne(() => Nicho, (nicho) => nicho.huecos)
+  @ManyToOne(() => Nicho, (nicho) => nicho.huecos, { eager: true })
   @JoinColumn({ name: 'id_nicho' })
   id_nicho: Nicho;
 
@@ -20,7 +19,7 @@ export class HuecosNicho{
   @Column({ length: 20 })
   estado: string;
 
-  @ManyToOne(() => Persona, (persona) => persona.huecos_nichos, { nullable: true })
+  @ManyToOne(() => Persona, (persona) => persona.huecos_nichos, { nullable: true, eager: true })
   @JoinColumn({ name: 'id_persona' })
   id_fallecido: Persona;
 

@@ -11,7 +11,7 @@ export class Nicho {
   @PrimaryGeneratedColumn('uuid')
   id_nicho: string;
 
-  @ManyToOne(() => Cementerio, (cementerio) => cementerio.nichos)
+  @ManyToOne(() => Cementerio, (cementerio) => cementerio.nichos, { eager: true })
   @JoinColumn({ name: 'id_cementerio' })
   id_cementerio: Cementerio;
 

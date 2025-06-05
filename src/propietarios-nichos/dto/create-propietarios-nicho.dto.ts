@@ -2,6 +2,7 @@ import { IsDate, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Nicho } from "src/nicho/entities/nicho.entity";
 import { Persona } from "src/personas/entities/persona.entity";
+import { DeepPartial } from "typeorm";
 
 export class CreatePropietarioNichoDto {
     @ApiProperty({
@@ -11,7 +12,7 @@ export class CreatePropietarioNichoDto {
         required: true
     })
     @IsNotEmpty()
-    id_persona: Persona;
+    id_persona: DeepPartial<Persona>;
 
     @ApiProperty({
         description: 'ID del nicho asociado',
@@ -20,7 +21,7 @@ export class CreatePropietarioNichoDto {
         required: true
     })
     @IsNotEmpty()
-    id_nicho: Nicho;
+    id_nicho: DeepPartial<Nicho>;
 
     @ApiProperty({
         description: 'Fecha de adquisición del nicho',

@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, In } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Nicho } from 'src/nicho/entities/nicho.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 
@@ -7,7 +7,7 @@ export class Exumacion {
   @PrimaryGeneratedColumn('uuid')
   id_exhumacion: string;
 
-  @ManyToOne(() => Inhumacion, (inhumacion) => inhumacion.exumaciones)
+  @ManyToOne(() => Inhumacion, (inhumacion) => inhumacion.exumaciones, { eager: true })
   @JoinColumn({ name: 'id_inhumacion' })
   id_inhumacion: Inhumacion;
 
@@ -29,7 +29,7 @@ export class Exumacion {
   fallecido: string;
 
   // Relación con nicho original
-  @ManyToOne(() => Nicho, (nicho) => nicho.exumaciones)
+  @ManyToOne(() => Nicho, (nicho) => nicho.exumaciones, { eager: true })
   @JoinColumn({ name: 'id_nicho' })
   nichoOriginal: Nicho;
 
@@ -48,18 +48,6 @@ export class Exumacion {
 
   @Column({ nullable: true })
   aprobadoPor?: string;
-
-  // @Column({ type: 'json', nullable: true })
-  // requisitos: {
-  //   certificadoDefuncion: { cumple: boolean; observacion?: string };
-  //   certificadoInhumacion: { cumple: boolean; observacion?: string };
-  //   copiaCI: { cumple: boolean; observacion?: string };
-  //   tituloPropiedad: { cumple: boolean; observacion?: string };
-  //   certificadoMunicipal: { cumple: boolean; observacion?: string };
-  //   tiempoMinimo: { cumple: boolean; observacion?: string };
-  //   ordenJudicial: { cumple: boolean; observacion?: string };
-  //   pago: { cumple: boolean; observacion?: string };
-  // };
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   fechaSolicitud: Date;

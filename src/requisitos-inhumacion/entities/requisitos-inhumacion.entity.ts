@@ -6,11 +6,11 @@ import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 
 @Entity()
 export class RequisitosInhumacion {
- @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
   id_requsitoInhumacion: string;
 
   // A) Datos institucionales
-  @ManyToOne(() => Cementerio, (cementerio) => cementerio.requisitos_inhumacion)
+  @ManyToOne(() => Cementerio, (cementerio) => cementerio.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_cementerio' })
   id_cementerio: Cementerio;
 
@@ -22,7 +22,7 @@ export class RequisitosInhumacion {
   metodoSolicitud: string;
 
   // C) Datos del solicitante
-  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion_solicitante)
+  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion_solicitante, { eager: true })
   @JoinColumn({ name: 'id_solicitante' })
   id_solicitante: Persona;
 
@@ -46,7 +46,7 @@ export class RequisitosInhumacion {
   copiaTituloPropiedadNicho: boolean;
 
   // E) Datos del nicho/fosa/sillio
-  @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion)
+  @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_hueco_nicho' })
   id_hueco_nicho: HuecosNicho;
 
@@ -54,11 +54,11 @@ export class RequisitosInhumacion {
   firmaAceptacionSepulcro: string;
 
   // F) Datos del fallecido
-  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion)
+  @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_fallecido' })
   id_fallecido: Persona;
   
-  @OneToOne(() => Inhumacion, (inhumacion) => inhumacion.id_requisitos_inhumacion)
+  @OneToOne(() => Inhumacion, (inhumacion) => inhumacion.id_requisitos_inhumacion, { eager: true })
   inhumacion: Inhumacion;
 
   @Column()
