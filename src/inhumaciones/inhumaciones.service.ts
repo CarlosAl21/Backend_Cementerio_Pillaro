@@ -27,7 +27,7 @@ export class InhumacionesService {
   async findAll() {
     try {
       return await this.repo.find({
-        relations: ['id_nicho', 'id_fallecido'],});
+        relations: ['id_nicho', 'id_fallecido', 'id_nicho.huecos'],});
     } catch (error) {
       throw new InternalServerErrorException(error.message || 'No se pudieron obtener las inhumaciones');
     }
@@ -36,7 +36,7 @@ export class InhumacionesService {
   // Obtener una inhumación por ID
   async findOne(id: string) {
     try {
-      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id }, relations: ['id_nicho', 'id_fallecido'] });
+      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id }, relations: ['id_nicho', 'id_fallecido','id_nicho.huecos'] });
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
@@ -62,7 +62,7 @@ export class InhumacionesService {
         if (!huecoNicho) {
           throw new NotFoundException('Hueco Nicho no encontrado');
         }
-        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'Ocupado' });
+        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'Ocupado', id_fallecido: saveInhumacion.id_fallecido });
         const savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
 
         return { saveInhumacion, savedHuecoNicho };

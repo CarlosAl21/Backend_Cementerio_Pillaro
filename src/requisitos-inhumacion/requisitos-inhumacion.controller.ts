@@ -50,37 +50,66 @@ export class RequisitosInhumacionController {
   ) {}
 
   @Post()
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'pdfs', maxCount: 10 }]))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación' })
-  @ApiBody({
-    type: CreateRequisitosInhumacionDto,
-    examples: {
-      ejemplo: {
-        summary: 'Ejemplo de creación',
-        value: {
-          id_cementerio: { id_cementerio: 'uuid-cementerio' },
-          pantoneroACargo: 'Juan Pérez',
-          metodoSolicitud: 'escrita',
-          id_solicitante: { id_persona: 'uuid-solicitante' },
-          observacionSolicitante: 'Observaciones sobre el solicitante',
-          copiaCertificadoDefuncion: true,
-          informeEstadisticoINEC: true,
-          copiaCedula: true,
-          pagoTasaInhumacion: true,
-          copiaTituloPropiedadNicho: true,
-          id_hueco_nicho: { id_detalle_hueco: 'uuid-hueco-nicho' },
-          firmaAceptacionSepulcro: 'Firma digitalizada o nombre completo',
-          id_fallecido: { id_persona: 'uuid-fallecido' },
-          fechaInhumacion: '2024-06-01',
-          horaInhumacion: '14:30',
-        },
+  @ApiResponse({ status: 201, description: 'Requisito creado correctamente.' })
+  @ApiBadRequestResponse({
+    description: 'Error al crear el requisito de inhumación.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida. Ej: falta al menos un PDF.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Debe subir al menos un PDF',
+        error: 'Bad Request',
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Requisito creado correctamente.' })
-  create(@Body() createRequisitosInhumacionDto: CreateRequisitosInhumacionDto) {
-    return this.requisitosInhumacionService.create(
-      createRequisitosInhumacionDto,
-    );
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
+  @ApiBody({
+    description:
+      'Datos del requisito (como JSON string) y archivos PDF (opcionales)',
+    schema: {
+      type: 'object',
+      properties: {
+        requisito: {
+          type: 'string',
+          example: JSON.stringify({
+            id_cementerio: 'uuid-cementerio',
+            pantoneroACargo: 'Juan Pérez',
+            metodoSolicitud: 'escrita',
+            id_solicitante: 'uuid-solicitante',
+            observacionSolicitante: 'Observaciones sobre el solicitante',
+            copiaCertificadoDefuncion: true,
+            informeEstadisticoINEC: true,
+            copiaCedula: true,
+            pagoTasaInhumacion: true,
+            copiaTituloPropiedadNicho: true,
+            id_hueco_nicho: 'uuid-hueco-nicho',
+            firmaAceptacionSepulcro: 'Firma digitalizada o nombre completo',
+            id_fallecido: 'uuid-fallecido',
+            fechaInhumacion: '2024-06-01',
+            horaInhumacion: '14:30',
+          }),
+        },
+        pdfs: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+        },
+      },
+      required: ['requisito'],
+    },
+  })
+  create(
+    @Body('requisito') requisitoStr: string,
+    @UploadedFiles() files: { pdfs?: Express.Multer.File[] },
+  ) {
+    const dto: CreateRequisitosInhumacionDto = JSON.parse(requisitoStr);
+    return this.requisitosInhumacionService.create(dto, files.pdfs ?? []);
   }
 
   @Get()
@@ -103,32 +132,60 @@ export class RequisitosInhumacionController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'pdfs', maxCount: 10 }]))
+  @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiBody({
-    type: UpdateRequisitosInhumacionDto,
-    examples: {
-      ejemplo: {
-        summary: 'Ejemplo de actualización',
+    description:
+      'Datos del requisito (como JSON string) y archivos PDF (opcionales)',
+    schema: {
+      type: 'object',
+      properties: {
         value: {
-          observacionSolicitante: 'Observaciones actualizadas',
+          type: 'string',
+          format: 'textarea',
+          example: `{
+  "copiaCertificadoDefuncion": true,
+  "informeEstadisticoINEC": false,
+  "copiaCedula": true,
+  "pagoTasaInhumacion": true,
+  "copiaTituloPropiedadNicho": false
+}`,
+        },
+        pdfs: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
         },
       },
+      required: ['value'],
     },
   })
   @ApiResponse({
     status: 200,
     description: 'Requisito actualizado correctamente.',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida. Ej: falta al menos un PDF.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Debe subir al menos un PDF',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
   @ApiResponse({ status: 404, description: 'Requisito no encontrado.' })
   update(
     @Param('id') id: string,
-    @Body() updateRequisitosInhumacionDto: UpdateRequisitosInhumacionDto,
+    @Body('value') valueStr: string,
+    @UploadedFiles() files: { pdfs?: Express.Multer.File[] },
   ) {
-    return this.requisitosInhumacionService.update(
-      id,
-      updateRequisitosInhumacionDto,
-    );
+    const dto: UpdateRequisitosInhumacionDto = JSON.parse(valueStr);
+    return this.requisitosInhumacionService.update(id, dto, files.pdfs ?? []);
   }
 
   @Delete(':id')
