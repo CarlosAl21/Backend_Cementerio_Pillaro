@@ -62,7 +62,7 @@ export class InhumacionesService {
         if (!huecoNicho) {
           throw new NotFoundException('Hueco Nicho no encontrado');
         }
-        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'ocupado' });
+        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'Ocupado' });
         const savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
 
         return { saveInhumacion, savedHuecoNicho };
