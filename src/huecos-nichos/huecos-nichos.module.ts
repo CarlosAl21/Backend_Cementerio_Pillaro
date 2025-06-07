@@ -8,5 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports:[TypeOrmModule.forFeature([HuecosNicho])],
   controllers: [HuecosNichosController],
   providers: [HuecosNichosService],
+  exports: [HuecosNichosService, TypeOrmModule.forFeature([HuecosNicho])],
 })
 export class HuecosNichosModule {}
