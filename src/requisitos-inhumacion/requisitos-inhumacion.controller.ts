@@ -49,7 +49,7 @@ export class RequisitosInhumacionController {
     @Inject('S3_CLIENT') private readonly s3Client: S3Client,
   ) {}
 
-  @Post()
+  @Post('PDF')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'pdfs', maxCount: 10 }]))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación' })
@@ -104,13 +104,46 @@ export class RequisitosInhumacionController {
       required: ['requisito'],
     },
   })
-  create(
+  createWithPdfs(
     @Body('requisito') requisitoStr: string,
     @UploadedFiles() files: { pdfs?: Express.Multer.File[] },
   ) {
     const dto: CreateRequisitosInhumacionDto = JSON.parse(requisitoStr);
-    return this.requisitosInhumacionService.create(dto, files.pdfs ?? []);
+    return this.requisitosInhumacionService.createwithPDF(dto, files.pdfs ?? []);
   }
+
+  @Post()
+  @ApiConsumes('application/json')
+  @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación (solo JSON), el link del documento es opcional' })
+  @ApiResponse({ status: 201, description: 'Requisito creado correctamente.' })
+  @ApiBadRequestResponse({
+    description: 'Error al crear el requisito de inhumación.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Datos inválidos',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
+  @ApiBody({
+    description: 'Datos del requisito en formato JSON',
+    type: CreateRequisitosInhumacionDto,
+    required: true,
+  })
+  create(
+    @Body() dto: CreateRequisitosInhumacionDto,
+  ) {
+    return this.requisitosInhumacionService.create(dto);
+  }
+
+  
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los requisitos de inhumación' })
@@ -131,7 +164,7 @@ export class RequisitosInhumacionController {
     return this.requisitosInhumacionService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('PDF/:id')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'pdfs', maxCount: 10 }]))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
@@ -179,13 +212,69 @@ export class RequisitosInhumacionController {
   @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
   @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
   @ApiResponse({ status: 404, description: 'Requisito no encontrado.' })
-  update(
+  updateWithPDF(
     @Param('id') id: string,
     @Body('value') valueStr: string,
     @UploadedFiles() files: { pdfs?: Express.Multer.File[] },
   ) {
     const dto: UpdateRequisitosInhumacionDto = JSON.parse(valueStr);
-    return this.requisitosInhumacionService.update(id, dto, files.pdfs ?? []);
+    return this.requisitosInhumacionService.updatewithPDF(id, dto, files.pdfs ?? []);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
+  @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
+  @ApiBody({
+    description: 'Datos del requisito en formato JSON',
+    schema: {
+      type: 'object',
+      properties: {
+        copiaCertificadoDefuncion: { type: 'boolean', example: true },
+        informeEstadisticoINEC: { type: 'boolean', example: false },
+        copiaCedula: { type: 'boolean', example: true },
+        pagoTasaInhumacion: { type: 'boolean', example: true },
+        copiaTituloPropiedadNicho: { type: 'boolean', example: false },
+        // Agrega aquí otros campos del DTO si es necesario
+      },
+      required: [
+        'copiaCertificadoDefuncion',
+        'informeEstadisticoINEC',
+        'copiaCedula',
+        'pagoTasaInhumacion',
+        'copiaTituloPropiedadNicho',
+      ],
+      example: {
+        copiaCertificadoDefuncion: true,
+        informeEstadisticoINEC: false,
+        copiaCedula: true,
+        pagoTasaInhumacion: true,
+        copiaTituloPropiedadNicho: false,
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Requisito actualizado correctamente.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Datos inválidos',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
+  @ApiResponse({ status: 404, description: 'Requisito no encontrado.' })
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateRequisitosInhumacionDto,
+  ) {
+    return this.requisitosInhumacionService.update(id, dto);
   }
 
   @Delete(':id')
