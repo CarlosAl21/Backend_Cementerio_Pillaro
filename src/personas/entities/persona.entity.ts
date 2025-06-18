@@ -11,15 +11,16 @@ export class Persona {
 
   @Column({ type: 'varchar', length: 100, unique: true}) cedula: string;
   @Column({ type: 'varchar', length: 100 }) nombres: string;
-  @Column() apellidos: string;
-  @Column({ type: 'date' }) fecha_nacimiento: Date;
+  @Column({type: 'varchar', length: 100 }) apellidos: string;
+  @Column({ type: 'date', nullable: true }) fecha_nacimiento: Date;
   @Column({ type: 'date', nullable: true }) fecha_defuncion: Date;
+  @Column({ type: 'date', nullable: true }) fecha_inhumacion: Date;
   @Column({ type: 'varchar', length: 100, nullable: true }) lugar_defuncion: string;
   @Column({ type: 'varchar', length: 100 ,nullable: true }) causa_defuncion: string;
-  @Column({ type: 'varchar', length: 100 }) direccion: string;
-  @Column({ type: 'varchar', length: 100 }) telefono: string;
-  @Column({ type: 'varchar', length: 100 }) correo: string;
-  @Column({ type: 'varchar', length: 100 }) tipo: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) direccion: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) telefono: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) correo: string;
+  @Column({ type: 'boolean', default: false}) fallecido: boolean;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
 

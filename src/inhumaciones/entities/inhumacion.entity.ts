@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 import { Exumacion } from 'src/exumacion/entities/exumacion.entity';
 import { Nicho } from 'src/nicho/entities/nicho.entity';
 import { Persona } from 'src/personas/entities/persona.entity';
@@ -39,6 +40,7 @@ export class Inhumacion {
   codigo_inhumacion: string;
 
   @OneToOne(() => RequisitosInhumacion, (requisitos) => requisitos.inhumacion)
+  @IsOptional()
   @JoinColumn({ name: 'id_requisitos_inhumacion' })
   id_requisitos_inhumacion: RequisitosInhumacion;
 

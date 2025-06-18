@@ -45,6 +45,12 @@ export class RequisitosInhumacion {
   @Column({ default: false })
   copiaTituloPropiedadNicho: boolean;
 
+  @Column({ default: false })
+  autorizacionDeMovilizacionDelCadaver: boolean;
+
+  @Column({ default: false })
+  OficioDeSolicitud: boolean;
+
   // E) Datos del nicho/fosa/sillio
   @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_hueco_nicho' })
@@ -66,7 +72,4 @@ export class RequisitosInhumacion {
 
   @Column()
   horaInhumacion: string;
-
-  @Column('simple-array', { nullable: true })
-  pdfUrls: string[];
 }

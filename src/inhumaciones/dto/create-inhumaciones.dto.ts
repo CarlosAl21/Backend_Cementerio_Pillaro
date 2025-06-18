@@ -96,6 +96,6 @@ export class CreateInhumacionDto {
         required: true
     })
     @IsString()
-    @IsNotEmpty()
-    id_requisitos_inhumacion: DeepPartial<RequisitosInhumacion>;
+    @IsOptional()
+    id_requisitos_inhumacion?: DeepPartial<RequisitosInhumacion>;
 }

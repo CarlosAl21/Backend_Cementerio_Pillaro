@@ -28,7 +28,37 @@ export class PersonasController {
   @Post()
   // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear nueva persona', description: 'Registra una nueva persona en el sistema' })
-  @ApiBody({ type: CreatePersonaDto })
+  @ApiBody({ 
+    type: CreatePersonaDto,
+    examples: {
+      fallecido: {
+        summary: 'Persona fallecida',
+        value: {
+          cedula: '1801234567',
+          nombres: 'María Esperanza',
+          apellidos: 'González Pérez',
+          fecha_nacimiento: '1945-03-12',
+          fecha_defuncion: '2020-08-15',
+          fecha_inhumacion: '2020-08-20',
+          lugar_defuncion: 'Hospital Provincial Ambato',
+          causa_defuncion: 'Causas naturales - Edad avanzada',
+          fallecido: true
+        }
+      },
+      vivo: {
+        summary: 'Persona viva',
+        value: {
+          cedula: '1802345678',
+          nombres: 'José Antonio',
+          apellidos: 'Ramírez Silva',
+          direccion: 'Av. Cevallos 456, Centro',
+          telefono: '032-834567',
+          correo: 'jose.ramirez@email.com',
+          fallecido: false
+        }
+      }
+    }
+  })
   @ApiCreatedResponse({ 
     description: 'Persona creada exitosamente',
     type: Persona

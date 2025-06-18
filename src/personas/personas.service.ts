@@ -49,7 +49,7 @@ export class PersonasService {
       if (!createPersonaDto.cedula || !this.validarCedula(createPersonaDto.cedula)) {
         throw new BadRequestException('Cédula inválida');
       }
-      if (createPersonaDto.tipo === 'RUC' && !this.validarRuc(createPersonaDto.cedula)) {
+      if (createPersonaDto.cedula === 'RUC' && !this.validarRuc(createPersonaDto.cedula)) {
         throw new BadRequestException('RUC inválido');
       }
       // Verificar si ya existe una persona con la misma cédula
@@ -61,19 +61,46 @@ export class PersonasService {
       if (createPersonaDto.correo && !this.validarEmail(createPersonaDto.correo)) {
         throw new BadRequestException('Correo electrónico inválido');
       }
-      // Validar fecha de nacimiento
-      if (createPersonaDto.fecha_nacimiento && new Date(createPersonaDto.fecha_nacimiento) >= new Date()) {
-        throw new BadRequestException('La fecha de nacimiento no puede ser futura');
-      }
-      // Validar fecha de defunción
-      if (createPersonaDto.fecha_defuncion) {
+
+      // Validaciones según fallecido
+      if (createPersonaDto.fallecido) {
+        // Si es fallecido, los siguientes campos son obligatorios
+        if (
+          !createPersonaDto.fecha_defuncion ||
+          !createPersonaDto.fecha_nacimiento ||
+          !createPersonaDto.lugar_defuncion ||
+          !createPersonaDto.causa_defuncion ||
+          !createPersonaDto.fecha_inhumacion
+        ) {
+          throw new BadRequestException('Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción y causa de defunción');
+        }
+        // Validar fechas
+        if (new Date(createPersonaDto.fecha_nacimiento) >= new Date()) {
+          throw new BadRequestException('La fecha de nacimiento no puede ser futura');
+        }
         const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
         const fechaDefuncion = new Date(createPersonaDto.fecha_defuncion);
         if (fechaDefuncion < fechaNacimiento) {
           throw new BadRequestException('La fecha de defunción no puede ser anterior a la fecha de nacimiento');
         }
+
+        if (createPersonaDto.fecha_inhumacion && fechaDefuncion < new Date(createPersonaDto.fecha_inhumacion)) {
+          throw new BadRequestException('La fecha de inhumación no puede ser anterior a la fecha de defunción');
+        }
+      } else {
+        // Si NO es fallecido, los siguientes campos son obligatorios
+        if (
+          !createPersonaDto.direccion ||
+          !createPersonaDto.telefono ||
+          !createPersonaDto.correo
+        ) {
+          throw new BadRequestException('Para personas vivas, debe proporcionar dirección, teléfono y correo');
+        }
+        if (!this.validarEmail(createPersonaDto.correo)) {
+          throw new BadRequestException('Correo electrónico inválido');
+        }
       }
-      
+
       // Crear y guardar la nueva persona
       const persona = this.personaRepo.create(createPersonaDto);
       return await this.personaRepo.save(persona);
