@@ -22,6 +22,12 @@ export class PropietarioNicho {
   @Column({ type: 'varchar', length: 255 }) observaciones: string;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
+  @Column({ 
+    type: 'enum', 
+    enum: ['Dueño', 'Heredero'], 
+    default: 'dueño' 
+  })
+  tipo: 'Dueño' | 'Heredero';
 
   @BeforeInsert()
   async setFechaCreacion() {
