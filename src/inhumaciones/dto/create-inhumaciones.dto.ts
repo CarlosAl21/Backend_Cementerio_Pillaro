@@ -81,7 +81,7 @@ export class CreateInhumacionDto {
 
     @ApiProperty({
         description: 'Estado de la inhumación',
-        enum: ['Programada', 'Realizada', 'Cancelada', 'Pendiente'],
+        enum: ['Realizada','Pendiente'],
         example: 'Programada',
         required: true
     })

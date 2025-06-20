@@ -13,14 +13,18 @@ export class CementerioService {
   async create(createCementerioDto: CreateCementerioDto) {
     try {
       const cementerio = this.cementerioRepository.create(createCementerioDto);
-      return await this.cementerioRepository.save(cementerio);
+      const savedCementerio = await this.cementerioRepository.save(cementerio);
+      // Mapeo explícito de la respuesta
+      return { cementerio: savedCementerio };
     } catch (error) {
       throw new InternalServerErrorException('Error en la creacion');
     }
   }
 
-  findAll() {
-    return this.cementerioRepository.find();
+  async findAll() {
+    const cementerios = await this.cementerioRepository.find();
+    // Mapeo explícito de la respuesta
+    return cementerios.map(cementerio => ({ cementerio }));
   }
 
   async findOne(id: string) {
@@ -29,7 +33,8 @@ export class CementerioService {
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      return cementerio;
+      // Mapeo explícito de la respuesta
+      return { cementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error en la busqueda');
@@ -43,7 +48,9 @@ export class CementerioService {
         throw new NotFoundException('No se encontro el cementerio');
       }
       this.cementerioRepository.merge(cementerio, updateCementerioDto);
-      return await this.cementerioRepository.save(cementerio);
+      const savedCementerio = await this.cementerioRepository.save(cementerio);
+      // Mapeo explícito de la respuesta
+      return { cementerio: savedCementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error en la actualizacion');
@@ -56,7 +63,9 @@ export class CementerioService {
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      return await this.cementerioRepository.remove(cementerio);
+      await this.cementerioRepository.remove(cementerio);
+      // Mapeo explícito de la respuesta
+      return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error en la eliminacion');
@@ -69,7 +78,8 @@ export class CementerioService {
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      return cementerio;
+      // Mapeo explícito de la respuesta
+      return { cementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error en la busqueda');

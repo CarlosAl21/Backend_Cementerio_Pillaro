@@ -36,6 +36,9 @@ export class Nicho {
   @Column({ type: 'varchar', name: 'fecha_construccion'})
   fecha_construccion: string;
 
+  // @Column({ type: 'date', nullable: true })
+  // fecha_adquisicion?: Date
+
   @Column({ type: 'text', nullable: true })
   observaciones?: string;
 

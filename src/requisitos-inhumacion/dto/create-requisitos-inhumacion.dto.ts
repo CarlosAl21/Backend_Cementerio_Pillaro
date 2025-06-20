@@ -14,13 +14,12 @@ import { DeepPartial } from 'typeorm';
 
 export enum MetodoSolicitud {
   ESCRITA = 'escrita',
-  VERBAL = 'verbal',
 }
 
 export class CreateRequisitosInhumacionDto {
   @ApiProperty({
     description: 'Cementerio donde se realiza la inhumación',
-    example: { id_cementerio: 'uuid-cementerio', nombre: 'Cementerio Central' },
+    example: { id_cementerio: 'uuid-cementerio'},
   })
   @IsNotEmpty()
   id_cementerio: DeepPartial<Cementerio>;
@@ -36,7 +35,7 @@ export class CreateRequisitosInhumacionDto {
 
   @ApiProperty({
     description: 'ID de la persona solicitante',
-    example: { id_persona: 'uuid-solicitante', nombres: 'Carlos Solicitante' },
+    example: { id_persona: 'uuid-solicitante' },
   })
   @IsNotEmpty()
   id_solicitante: DeepPartial<Persona>;
@@ -89,7 +88,7 @@ export class CreateRequisitosInhumacionDto {
 
   @ApiProperty({
     description: 'ID de la persona fallecida',
-    example: { id_persona: 'uuid-fallecido', nombres: 'Pedro Fallecido' },
+    example: { id_persona: 'uuid-fallecido'},
   })
   @IsNotEmpty()
   id_fallecido: DeepPartial<Persona>;

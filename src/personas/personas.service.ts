@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { CreatePersonaDto } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Persona } from './entities/persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+
 @Injectable()
 export class PersonasService {
   constructor(
@@ -46,19 +53,30 @@ export class PersonasService {
   async create(createPersonaDto: CreatePersonaDto) {
     try {
       // Validar cédula o RUC
-      if (!createPersonaDto.cedula || !this.validarCedula(createPersonaDto.cedula)) {
+      if (
+        !createPersonaDto.cedula ||
+        !this.validarCedula(createPersonaDto.cedula)
+      ) {
         throw new BadRequestException('Cédula inválida');
       }
-      if (createPersonaDto.cedula === 'RUC' && !this.validarRuc(createPersonaDto.cedula)) {
+      if (
+        createPersonaDto.cedula === 'RUC' &&
+        !this.validarRuc(createPersonaDto.cedula)
+      ) {
         throw new BadRequestException('RUC inválido');
       }
       // Verificar si ya existe una persona con la misma cédula
-      const existingPersona = await this.personaRepo.findOne({ where: { cedula: createPersonaDto.cedula } });
+      const existingPersona = await this.personaRepo.findOne({
+        where: { cedula: createPersonaDto.cedula },
+      });
       if (existingPersona) {
         throw new ConflictException('Ya existe una persona con esta cédula');
       }
       // Validar email
-      if (createPersonaDto.correo && !this.validarEmail(createPersonaDto.correo)) {
+      if (
+        createPersonaDto.correo &&
+        !this.validarEmail(createPersonaDto.correo)
+      ) {
         throw new BadRequestException('Correo electrónico inválido');
       }
 
@@ -69,23 +87,34 @@ export class PersonasService {
           !createPersonaDto.fecha_defuncion ||
           !createPersonaDto.fecha_nacimiento ||
           !createPersonaDto.lugar_defuncion ||
-          !createPersonaDto.causa_defuncion ||
-          !createPersonaDto.fecha_inhumacion
+          !createPersonaDto.causa_defuncion
         ) {
-          throw new BadRequestException('Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción y causa de defunción');
+          throw new BadRequestException(
+            'Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción y causa de defunción',
+          );
         }
         // Validar fechas
         if (new Date(createPersonaDto.fecha_nacimiento) >= new Date()) {
-          throw new BadRequestException('La fecha de nacimiento no puede ser futura');
+          throw new BadRequestException(
+            'La fecha de nacimiento no puede ser futura',
+          );
         }
         const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
         const fechaDefuncion = new Date(createPersonaDto.fecha_defuncion);
         if (fechaDefuncion < fechaNacimiento) {
-          throw new BadRequestException('La fecha de defunción no puede ser anterior a la fecha de nacimiento');
+          throw new BadRequestException(
+            'La fecha de defunción no puede ser anterior a la fecha de nacimiento',
+          );
         }
 
-        if (createPersonaDto.fecha_inhumacion && fechaDefuncion < new Date(createPersonaDto.fecha_inhumacion)) {
-          throw new BadRequestException('La fecha de inhumación no puede ser anterior a la fecha de defunción');
+        if (createPersonaDto.fecha_inhumacion) {
+          const fechaInhumacion = new Date(createPersonaDto.fecha_inhumacion);
+
+          if (fechaInhumacion < fechaDefuncion) {
+            throw new BadRequestException(
+              'La fecha de inhumación no puede ser anterior a la fecha de defunción',
+            );
+          }
         }
       } else {
         // Si NO es fallecido, los siguientes campos son obligatorios
@@ -94,7 +123,9 @@ export class PersonasService {
           !createPersonaDto.telefono ||
           !createPersonaDto.correo
         ) {
-          throw new BadRequestException('Para personas vivas, debe proporcionar dirección, teléfono y correo');
+          throw new BadRequestException(
+            'Para personas vivas, debe proporcionar dirección, teléfono y correo',
+          );
         }
         if (!this.validarEmail(createPersonaDto.correo)) {
           throw new BadRequestException('Correo electrónico inválido');
@@ -106,11 +137,11 @@ export class PersonasService {
       return await this.personaRepo.save(persona);
     } catch (error) {
       if (
-              error instanceof BadRequestException ||
-              error instanceof ConflictException
-            ) {
-              throw error;
-            }
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Error creating persona');
     }
   }
@@ -119,9 +150,11 @@ export class PersonasService {
     return this.personaRepo.find();
   }
 
-  async findOne(id: string){
+  async findOne(id: string) {
     try {
-      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      const persona = await this.personaRepo.findOne({
+        where: { id_persona: id },
+      });
       if (!persona) {
         throw new NotFoundException('Persona not found');
       }
@@ -140,12 +173,12 @@ export class PersonasService {
       }
 
       const searchTerm = `%${query}%`;
-      
+
       return await this.personaRepo
         .createQueryBuilder('persona')
         .where(
           '(persona.cedula ILIKE :searchTerm OR persona.nombres ILIKE :searchTerm OR persona.apellidos ILIKE :searchTerm)',
-          { searchTerm }
+          { searchTerm },
         )
         .getMany();
     } catch (error) {
@@ -155,10 +188,61 @@ export class PersonasService {
 
   async update(id: string, dto: UpdatePersonaDto) {
     try {
-      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      const persona = await this.personaRepo.findOne({
+        where: { id_persona: id },
+      });
       if (!persona) {
         throw new NotFoundException('Persona not found');
       }
+
+      // Validaciones si se actualiza a fallecido
+      if (dto.fallecido) {
+        if (
+          !dto.fecha_defuncion ||
+          !dto.fecha_nacimiento ||
+          !dto.lugar_defuncion ||
+          !dto.causa_defuncion
+        ) {
+          throw new BadRequestException(
+            'Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción, causa de defunción y fecha de inhumación',
+          );
+        }
+        if (new Date(dto.fecha_nacimiento) >= new Date()) {
+          throw new BadRequestException(
+            'La fecha de nacimiento no puede ser futura',
+          );
+        }
+        const fechaNacimiento = new Date(dto.fecha_nacimiento);
+        const fechaDefuncion = new Date(dto.fecha_defuncion);
+        if (fechaDefuncion < fechaNacimiento) {
+          throw new BadRequestException(
+            'La fecha de defunción no puede ser anterior a la fecha de nacimiento',
+          );
+        }
+        if (dto.fecha_inhumacion) {
+          const fechaInhumacion = new Date(dto.fecha_inhumacion);
+          if (fechaInhumacion < fechaDefuncion) {
+            throw new BadRequestException(
+              'La fecha de inhumación no puede ser anterior a la fecha de defunción',
+            );
+          }
+        }
+      } else {
+        // Si NO es fallecido, los siguientes campos son obligatorios
+        if (
+          (dto.direccion !== undefined && !dto.direccion) ||
+          (dto.telefono !== undefined && !dto.telefono) ||
+          (dto.correo !== undefined && !dto.correo)
+        ) {
+          throw new BadRequestException(
+            'Para personas vivas, debe proporcionar dirección, teléfono y correo',
+          );
+        }
+        if (dto.correo && !this.validarEmail(dto.correo)) {
+          throw new BadRequestException('Correo electrónico inválido');
+        }
+      }
+
       this.personaRepo.merge(persona, dto);
       return await this.personaRepo.save(persona);
     } catch (error) {
@@ -167,9 +251,11 @@ export class PersonasService {
     }
   }
 
-  async remove(id: string){
+  async remove(id: string) {
     try {
-      const persona = await this.personaRepo.findOne({ where: { id_persona: id } });
+      const persona = await this.personaRepo.findOne({
+        where: { id_persona: id },
+      });
       if (!persona) {
         throw new NotFoundException('Persona not found');
       }
@@ -180,4 +266,3 @@ export class PersonasService {
     }
   }
 }
-

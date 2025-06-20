@@ -52,7 +52,8 @@ export class HuecosNichosController {
   @ApiResponse({ status: 200, description: 'Lista de huecos del nicho' })
   @ApiResponse({ status: 404, description: 'No se encontraron huecos para el nicho dado' })
   async findByNicho(@Param('idNicho') idNicho: string): Promise<HuecosNicho[]> {
-    return this.huecosNichosService.findByNicho(idNicho);
+    const result = await this.huecosNichosService.findByNicho(idNicho);
+    return result.map((item: any) => item.hueco);
   }
 
   @Patch(':id')
