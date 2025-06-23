@@ -39,7 +39,8 @@ export class NichosController {
           fecha_construccion: "2022-05-10",
           // fecha_adquisicion: "2022-06-01",
           observaciones: "Construido recientemente con mármol importado",
-          num_huecos: 4
+          num_huecos: 4,
+          administrador: "Juan Pérez"
         }
       }
     }

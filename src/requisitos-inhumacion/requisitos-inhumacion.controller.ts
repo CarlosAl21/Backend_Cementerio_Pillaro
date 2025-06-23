@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
 } from '@nestjs/common';
 import { RequisitosInhumacionService } from './requisitos-inhumacion.service';
 import { CreateRequisitosInhumacionDto } from './dto/create-requisitos-inhumacion.dto';
@@ -19,13 +20,24 @@ import {
   ApiConsumes,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { PDFGeneratorService } from 'src/shared/pdf-generator/pdf-generator.service';
+import { Response } from 'express';
 
 @ApiTags('Requisitos Inhumacion')
 @Controller('requisitos-inhumacion')
 export class RequisitosInhumacionController {
   constructor(
     private readonly requisitosInhumacionService: RequisitosInhumacionService,
+    private readonly pdfGeneratorService: PDFGeneratorService, 
   ) {}
+
+
+@Get(':id/pdf')
+async generarPDF(@Param('id') id: string, @Res() res: Response) {
+  const requisitos = await this.requisitosInhumacionService.findOne(id); // Incluye relaciones
+  const pdfPath = await this.pdfGeneratorService.generarPDF(requisitos);
+  res.download(pdfPath);
+}
 
   @Post()
   @ApiConsumes('application/json')

@@ -32,7 +32,7 @@ export class RequisitosInhumacionService {
     try {
       const huecoNicho = await this.huecosNichoRepo.findOne({
         where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco },
-        relations: ['id_nicho'],
+        relations: ['id_nicho', 'id_nicho.propietarios_nicho'],
       });
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
@@ -149,6 +149,8 @@ export class RequisitosInhumacionService {
           'id_cementerio',
           'id_solicitante',
           'id_hueco_nicho',
+          'id_hueco_nicho.id_nicho',
+          'id_hueco_nicho.id_nicho.propietarios_nicho',
           'id_fallecido',
         ],
       });
@@ -164,6 +166,8 @@ export class RequisitosInhumacionService {
         cementerio: req.id_cementerio,
         solicitante: req.id_solicitante,
         huecoNicho: req.id_hueco_nicho,
+        nicho: req.id_hueco_nicho.id_nicho,
+        propietarioNicho: req.id_hueco_nicho.id_nicho.propietarios_nicho,
         fallecido: req.id_fallecido,
       }));
     } catch (error) {
@@ -179,6 +183,8 @@ export class RequisitosInhumacionService {
           'id_cementerio',
           'id_solicitante',
           'id_hueco_nicho',
+          'id_hueco_nicho.id_nicho',
+          'id_hueco_nicho.id_nicho.propietarios_nicho',
           'id_fallecido',
           'inhumacion',
         ],
@@ -197,6 +203,8 @@ export class RequisitosInhumacionService {
         cementerio: record.id_cementerio,
         solicitante: record.id_solicitante,
         huecoNicho: record.id_hueco_nicho,
+        nicho: record.id_hueco_nicho.id_nicho,
+        propietarioNicho: record.id_hueco_nicho.id_nicho.propietarios_nicho,
         fallecido: record.id_fallecido,
         inhumacion: record.inhumacion,
       };

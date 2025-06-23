@@ -33,23 +33,44 @@ export class RequisitosInhumacion {
   @Column({ default: false })
   copiaCertificadoDefuncion: boolean;
 
+  @Column ( {nullable: true})
+  observacionCertificadoDefuncion: string;
+
   @Column({ default: false })
   informeEstadisticoINEC: boolean;
+
+  @Column ( {nullable: true })
+  observacionInformeEstadisticoINEC: string;
 
   @Column({ default: false })
   copiaCedula: boolean;
 
+  @Column ( {nullable: true })
+  observacionCopiaCedula: string;
+
   @Column({ default: false })
   pagoTasaInhumacion: boolean;
+
+  @Column ( {nullable: true })
+  observacionPagoTasaInhumacion: string;
 
   @Column({ default: false })
   copiaTituloPropiedadNicho: boolean;
 
+  @Column ( {nullable: true })
+  observacionCopiaTituloPropiedadNicho: string;
+
   @Column({ default: false })
   autorizacionDeMovilizacionDelCadaver: boolean;
 
+  @Column ( {nullable: true })
+  observacionAutorizacionMovilizacion: string;
+
   @Column({ default: false })
   OficioDeSolicitud: boolean;
+
+  @Column ( {nullable: true })
+  observacionOficioSolicitud: string;
 
   // E) Datos del nicho/fosa/sillio
   @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion, { eager: true })

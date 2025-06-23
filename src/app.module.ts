@@ -22,6 +22,7 @@ import { HuecosNichosModule } from './huecos-nichos/huecos-nichos.module';
 import { RequisitosInhumacion } from './requisitos-inhumacion/entities/requisitos-inhumacion.entity';
 import { HuecosNicho } from './huecos-nichos/entities/huecos-nicho.entity';
 import { RequisitosInhumacionModule } from './requisitos-inhumacion/requisitos-inhumacion.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { RequisitosInhumacionModule } from './requisitos-inhumacion/requisitos-i
     PropietariosNichosModule,
     HuecosNichosModule,
     RequisitosInhumacionModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
