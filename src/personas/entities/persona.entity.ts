@@ -20,6 +20,7 @@ export class Persona {
   @Column({ type: 'varchar', length: 100, nullable: true }) direccion: string;
   @Column({ type: 'varchar', length: 100, nullable: true }) telefono: string;
   @Column({ type: 'varchar', length: 100, nullable: true }) correo: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) nacionalidad: string;
   @Column({ type: 'boolean', default: false}) fallecido: boolean;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;

@@ -49,9 +49,6 @@ export class Nicho {
   @UpdateDateColumn({ type: 'varchar', nullable: true })
   fecha_actualizacion: string;
 
-  @Column({ type: 'text', nullable: true })
-  administrador: string;
-
   @OneToMany(() => Exumacion, (exumacion) => exumacion.nichoOriginal)
   exumaciones: Exumacion[];
 

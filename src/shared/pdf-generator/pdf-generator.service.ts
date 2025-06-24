@@ -116,7 +116,7 @@ const docDefinition = {
     colSpan: 3,
     fillColor: 'black',
     text: '',
-    margin: [0, 10, 0, 10],  
+    margin: [0, 2, 0, 2], // antes era [0, 10, 0, 10]
   }, {}, {}
 ],
       
@@ -171,7 +171,7 @@ const docDefinition = {
     colSpan: 5,
     fillColor: 'black',
     text: '',
-    margin: [0, 10, 0, 10], 
+    margin: [0, 2, 0, 2], // antes era [0, 10, 0, 10]
   }, {}, {}, {}
 ],
       
@@ -248,32 +248,43 @@ const docDefinition = {
       ],
 
       [
-        {border:[false, true, false, true], text:''},
-        { text: 'Num Celular', bold: true , border:[false,true,true,true]},
-        { text: requisitos?.solicitante?.telefono||''},
+        { border:[false, true, false, true], text:'' },
+        { text: 'Num Celular', bold: true, border:[false,true,true,true] },
+        { text: requisitos?.solicitante?.telefono||'' },
         { text: 'Copia del T. de propiedad del nicho/fosa/sitio', alignment: 'left', valign: 'middle' },
-        { text: requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: !requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: requisitos?.requisito?.observacionCopiaTituloPropiedadNicho || '', alignment: 'left', valign: 'middle'}
+        { text: requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.requisito?.observacionCopiaTituloPropiedadNicho || '', alignment: 'left', valign: 'middle' }
+      ],
+      
+      [
+        {border:[false,false,false,false], text:''},
+        { text: 'Observación', bold: true, rowSpan: 2, margin: [0, 5, 0, 5] , valign: 'middle', border:[false,false,false,false]},
+        { text: requisitos?.requisito?.observacionSolicitante || '', rowSpan: 2, valign: 'middle'},
+        { text: 'Autorización de Movilización del Cadáver', alignment: 'left' , valign: 'middle'},
+        { text: requisitos?.requisito?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.requisito?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.requisito?.observacionAutorizacionMovilizacion || '', alignment: 'left', valign: 'middle' }
       ],
 
       [
-        {border:[false,true,false,true], text:''},
-        { text: 'Observación', bold: true, alignment: 'center' , valign: 'middle', border:[false,true,true,true]},
-        { text: requisitos?.observacionSolicitante?.toUpperCase() || 'SIN OBSERVACIONES', colSpan: 5, alignment: 'left' , decoration: 'underline', valign: 'middle'},
-        { },
-        { },
-        { },
-        { }
+        {border:[false,false,false,false], text:''},
+        {border:[false,false,false,false], text:''}, 
+        {border:[false,false,false,false], text:''}, 
+        { text: 'Oficio de Solicitud', alignment: 'left' },
+        { text: requisitos?.requisito?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.requisito?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.requisito?.observacionOficioSolicitud || '', alignment: 'left', valign: 'middle' }
       ],
+
       [
-  {
-    colSpan: 7,
-    fillColor: 'black',
-    text: '',
-    margin: [0, 10, 0, 10] 
-  }, {}, {}, {}, {},{}
-],
+        {
+          colSpan: 7,
+          fillColor: 'black',
+          text: '',
+          margin: [0, 2, 0, 2] // antes era [0, 10, 0, 10]
+        }, {}, {}, {}, {},{}
+      ],
     ]
   },
 
@@ -330,10 +341,10 @@ const docDefinition = {
         {border:[false,true,false,true], text:''},
         { text: 'Nombre del administrador', bold: true , colSpan:2, border:[false,true,true,true]},
         {},
-        { text: requisitos?.nicho?.administrador?.toUpperCase() || '', colSpan:2},
+        { text: (requisitos?.requisito?.nombreAdministradorNicho || '').toUpperCase(), colSpan:2},
         {},
         { text: 'Lugar del sitio / código', bold: true },
-        { text: requisitos?.huecoNicho?.id_detalle_hueco || '' },
+        { text: `${requisitos?.huecoNicho?.id_nicho?.sector || ''} ${requisitos?.huecoNicho?.id_nicho?.fila || ''} / ${requisitos?.huecoNicho?.id_nicho?.id_nicho || ''}`.trim() },
       ],
 
       [
@@ -350,7 +361,7 @@ const docDefinition = {
     colSpan: 7,
     fillColor: 'black',
     text: '',
-    margin: [0, 10, 0, 10], 
+    margin: [0, 2, 0, 2], // antes era [0, 10, 0, 10]
   }, {}, {}, {},{}
 ],
       
@@ -396,7 +407,7 @@ const docDefinition = {
         { text: 'Causa de muerte', bold: true , alignment:'left', valign: 'middle', border:[false,true,true,true]},
         { text: requisitos?.fallecido?.causa_defuncion||'' , alignment:'left' ,valign: 'middle'},
         { text: 'Nacionalidad', bold: true, alignment:'left' , valign: 'middle'},
-        { text: 'ECUATORIANA', alignment:'left' , valign: 'middle'}
+        { text: (requisitos?.fallecido?.nacionalidad || '').toUpperCase(), alignment:'left', valign: 'middle' }
       ],
 
       [
@@ -419,9 +430,9 @@ const docDefinition = {
     colSpan: 5,
     fillColor: 'black',
     text: '',
-    margin: [0, 10, 0, 10], 
+    margin: [0, 2, 0, 2], // antes era [0, 10, 0, 10]
     height: 4
-  }, {}, {}, {},{}
+  }, {}, {}, {}, {}
 ],
       
     ]
@@ -473,10 +484,10 @@ const docDefinition = {
   text: [
     'El solicitante de ser el caso deberá dar cumplimiento a la ',
     {
-      text: 'ORDENANZA QUE REGULA LA ADMINISTRACIÓN Y FUNCIONAMIENTO DE LOS CEMENTERIOS MUNICIPALES DEL CANTÓN SANTIAGO DE PILLARO CAPÍTULO IV DE LAS ÁREAS DE INHUMACIÓN EN NICHOS Y FOSAS ART.17',
+      text: 'ORDENANZA QUE REGULA LA ADMINISTRACIÓN Y FUNCIONAMIENTO DE LOS CEMENTERIOS MUNICIPALES DEL CANTÓN SANTIAGO DE PILLARO CAPÍTULO IV DE LAS ÁREAS DE INHUMACIÓN EN NICHOS Y FOSAS ART.17 ',
       bold: true
     },
-    'Terminadas las obras, los constructores o en su defecto los titulares del derecho funerario correspondiente, estarán obligados a retirar las tierras, piedras, escombros y en general cualquier residuo de los materiales empleados, para que sean depositados en la escombrera municipal ubicada en: EL SECTOR DE YAMBO HUAPANTE GRANDE.; así como obligados a reparar cualquier desperfecto que con\nvehículos o cualquier otro elemento hayan causado en las calles, instalaciones, construcciones. etc.'
+    'Terminadas las obras, los constructores o en su defecto los titulares del derecho funerario correspondiente, estarán obligados a retirar las tierras, piedras, escombros y en general cualquier residuo de los materiales empleados, para que sean depositados en la escombrera municipal ubicada en: EL SECTOR DE YAMBO HUAPANTE GRANDE.;\n así como obligados a reparar cualquier desperfecto que con vehículos o cualquier otro elemento hayan causado en las calles, instalaciones, construcciones. etc.'
   ],
   fontSize: 5,
   alignment: 'center',

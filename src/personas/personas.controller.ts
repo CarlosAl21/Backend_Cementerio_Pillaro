@@ -42,6 +42,7 @@ export class PersonasController {
           fecha_inhumacion: '2020-08-20',
           lugar_defuncion: 'Hospital Provincial Ambato',
           causa_defuncion: 'Causas naturales - Edad avanzada',
+          nacionalidad: 'Ecuatoriana',
           fallecido: true
         }
       },

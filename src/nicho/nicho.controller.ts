@@ -3,8 +3,7 @@ import { NichoService } from './nicho.service';
 import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+
 
 @ApiTags('nichos')
 @Controller('nichos')
@@ -40,7 +39,6 @@ export class NichosController {
           // fecha_adquisicion: "2022-06-01",
           observaciones: "Construido recientemente con mármol importado",
           num_huecos: 4,
-          administrador: "Juan Pérez"
         }
       }
     }

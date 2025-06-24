@@ -87,10 +87,11 @@ export class PersonasService {
           !createPersonaDto.fecha_defuncion ||
           !createPersonaDto.fecha_nacimiento ||
           !createPersonaDto.lugar_defuncion ||
-          !createPersonaDto.causa_defuncion
+          !createPersonaDto.causa_defuncion ||
+          !createPersonaDto.nacionalidad
         ) {
           throw new BadRequestException(
-            'Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción y causa de defunción',
+            'Para personas fallecidas, debe proporcionar fecha de defunción, fecha de nacimiento, lugar de defunción y causa de defunción, fecha de inhumación y nacionalidad',
           );
         }
         // Validar fechas

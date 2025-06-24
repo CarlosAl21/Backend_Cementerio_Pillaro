@@ -93,4 +93,7 @@ export class RequisitosInhumacion {
 
   @Column()
   horaInhumacion: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  nombreAdministradorNicho: string; 
 }

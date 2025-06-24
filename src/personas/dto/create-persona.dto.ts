@@ -61,4 +61,9 @@ export class CreatePersonaDto {
   @IsOptional()
   @IsBoolean()
   fallecido?: boolean;
+
+   @ApiPropertyOptional({ description: 'Indica la nacionalidad de la persona  fallecida', default: false })
+  @IsOptional()
+  @IsString()
+  nacionalidad?: string;
 }
