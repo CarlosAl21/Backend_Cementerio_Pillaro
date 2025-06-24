@@ -85,7 +85,8 @@ const docDefinition = {
                       width: 'auto',
                       text: 'FECHA:',                     
                       alignment: 'left',
-                      bold:true
+                      bold:true,
+                      margin: [5, 0, 0, 0] // [left, top, right, bottom]
                     },
                     {
                      width: 'auto',
