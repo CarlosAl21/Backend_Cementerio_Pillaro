@@ -213,9 +213,9 @@ const docDefinition = {
         { text: '  Nombre/Apellido', bold: true , valign: 'middle', border:[false,true,true,true]},
         { text: `${requisitos?.solicitante?.nombres?.toUpperCase()||''} ${requisitos?.solicitante?.apellidos?.toUpperCase()||''}` , valign: 'middle', border:[false,true,true,true]},        
         { text: '  Copia del certificado de defunción JRC', alignment: 'left' , valign: 'middle'},
-        { text: requisitos?.requisito?.copiaCertificadoDefuncion ? 'X' : '', alignment: 'center',valign: 'middle' },
-        { text: !requisitos?.requisito?.copiaCertificadoDefuncion ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: requisitos?.requisito?.observacionCertificadoDefuncion || '', alignment: 'left', valign: 'middle' }
+        { text: requisitos?.copiaCertificadoDefuncion ? 'X' : '', alignment: 'center',valign: 'middle' },
+        { text: !requisitos?.copiaCertificadoDefuncion ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.observacionCertificadoDefuncion || '', alignment: 'left', valign: 'middle' }
       ],
 
       [
@@ -223,9 +223,9 @@ const docDefinition = {
         { text: '  N° Cédula de identidad', bold: true, valign: 'middle' , border:[false,true,true,true]},
         { text: requisitos?.solicitante?.cedula || '', valign: 'middle'},
         { text: '  Informe estadístico INEC', alignment: 'left' , valign: 'middle'},
-        { text: requisitos?.requisito?.informeEstadisticoINEC ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: !requisitos?.requisito?.informeEstadisticoINEC ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: requisitos?.requisito?.observacionInformeEstadisticoINEC || '', alignment: 'left', valign: 'middle' }
+        { text: requisitos?.informeEstadisticoINEC ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.informeEstadisticoINEC ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.observacionInformeEstadisticoINEC || '', alignment: 'left', valign: 'middle' }
       ],
 
       [
@@ -233,9 +233,9 @@ const docDefinition = {
         { text: 'Dirección', bold: true, rowSpan: 2, margin: [0, 5, 0, 5] , valign: 'middle', border:[false,false,false,false]},
         { text: requisitos?.solicitante?.direccion?.toUpperCase()||'', rowSpan: 2 , valign: 'middle'},
         { text: 'Copia de C.I. del solicitante', alignment: 'left' , valign: 'middle'},
-        { text: requisitos?.requisito?.copiaCedula ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: !requisitos?.requisito?.copiaCedula ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: requisitos?.requisito?.observacionCopiaCedula || '', alignment: 'left', valign: 'middle'}
+        { text: requisitos?.copiaCedula ? 'X' : '', alignment: 'center' , valign: 'middle'},
+        { text: !requisitos?.copiaCedula ? 'X' : '', alignment: 'center' , valign: 'middle'},
+        { text: requisitos?.observacionCopiaCedula || '', alignment: 'left', valign: 'middle'}
       ],
 
       [
@@ -243,9 +243,9 @@ const docDefinition = {
         {border:[false,false,false,false], text:''}, 
         {border:[false,false,false,false], text:''}, 
         { text: 'Pago de tasa por inhumación', alignment: 'left' },
-        { text: requisitos?.requisito?.pagoTasaInhumacion ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: !requisitos?.requisito?.pagoTasaInhumacion ? 'X' : '', alignment: 'center' , valign: 'middle'},
-        { text: requisitos?.requisito?.observacionPagoTasaInhumacion || '', alignment: 'left', valign: 'middle'}
+        { text: requisitos?.pagoTasaInhumacion ? 'X' : '', alignment: 'center' , valign: 'middle'},
+        { text: !requisitos?.pagoTasaInhumacion ? 'X' : '', alignment: 'center' , valign: 'middle'},
+        { text: requisitos?.observacionPagoTasaInhumacion || '', alignment: 'left', valign: 'middle'}
       ],
 
       [
@@ -253,19 +253,19 @@ const docDefinition = {
         { text: 'Num Celular', bold: true, border:[false,true,true,true] },
         { text: requisitos?.solicitante?.telefono||'' },
         { text: 'Copia del T. de propiedad del nicho/fosa/sitio', alignment: 'left', valign: 'middle' },
-        { text: requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: !requisitos?.requisito?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: requisitos?.requisito?.observacionCopiaTituloPropiedadNicho || '', alignment: 'left', valign: 'middle' }
+        { text: requisitos?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.copiaTituloPropiedadNicho ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.observacionCopiaTituloPropiedadNicho || '', alignment: 'left', valign: 'middle' }
       ],
       
       [
         {border:[false,false,false,false], text:''},
         { text: 'Observación', bold: true, rowSpan: 2, margin: [0, 5, 0, 5] , valign: 'middle', border:[false,false,false,false]},
-        { text: requisitos?.requisito?.observacionSolicitante || '', rowSpan: 2, valign: 'middle'},
+        { text: requisitos?.observacionSolicitante || '', rowSpan: 2, valign: 'middle'},
         { text: 'Autorización de Movilización del Cadáver', alignment: 'left' , valign: 'middle'},
-        { text: requisitos?.requisito?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: !requisitos?.requisito?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: requisitos?.requisito?.observacionAutorizacionMovilizacion || '', alignment: 'left', valign: 'middle' }
+        { text: requisitos?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.autorizacionDeMovilizacionDelCadaver ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.observacionAutorizacionMovilizacion || '', alignment: 'left', valign: 'middle' }
       ],
 
       [
@@ -273,9 +273,9 @@ const docDefinition = {
         {border:[false,false,false,false], text:''}, 
         {border:[false,false,false,false], text:''}, 
         { text: 'Oficio de Solicitud', alignment: 'left' },
-        { text: requisitos?.requisito?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: !requisitos?.requisito?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
-        { text: requisitos?.requisito?.observacionOficioSolicitud || '', alignment: 'left', valign: 'middle' }
+        { text: requisitos?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: !requisitos?.OficioDeSolicitud ? 'X' : '', alignment: 'center', valign: 'middle' },
+        { text: requisitos?.observacionOficioSolicitud || '', alignment: 'left', valign: 'middle' }
       ],
 
       [
@@ -342,7 +342,7 @@ const docDefinition = {
         {border:[false,true,false,true], text:''},
         { text: 'Nombre del administrador', bold: true , colSpan:2, border:[false,true,true,true]},
         {},
-        { text: (requisitos?.requisito?.nombreAdministradorNicho || '').toUpperCase(), colSpan:2},
+        { text: (requisitos?.nombreAdministradorNicho || '').toUpperCase(), colSpan:2},
         {},
         { text: 'Lugar del sitio / código', bold: true },
         { text: `${requisitos?.huecoNicho?.id_nicho?.sector || ''} ${requisitos?.huecoNicho?.id_nicho?.fila || ''} / ${requisitos?.huecoNicho?.id_nicho?.id_nicho || ''}`.trim() },
@@ -416,7 +416,7 @@ const docDefinition = {
         { text: 'Fecha de nacimiento', bold: true, alignment:'left' , valign: 'middle', border:[false,true,true,true]},
         { text: this.formatearFechaLarga(requisitos?.fallecido?.fecha_nacimiento||''), alignment:'left', valign: 'middle' },
         { text: 'Fecha de Inhumación', bold: true, alignment:'left' , valign: 'middle'},
-        { text: this.formatearFechaLarga(requisitos?.requisito?.fechaInhumacion||''), alignment:'left', valign: 'middle' }
+        { text: this.formatearFechaLarga(requisitos?.fechaInhumacion||''), alignment:'left', valign: 'middle' }
       ],
 
       [
@@ -424,7 +424,7 @@ const docDefinition = {
         { text: 'Fecha de fallecimiento', bold: true, alignment:'left', valign: 'middle', border:[false,true,true,true] },
         { text: this.formatearFechaLarga(requisitos?.fallecido?.fecha_defuncion||''), alignment:'left', valign: 'middle' },
         { text: 'Hora de Inhumación', bold: true, alignment:'left', valign: 'middle' },
-        { text: this.formatearHora(requisitos?.requisito?.horaInhumacion||''), alignment:'left', valign: 'middle' }
+        { text: this.formatearHora(requisitos?.horaInhumacion||''), alignment:'left', valign: 'middle' }
       ],
         [
   {
@@ -591,11 +591,11 @@ if (!fs.existsSync(pdfDir)) {
   fs.mkdirSync(pdfDir, { recursive: true });
 }
 
-if (!requisitos?.requisito?.id_requsitoInhumacion) {
+if (!requisitos?.id_requsitoInhumacion) {
   return Promise.reject('No se puede generar el nombre del PDF: ID de requisito inválido');
 }
 
-const pdfPath = path.resolve(pdfDir, `inhumacion_${requisitos.requisito.id_requsitoInhumacion}.pdf`);
+const pdfPath = path.resolve(pdfDir, `inhumacion_${requisitos.id_requsitoInhumacion}.pdf`);
 
 return new Promise((resolve, reject) => {
   const pdfDoc = printer.createPdfKitDocument(docDefinition);
