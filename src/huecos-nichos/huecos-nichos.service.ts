@@ -30,11 +30,7 @@ export class HuecosNichosService {
         relations: ['id_nicho', 'id_fallecido'],
       }).then(huecos =>
         huecos.map(h => ({
-          hueco: {
-            ...h,
-            id_nicho: undefined,
-            id_fallecido: undefined,
-          },
+          ...h,
           nicho: h.id_nicho,
           fallecido: h.id_fallecido,
         }))

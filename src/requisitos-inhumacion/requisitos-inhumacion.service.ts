@@ -30,10 +30,24 @@ export class RequisitosInhumacionService {
 
   async create(dto: CreateRequisitosInhumacionDto) {
     try {
+
+      // Normalizar id_fallecido si llega como string
+      if (typeof dto.id_fallecido === 'string') {
+        dto.id_fallecido = { id_persona: dto.id_fallecido };
+      }
+
+      // Normalizar id_solicitante si llega como string
+      if (typeof dto.id_solicitante === 'string') {
+        dto.id_solicitante = { id_persona: dto.id_solicitante };
+      }
+
+
       const huecoNicho = await this.huecosNichoRepo.findOne({
         where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco },
         relations: ['id_nicho', 'id_nicho.propietarios_nicho'],
       });
+
+
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
       }
@@ -43,9 +57,11 @@ export class RequisitosInhumacionService {
         );
       }
 
+      
       const personaFallecido = await this.personaRepo.findOne({
         where: { id_persona: dto.id_fallecido.id_persona },
       });
+
       if (!personaFallecido) {
         throw new NotFoundException(
           `Fallecido con ID ${dto.id_fallecido.id_persona} no encontrado`,
@@ -59,6 +75,7 @@ export class RequisitosInhumacionService {
       const solicitante = await this.personaRepo.findOne({
         where: { id_persona: dto.id_solicitante.id_persona },
       });
+
       if (!solicitante) {
         throw new NotFoundException(
           `Solicitante con ID ${dto.id_solicitante.id_persona} no encontrado`,
@@ -91,9 +108,8 @@ export class RequisitosInhumacionService {
       const secuencial = String(count + 1).padStart(3, '0');
       const codigo_inhumacion = `${secuencial}-${year}`;
 
-      const nomSolicitante = solicitante.nombres+' '+solicitante.apellidos;
+      const nomSolicitante = solicitante.nombres + ' ' + solicitante.apellidos;
 
-      console.log('Nombre del solicitante:', nomSolicitante);
 
       const inhumacion = this.inhumacionRepo.create({
         id_nicho: huecoNicho.id_nicho,
@@ -127,7 +143,7 @@ export class RequisitosInhumacionService {
       const savedInhumacion = await this.inhumacionRepo.save(inhumacion);
       // Mapeo explícito de la respuesta
       return {
-        requisito: savedEntity,
+        ...savedEntity,
         inhumacion: savedInhumacion,
         huecoNicho: allRequiredTrue ? huecoNicho : undefined,
         fallecido: personaFallecido,
@@ -155,14 +171,8 @@ export class RequisitosInhumacionService {
         ],
       });
       // Mapeo: separa cada objeto relacionado
-      return requisitos.map(req => ({
-        requisito: {
-          ...req,
-          id_cementerio: undefined,
-          id_solicitante: undefined,
-          id_hueco_nicho: undefined,
-          id_fallecido: undefined,
-        },
+      return requisitos.map((req) => ({
+        ...req,
         cementerio: req.id_cementerio,
         solicitante: req.id_solicitante,
         huecoNicho: req.id_hueco_nicho,
@@ -192,14 +202,7 @@ export class RequisitosInhumacionService {
       if (!record) throw new NotFoundException(`Requisito ${id} no encontrado`);
       // Mapeo: separa cada objeto relacionado
       return {
-        requisito: {
-          ...record,
-          id_cementerio: undefined,
-          id_solicitante: undefined,
-          id_hueco_nicho: undefined,
-          id_fallecido: undefined,
-          inhumacion: undefined,
-        },
+        ...record,
         cementerio: record.id_cementerio,
         solicitante: record.id_solicitante,
         huecoNicho: record.id_hueco_nicho,

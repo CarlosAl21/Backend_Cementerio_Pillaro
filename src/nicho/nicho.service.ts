@@ -57,13 +57,7 @@ export class NichoService {
       });
       // Mapeo: separa cada objeto relacionado
       return nichos.map(nicho => ({
-        nicho: {
           ...nicho,
-          id_cementerio: undefined,
-          inhumaciones: undefined,
-          propietarios_nicho: undefined,
-          huecos: undefined,
-        },
         cementerio: nicho.id_cementerio,
         inhumaciones: nicho.inhumaciones,
         propietarios: nicho.propietarios_nicho,
@@ -92,13 +86,8 @@ export class NichoService {
       }
       // Mapeo: separa cada objeto relacionado
       return {
-        nicho: {
+
           ...nicho,
-          id_cementerio: undefined,
-          inhumaciones: undefined,
-          propietarios_nicho: undefined,
-          huecos: undefined,
-        },
         cementerio: nicho.id_cementerio,
         inhumaciones: nicho.inhumaciones,
         propietarios: nicho.propietarios_nicho,
@@ -114,8 +103,8 @@ export class NichoService {
     try {
       const nicho = await this.findOne(id);
       // Solo actualiza el objeto nicho, no los relacionados
-      Object.assign(nicho.nicho, updateDto);
-      const nichoActualizado = await this.nichoRepository.save(nicho.nicho);
+      Object.assign(nicho, updateDto);
+      const nichoActualizado = await this.nichoRepository.save(nicho  );
       return {
         nicho: nichoActualizado,
         cementerio: nicho.cementerio,

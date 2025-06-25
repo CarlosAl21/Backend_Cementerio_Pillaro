@@ -24,7 +24,7 @@ export class CementerioService {
   async findAll() {
     const cementerios = await this.cementerioRepository.find();
     // Mapeo explícito de la respuesta
-    return cementerios.map(cementerio => ({ cementerio }));
+    return cementerios.map(cementerio => ({ ...cementerio }));
   }
 
   async findOne(id: string) {
@@ -34,7 +34,7 @@ export class CementerioService {
         throw new NotFoundException('No se encontro el cementerio');
       }
       // Mapeo explícito de la respuesta
-      return { cementerio };
+      return { ...cementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error en la busqueda');

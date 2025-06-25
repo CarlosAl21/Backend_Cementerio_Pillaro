@@ -34,7 +34,8 @@ export class RequisitosInhumacionController {
 
 @Get(':id/pdf')
 async generarPDF(@Param('id') id: string, @Res() res: Response) {
-  const requisitos = await this.requisitosInhumacionService.findOne(id); // Incluye relaciones
+  const requisitos = await this.requisitosInhumacionService.findOne(id); 
+  // Incluye relaciones
   const pdfPath = await this.pdfGeneratorService.generarPDF(requisitos);
   res.download(pdfPath);
 }

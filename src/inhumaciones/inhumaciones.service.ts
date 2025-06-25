@@ -64,11 +64,8 @@ export class InhumacionesService {
       });
       // Mapeo: separa cada objeto relacionado
       return inhumaciones.map(inh => ({
-        inhumacion: {
-          ...inh,
-          id_nicho: undefined,
-          id_fallecido: undefined,
-        },
+      
+        ...inh,
         nicho: inh.id_nicho,
         fallecido: inh.id_fallecido,
         huecos: inh.id_nicho?.huecos,
@@ -87,11 +84,7 @@ export class InhumacionesService {
       }
       // Mapeo: separa cada objeto relacionado
       return {
-        inhumacion: {
           ...inhumacion,
-          id_nicho: undefined,
-          id_fallecido: undefined,
-        },
         nicho: inhumacion.id_nicho,
         fallecido: inhumacion.id_fallecido,
         huecos: inhumacion.id_nicho?.huecos,
