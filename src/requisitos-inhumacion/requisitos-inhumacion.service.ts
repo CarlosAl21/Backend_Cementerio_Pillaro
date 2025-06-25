@@ -271,7 +271,7 @@ export class RequisitosInhumacionService {
       }
 
       return {
-        requisito: savedEntity,
+        ...savedEntity,
         inhumacion: savedEntity.inhumacion,
         huecoNicho: savedEntity.id_hueco_nicho,
         fallecido: savedEntity.id_fallecido,
