@@ -43,7 +43,7 @@ export class InhumacionesController {
           responsable_inhumacion: "Carlos Gómez",
           observaciones: "Requiere traslado desde otro cementerio",
           codigo_inhumacion: "INH-2023-001",
-          estado: "Programada"
+          estado: "Pendiente"
         }
       }
     }
@@ -105,9 +105,7 @@ export class InhumacionesController {
     examples: {
       ejemplo1: {
         value: {
-          estado: "Realizada",
-          hora_inhumacion: "15:00",
-          observaciones: "Inhumación completada satisfactoriamente"
+          estado: "Completado"
         }
       }
     }

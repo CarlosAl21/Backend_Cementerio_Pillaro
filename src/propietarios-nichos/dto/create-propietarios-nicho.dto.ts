@@ -1,7 +1,13 @@
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsNotEmpty, IsString, IsEnum } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Nicho } from "src/nicho/entities/nicho.entity";
 import { Persona } from "src/personas/entities/persona.entity";
+import { DeepPartial } from "typeorm";
+
+export enum TipoPropietario {
+  Dueño = 'Dueño',
+  Heredero = 'Heredero'
+}
 
 export class CreatePropietarioNichoDto {
     @ApiProperty({
@@ -11,7 +17,7 @@ export class CreatePropietarioNichoDto {
         required: true
     })
     @IsNotEmpty()
-    id_persona: Persona;
+    id_persona: DeepPartial<Persona>;
 
     @ApiProperty({
         description: 'ID del nicho asociado',
@@ -20,7 +26,7 @@ export class CreatePropietarioNichoDto {
         required: true
     })
     @IsNotEmpty()
-    id_nicho: Nicho;
+    id_nicho: DeepPartial<Nicho>;
 
     @ApiProperty({
         description: 'Fecha de adquisición del nicho',
@@ -54,7 +60,6 @@ export class CreatePropietarioNichoDto {
     
     @ApiProperty({
         description: 'Estado actual de la propiedad',
-        enum: ['Activo', 'Inactivo', 'En proceso', 'Vendido', 'Heredado'],
         example: 'Activo',
         required: true
     })
@@ -70,4 +75,14 @@ export class CreatePropietarioNichoDto {
     @IsString()
     @IsNotEmpty()
     observaciones: string;
+
+    @ApiProperty({
+        description: 'Tipo de propietario',
+        enum: TipoPropietario,
+        example: 'Dueño',
+        required: true
+    })
+    @IsEnum(TipoPropietario)
+    @IsNotEmpty()
+    tipo: TipoPropietario;
 }

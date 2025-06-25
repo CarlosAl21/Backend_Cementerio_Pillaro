@@ -7,11 +7,11 @@ export class PropietarioNicho {
   @PrimaryGeneratedColumn('uuid')
   id_propietario_nicho: string;
 
-  @ManyToOne(() => Persona, (persona) => persona.propietarios_nichos)
+  @ManyToOne(() => Persona, (persona) => persona.propietarios_nichos, { eager: true })
   @JoinColumn({ name: 'id_persona' })
   id_persona: Persona;
-  // id de nicho sin relacion directa hasta que se pueda unir 
-  @ManyToOne(()=> Nicho, (nicho) => nicho.propietarios_nicho)
+
+  @ManyToOne(() => Nicho, (nicho) => nicho.propietarios_nicho, { eager: true })
   @JoinColumn({ name: 'id_nicho' })
   id_nicho: Nicho;
 
@@ -22,6 +22,12 @@ export class PropietarioNicho {
   @Column({ type: 'varchar', length: 255 }) observaciones: string;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
+  @Column({ 
+    type: 'varchar', 
+    length: 50, 
+    default: 'Dueño' 
+  })
+  tipo: string; // Puede ser 'Dueño', 'Co-propietario', etc.
 
   @BeforeInsert()
   async setFechaCreacion() {
@@ -32,6 +38,4 @@ export class PropietarioNicho {
   async setFechaActualizacion() {
     this.fecha_actualizacion = new Date();
   }
-
-
 }

@@ -1,116 +1,69 @@
-import { IsDate, IsNotEmpty, IsString, IsOptional, IsEmail, IsPhoneNumber, Length } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsString, IsOptional, IsDate, IsBoolean, Length, IsUUID } from "class-validator";
 
 export class CreatePersonaDto {
-    @ApiProperty({
-        description: 'Número de cédula de identidad',
-        example: '1234567890',
-        minLength: 10,
-        maxLength: 13,
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    @Length(10, 13)
-    cedula: string;
+  @ApiProperty({ description: 'Número de cédula de identidad', example: '1234567890', minLength: 10, maxLength: 13 })
+  @IsString()
+  @Length(10, 13)
+  cedula: string;
 
-    @ApiProperty({
-        description: 'Nombres de la persona',
-        example: 'Juan Carlos',
-        minLength: 2,
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    @Length(2, 50)
-    nombres: string;
+  @ApiProperty({ description: 'Nombres de la persona', example: 'Juan Carlos', minLength: 2 })
+  @IsString()
+  @Length(2, 100)
+  nombres: string;
 
-    @ApiProperty({
-        description: 'Apellidos de la persona',
-        example: 'Pérez González',
-        minLength: 2,
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    @Length(2, 50)
-    apellidos: string;
-    
-    @ApiProperty({
-        description: 'Fecha de nacimiento',
-        type: 'string',
-        format: 'date',
-        example: '1990-05-15',
-        required: true
-    })
-    @IsDate()
-    @IsNotEmpty()
-    fecha_nacimiento: Date;
-    
-    @ApiPropertyOptional({
-        description: 'Fecha de defunción (opcional)',
-        type: 'string',
-        format: 'date',
-        example: '2023-01-10'
-    })
-    @IsDate()
-    @IsOptional()
-    fecha_defuncion?: Date;
+  @ApiProperty({ description: 'Apellidos de la persona', example: 'Pérez González', minLength: 2 })
+  @IsString()
+  @Length(2, 100)
+  apellidos: string;
 
-    @ApiPropertyOptional({
-        description: 'Lugar de defunción (opcional)',
-        example: 'Hospital General, Quito',
-        required: false
-    })
-    @IsString()
-    @IsOptional()
-    lugar_defuncion?: string;
+  @ApiPropertyOptional({ description: 'Fecha de nacimiento', type: 'string', format: 'date', example: '1990-05-15' })
+  @IsOptional()
+  @IsDate()
+  fecha_nacimiento?: Date;
 
-    @ApiPropertyOptional({
-        description: 'Causa de defunción (opcional)',
-        example: 'Enfermedad cardiovascular',
-        required: false
-    })
-    @IsString()
-    @IsOptional()
-    causa_defuncion?: string;
+  @ApiPropertyOptional({ description: 'Fecha de defunción', type: 'string', format: 'date', example: '2023-01-10' })
+  @IsOptional()
+  @IsDate()
+  fecha_defuncion?: Date;
 
-    @ApiProperty({
-        description: 'Dirección domiciliaria',
-        example: 'Av. Amazonas N23-45 y Veintimilla',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    direccion: string;
+  @ApiPropertyOptional({ description: 'Fecha de inhumación', type: 'string', format: 'date', example: '2023-01-12' })
+  @IsOptional()
+  @IsDate()
+  fecha_inhumacion?: Date;
 
-    @ApiProperty({
-        description: 'Número de teléfono',
-        example: '+593987654321',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    @IsPhoneNumber() // Validate phone number format
-    telefono: string;
+  @ApiPropertyOptional({ description: 'Lugar de defunción', example: 'Hospital General, Quito' })
+  @IsOptional()
+  @IsString()
+  lugar_defuncion?: string;
 
-    @ApiProperty({
-        description: 'Correo electrónico',
-        example: 'juan.perez@example.com',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    @IsEmail()
-    correo: string;
+  @ApiPropertyOptional({ description: 'Causa de defunción', example: 'Enfermedad cardiovascular' })
+  @IsOptional()
+  @IsString()
+  causa_defuncion?: string;
 
-    @ApiProperty({
-        description: 'Tipo de persona',
-        enum: ['Familiar', 'Difunto', 'Responsable', 'Otro'],
-        example: 'Familiar',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    tipo: string;
+  @ApiPropertyOptional({ description: 'Dirección domiciliaria', example: 'Av. Amazonas N23-45 y Veintimilla' })
+  @IsOptional()
+  @IsString()
+  direccion?: string;
+
+  @ApiPropertyOptional({ description: 'Número de teléfono', example: '+593987654321' })
+  @IsOptional()
+  @IsString()
+  telefono?: string;
+
+  @ApiPropertyOptional({ description: 'Correo electrónico', example: 'juan.perez@example.com' })
+  @IsOptional()
+  @IsString()
+  correo?: string;
+
+  @ApiPropertyOptional({ description: 'Indica si la persona está fallecida', default: false })
+  @IsOptional()
+  @IsBoolean()
+  fallecido?: boolean;
+
+   @ApiPropertyOptional({ description: 'Indica la nacionalidad de la persona  fallecida', default: false })
+  @IsOptional()
+  @IsString()
+  nacionalidad?: string;
 }

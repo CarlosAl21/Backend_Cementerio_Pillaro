@@ -2,24 +2,26 @@ import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { Inhumacion } from 'src/inhumaciones/entities/inhumacion.entity';
 import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 import { RequisitosInhumacion } from 'src/requisitos-inhumacion/entities/requisitos-inhumacion.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, BeforeUpdate, In } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeInsert, BeforeUpdate } from 'typeorm';
 
 @Entity('personas')
 export class Persona {
   @PrimaryGeneratedColumn('uuid')
   id_persona: string;
 
-  @Column({ type: 'varchar', length: 100 }) cedula: string;
+  @Column({ type: 'varchar', length: 100, unique: true}) cedula: string;
   @Column({ type: 'varchar', length: 100 }) nombres: string;
-  @Column() apellidos: string;
-  @Column({ type: 'date' }) fecha_nacimiento: Date;
+  @Column({type: 'varchar', length: 100 }) apellidos: string;
+  @Column({ type: 'date', nullable: true }) fecha_nacimiento: Date;
   @Column({ type: 'date', nullable: true }) fecha_defuncion: Date;
+  @Column({ type: 'date', nullable: true }) fecha_inhumacion: Date;
   @Column({ type: 'varchar', length: 100, nullable: true }) lugar_defuncion: string;
   @Column({ type: 'varchar', length: 100 ,nullable: true }) causa_defuncion: string;
-  @Column({ type: 'varchar', length: 100 }) direccion: string;
-  @Column({ type: 'varchar', length: 100 }) telefono: string;
-  @Column({ type: 'varchar', length: 100 }) correo: string;
-  @Column({ type: 'varchar', length: 100 }) tipo: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) direccion: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) telefono: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) correo: string;
+  @Column({ type: 'varchar', length: 100, nullable: true }) nacionalidad: string;
+  @Column({ type: 'boolean', default: false}) fallecido: boolean;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
 
@@ -35,7 +37,7 @@ export class Persona {
   @OneToMany(() => RequisitosInhumacion, (requisitosInhumacion) => requisitosInhumacion.id_solicitante)
   requisitos_inhumacion_solicitante: RequisitosInhumacion[];
 
-  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_persona)
+  @OneToMany(() => HuecosNicho, (huecosNicho) => huecosNicho.id_fallecido)
   huecos_nichos: HuecosNicho[];
 
   @BeforeInsert()

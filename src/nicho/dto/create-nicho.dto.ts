@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsInt, IsDateString, IsOptional, IsUUID, MaxLength, Min, Max, Length } from 'class-validator';
+import { IsNotEmpty, IsString, IsInt, IsDateString, IsOptional, IsUUID, MaxLength, Min, Max, Length, IsDate } from 'class-validator';
 import { Cementerio } from 'src/cementerio/entities/cementerio.entity';
 import { DeepPartial } from 'typeorm';
 
@@ -52,7 +52,7 @@ export class CreateNichoDto {
 
   @ApiProperty({
     description: 'Tipo de nicho',
-    enum: ['Bóveda', 'Nicho', 'Doble', 'Especial'],
+    enum: ['Nicho', 'Mausoleo', 'Fosa'],
     example: 'Individual',
     required: true
   })
@@ -71,6 +71,17 @@ export class CreateNichoDto {
   @IsNotEmpty()
   fecha_construccion: string;
 
+  @ApiProperty({
+    description: 'Fecha de adquisición del nicho',
+    type: 'string',
+    format: 'date',
+    example: '2023-01-01',
+    required: true
+  })
+  // @IsDate()
+  // @IsOptional()
+  // fecha_adquisicion?: Date;
+
   @ApiPropertyOptional({
     description: 'Observaciones adicionales sobre el nicho',
     example: 'Construido recientemente con mármol importado',
@@ -84,14 +95,10 @@ export class CreateNichoDto {
   @ApiProperty({
     description: 'Cantidad de huecos del nicho',
     example: 2,
-    minimum: 1,
-    maximum: 2,
     required: true
   })
   @IsInt()
   @IsNotEmpty()
-  @Min(1)
-  @Max(2)
-  numero_huecos: number;
+  num_huecos: number;
 
 }

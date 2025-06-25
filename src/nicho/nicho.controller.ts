@@ -3,8 +3,7 @@ import { NichoService } from './nicho.service';
 import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+
 
 @ApiTags('nichos')
 @Controller('nichos')
@@ -12,20 +11,34 @@ export class NichosController {
   constructor(private readonly nichosService: NichoService) {}
 
   @Post()
-  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Crear un nuevo nicho' })
-  @ApiBody({ 
+  @ApiBody({
     type: CreateNichoDto,
     examples: {
-      ejemplo1: {
+      soloRequeridos: {
+        summary: 'Solo campos requeridos',
         value: {
           id_cementerio: "123e4567-e89b-12d3-a456-426614174000",
           sector: "A",
           fila: "1",
           numero: "15",
-          tipo: "Individual",
+          tipo: "Nicho",
           fecha_construccion: "2023-01-01",
-          numero_huecos: 2
+          num_huecos: 2
+        }
+      },
+      conOpcionales: {
+        summary: 'Con campos opcionales',
+        value: {
+          id_cementerio: "123e4567-e89b-12d3-a456-426614174000",
+          sector: "B",
+          fila: "2",
+          numero: "20",
+          tipo: "Fosa",
+          fecha_construccion: "2022-05-10",
+          // fecha_adquisicion: "2022-06-01",
+          observaciones: "Construido recientemente con mármol importado",
+          num_huecos: 4,
         }
       }
     }
@@ -82,4 +95,21 @@ export class NichosController {
   remove(@Param('id') id: string) {
     return this.nichosService.remove(id);
   }
+
+  @Get('propietarios/:id')
+  @ApiOperation({ summary: 'Obtener propietarios de un nicho por ID del nicho' })
+  @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({ status: 200, description: 'Lista de propietarios del nicho' })
+  findPropietarios(@Param('id') id: string) {
+    return this.nichosService.findPropietariosNicho(id);
+  }
+
+  @Get('fallecidos/:cedula')
+  @ApiOperation({ summary: 'Obtener fallecidos de un nicho por la cedula del fallecido' })
+  @ApiParam({ name: 'cedula', example: '1234567890' })
+  @ApiResponse({ status: 200, description: 'Lista de fallecidos del nicho' })
+  findFallecidos(@Param('cedula') cedula: string) {
+    return this.nichosService.findByCedulaFallecido(cedula);
+  }
+  
 }

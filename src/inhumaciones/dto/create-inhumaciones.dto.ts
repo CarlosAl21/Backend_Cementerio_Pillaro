@@ -3,6 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Nicho } from "src/nicho/entities/nicho.entity";
 import { Persona } from "src/personas/entities/persona.entity";
 import { DeepPartial } from "typeorm";
+import { RequisitosInhumacion } from "src/requisitos-inhumacion/entities/requisitos-inhumacion.entity";
 
 export class CreateInhumacionDto {
     @ApiProperty({
@@ -80,11 +81,21 @@ export class CreateInhumacionDto {
 
     @ApiProperty({
         description: 'Estado de la inhumación',
-        enum: ['Programada', 'Realizada', 'Cancelada', 'Pendiente'],
+        enum: ['Realizada','Pendiente'],
         example: 'Programada',
         required: true
     })
     @IsString()
     @IsNotEmpty()
     estado: string;
+
+    @ApiProperty({
+        description: 'ID de los requisitos de inhumación asociados',
+        example: '123e4567-e89b-12d3-a456-426614174002',
+        format: 'uuid',
+        required: true
+    })
+    @IsString()
+    @IsOptional()
+    id_requisitos_inhumacion?: DeepPartial<RequisitosInhumacion>;
 }

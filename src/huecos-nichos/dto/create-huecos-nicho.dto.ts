@@ -18,13 +18,30 @@ export class CreateHuecosNichoDto {
   @ApiProperty({
     description: 'Número de hueco del nicho',
     example: 2,
-    minimum: 1,
-    maximum: 2,
     required: true
   })
   @IsInt()
   @IsNotEmpty()
-  @Min(1)
-  @Max(2)
   numero_hueco: number;
+
+  @ApiProperty({
+    description: 'Estado del hueco (Disponible, Ocupado, Reservado)',
+    example: 'Disponible',
+    required: true
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(20)
+  estado: string;
+
+  @ApiPropertyOptional({
+    description: 'ID del fallecido asociada al hueco (opcional)',
+    example: '123e4567-e89b-12d3-a456-426614174001',
+    format: 'uuid',
+    required: false
+  })
+  @IsOptional()
+  @IsUUID()
+  id_fallecido?: DeepPartial<Persona>;
+
 }

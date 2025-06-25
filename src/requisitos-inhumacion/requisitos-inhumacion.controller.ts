@@ -1,48 +1,86 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+} from '@nestjs/common';
 import { RequisitosInhumacionService } from './requisitos-inhumacion.service';
 import { CreateRequisitosInhumacionDto } from './dto/create-requisitos-inhumacion.dto';
 import { UpdateRequisitosInhumacionDto } from './dto/update-requisitos-inhumacion.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiConsumes,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
+import { PDFGeneratorService } from 'src/shared/pdf-generator/pdf-generator.service';
+import { Response } from 'express';
 
 @ApiTags('Requisitos Inhumacion')
 @Controller('requisitos-inhumacion')
 export class RequisitosInhumacionController {
-  constructor(private readonly requisitosInhumacionService: RequisitosInhumacionService) {}
+  constructor(
+    private readonly requisitosInhumacionService: RequisitosInhumacionService,
+    private readonly pdfGeneratorService: PDFGeneratorService, 
+  ) {}
+
+
+@Get(':id/pdf')
+async generarPDF(@Param('id') id: string, @Res() res: Response) {
+  const requisitos = await this.requisitosInhumacionService.findOne(id); // Incluye relaciones
+  const pdfPath = await this.pdfGeneratorService.generarPDF(requisitos);
+  res.download(pdfPath);
+}
 
   @Post()
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación' })
-  @ApiBody({
-    type: CreateRequisitosInhumacionDto,
-    examples: {
-      ejemplo: {
-        summary: 'Ejemplo de creación',
-        value: {
-          // Ajusta los campos según tu DTO real
-          fecha: '2024-06-01',
-          solicitante: 'uuid-solicitante',
-          fosa: 'uuid-fosa',
-          fallecido: 'uuid-fallecido',
-          observaciones: 'Observaciones de ejemplo'
-        }
-      }
-    }
-  })
+  @ApiConsumes('application/json')
+  @ApiOperation({ summary: 'Crear un nuevo requisito de inhumación (solo JSON), el link del documento es opcional' })
   @ApiResponse({ status: 201, description: 'Requisito creado correctamente.' })
-  create(@Body() createRequisitosInhumacionDto: CreateRequisitosInhumacionDto) {
-    return this.requisitosInhumacionService.create(createRequisitosInhumacionDto);
+  @ApiBadRequestResponse({
+    description: 'Error al crear el requisito de inhumación.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Datos inválidos',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
+  @ApiBody({
+    description: 'Datos del requisito en formato JSON',
+    type: CreateRequisitosInhumacionDto,
+    required: true,
+  })
+  create(
+    @Body() dto: CreateRequisitosInhumacionDto,
+  ) {
+    return this.requisitosInhumacionService.create(dto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los requisitos de inhumación' })
-  @ApiResponse({ status: 200, description: 'Lista de requisitos de inhumación.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de requisitos de inhumación.',
+  })
   findAll() {
-    return this.requisitosInhumacionService.findAll();  
+    return this.requisitosInhumacionService.findAll();
   }
 
-  @Get(':id')
+  @Get('/requisito/:id')
   @ApiOperation({ summary: 'Obtener un requisito de inhumación por ID' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiResponse({ status: 200, description: 'Requisito encontrado.' })
@@ -52,34 +90,71 @@ export class RequisitosInhumacionController {
   }
 
   @Patch(':id')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
   @ApiBody({
-    type: UpdateRequisitosInhumacionDto,
-    examples: {
-      ejemplo: {
-        summary: 'Ejemplo de actualización',
-        value: {
-          // Ajusta los campos según tu DTO real
-          observaciones: 'Observaciones actualizadas'
-        }
-      }
-    }
+    description: 'Datos del requisito en formato JSON',
+    schema: {
+      type: 'object',
+      properties: {
+        copiaCertificadoDefuncion: { type: 'boolean', example: true },
+        informeEstadisticoINEC: { type: 'boolean', example: false },
+        copiaCedula: { type: 'boolean', example: true },
+        pagoTasaInhumacion: { type: 'boolean', example: true },
+        copiaTituloPropiedadNicho: { type: 'boolean', example: false },
+        // Agrega aquí otros campos del DTO si es necesario
+      },
+      required: [
+        'copiaCertificadoDefuncion',
+        'informeEstadisticoINEC',
+        'copiaCedula',
+        'pagoTasaInhumacion',
+        'copiaTituloPropiedadNicho',
+      ],
+      example: {
+        copiaCertificadoDefuncion: true,
+        informeEstadisticoINEC: false,
+        copiaCedula: true,
+        pagoTasaInhumacion: true,
+        copiaTituloPropiedadNicho: false,
+      },
+    },
   })
-  @ApiResponse({ status: 200, description: 'Requisito actualizado correctamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Requisito actualizado correctamente.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Petición inválida.',
+    schema: {
+      example: {
+        statusCode: 400,
+        message: 'Datos inválidos',
+        error: 'Bad Request',
+      },
+    },
+  })
+  @ApiResponse({ status: 409, description: 'Hueco no disponible.' })
+  @ApiResponse({ status: 500, description: 'Error interno del servidor.' })
   @ApiResponse({ status: 404, description: 'Requisito no encontrado.' })
-  update(@Param('id') id: string, @Body() updateRequisitosInhumacionDto: UpdateRequisitosInhumacionDto) {
-    return this.requisitosInhumacionService.update(id, updateRequisitosInhumacionDto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateRequisitosInhumacionDto,
+  ) {
+    return this.requisitosInhumacionService.update(id, dto);
   }
 
   @Delete(':id')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Eliminar un requisito de inhumación' })
   @ApiParam({ name: 'id', description: 'ID del requisito de inhumación' })
-  @ApiResponse({ status: 200, description: 'Requisito eliminado correctamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Requisito eliminado correctamente.',
+  })
   @ApiResponse({ status: 404, description: 'Requisito no encontrado.' })
   remove(@Param('id') id: string) {
     return this.requisitosInhumacionService.remove(id);
   }
+
 }

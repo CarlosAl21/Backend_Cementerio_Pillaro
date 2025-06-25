@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, BadRequestException } from '@nestjs/common';
 import { HuecosNichosService } from './huecos-nichos.service';
 import { CreateHuecosNichoDto } from './dto/create-huecos-nicho.dto';
 import { UpdateHuecosNichoDto } from './dto/update-huecos-nicho.dto';
@@ -48,11 +48,12 @@ export class HuecosNichosController {
 
   @Get('por-nicho/:idNicho')
   @ApiOperation({ summary: 'Obtener todos los huecos de un nicho por su ID' })
-  @ApiParam({ name: 'id_nicho', example: '456e7890-f12a-45c6-b789-123456789abc' })
+  @ApiParam({ name: 'idNicho', example: '456e7890-f12a-45c6-b789-123456789abc' })
   @ApiResponse({ status: 200, description: 'Lista de huecos del nicho' })
   @ApiResponse({ status: 404, description: 'No se encontraron huecos para el nicho dado' })
-  findByNicho(@Param('id_nicho') id_nicho: string): Promise<HuecosNicho[]> {
-    return this.huecosNichosService.findByNicho(id_nicho);
+  async findByNicho(@Param('idNicho') idNicho: string): Promise<HuecosNicho[]> {
+    const result = await this.huecosNichosService.findByNicho(idNicho);
+    return result.map((item: any) => item.hueco);
   }
 
   @Patch(':id')

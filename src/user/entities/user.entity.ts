@@ -8,7 +8,7 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id_user: string;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column({ type: 'varchar', length: 100, unique: true })
     cedula: string;
 
     @Column({ type: 'varchar', length: 100 })
