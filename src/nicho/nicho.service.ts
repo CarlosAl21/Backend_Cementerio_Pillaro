@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Nicho } from './entities/nicho.entity';
@@ -28,14 +32,15 @@ export class NichoService {
         const hueco = this.huecosNichoRepository.create({
           num_hueco: i,
           estado: 'Disponible',
-          id_nicho: nichoGuardado as Nicho,
+          id_nicho: nichoGuardado,
         });
         huecos.push(hueco);
       }
       const huecosGuardados = await this.huecosNichoRepository.save(huecos);
+      console.log('create');
       // Mapeo explícito de la respuesta
       return {
-        nicho: nichoGuardado,
+        ...nichoGuardado,
         huecos: huecosGuardados,
       };
     } catch (error) {
@@ -56,8 +61,8 @@ export class NichoService {
         ],
       });
       // Mapeo: separa cada objeto relacionado
-      return nichos.map(nicho => ({
-          ...nicho,
+      return nichos.map((nicho) => ({
+        ...nicho,
         cementerio: nicho.id_cementerio,
         inhumaciones: nicho.inhumaciones,
         propietarios: nicho.propietarios_nicho,
@@ -86,8 +91,7 @@ export class NichoService {
       }
       // Mapeo: separa cada objeto relacionado
       return {
-
-          ...nicho,
+        ...nicho,
         cementerio: nicho.id_cementerio,
         inhumaciones: nicho.inhumaciones,
         propietarios: nicho.propietarios_nicho,
@@ -104,7 +108,7 @@ export class NichoService {
       const nicho = await this.findOne(id);
       // Solo actualiza el objeto nicho, no los relacionados
       Object.assign(nicho, updateDto);
-      const nichoActualizado = await this.nichoRepository.save(nicho  );
+      const nichoActualizado = await this.nichoRepository.save(nicho);
       return {
         nicho: nichoActualizado,
         cementerio: nicho.cementerio,
@@ -148,7 +152,9 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar los propietarios del nicho');
+      throw new InternalServerErrorException(
+        'Error al buscar los propietarios del nicho',
+      );
     }
   }
 
@@ -158,7 +164,9 @@ export class NichoService {
         where: { cedula: cedula, fallecido: true },
       });
       if (!persona) {
-        throw new NotFoundException(`Persona con cédula ${cedula} no encontrada o no es un fallecido`);
+        throw new NotFoundException(
+          `Persona con cédula ${cedula} no encontrada o no es un fallecido`,
+        );
       }
 
       const hueco = await this.huecosNichoRepository.find({
@@ -170,12 +178,14 @@ export class NichoService {
       return {
         fallecido: persona,
         huecos: hueco,
-        nichos: hueco.map(h => h.id_nicho),
-        cementerios: hueco.map(h => h.id_nicho?.id_cementerio),
+        nichos: hueco.map((h) => h.id_nicho),
+        cementerios: hueco.map((h) => h.id_nicho?.id_cementerio),
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar los nichos por cédula del fallecido');
+      throw new InternalServerErrorException(
+        'Error al buscar los nichos por cédula del fallecido',
+      );
     }
   }
 }

@@ -74,8 +74,6 @@ export class HuecosNichosService {
       return huecos.map(h => ({
         hueco: {
           ...h,
-          id_nicho: undefined,
-          id_fallecido: undefined,
         },
         nicho: h.id_nicho,
         fallecido: h.id_fallecido,

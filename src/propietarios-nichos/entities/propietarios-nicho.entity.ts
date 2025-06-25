@@ -27,7 +27,7 @@ export class PropietarioNicho {
     length: 50, 
     default: 'Dueño' 
   })
-  tipo: string; // Puede ser 'Dueño', 'Co-propietario', etc.
+  tipo: string; // Puede ser 'Dueño' o 'Heredero'
 
   @BeforeInsert()
   async setFechaCreacion() {
