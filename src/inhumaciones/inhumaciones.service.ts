@@ -20,6 +20,13 @@ export class InhumacionesService {
    */
   async create(CreateInhumacionDto: CreateInhumacionDto) {
     try {
+      if (typeof dto.id_fallecido=== 'string') {
+        dto.id_fallecido = { id_persona: dto.id_fallecido };
+      }
+
+      if (typeof dto.id_nicho=== 'string') {
+        dto.id_nicho = { id_nicho: dto.id_nicho };
+      }
       // Verificar si ya existe una inhumación para el fallecido
       const existeInhumacion = await this.repo.findOne({
         where: { id_fallecido: { id_persona: CreateInhumacionDto.id_fallecido.id_persona } },
@@ -212,10 +219,11 @@ export class InhumacionesService {
       }
       // Mapeo explícito de la respuesta
       return {
-        ...persona,
-        huecos: persona.huecos_nichos,
-        nichos: persona.huecos_nichos?.map(h => h.id_nicho),
-        cementerios: persona.huecos_nichos?.map(h => h.id_nicho?.id_cementerio),
+        ...savedEntity,
+        inhumacion: savedEntity.inhumacion,
+        huecoNicho: savedEntity.id_hueco_nicho,
+        fallecido: savedEntity.id_fallecido,
+        solicitante: savedEntity.id_solicitante,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
