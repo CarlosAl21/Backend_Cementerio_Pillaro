@@ -101,6 +101,7 @@ export class InhumacionesService {
       // Si la inhumación fue realizada, actualizar datos del fallecido y hueco
       if (saveInhumacion.estado == 'Realizado') {
         personaFallecido.fecha_inhumacion = new Date(CreateInhumacionDto.fecha_inhumacion);
+        personaFallecido.fallecido = true; // <-- Actualiza el estado a fallecido
         await this.personaRepo.save(personaFallecido);
       }
       if (saveInhumacion.estado === 'Realizado') {
@@ -113,15 +114,17 @@ export class InhumacionesService {
 
         // Mapeo explícito de la respuesta
         return {
-          inhumacion: saveInhumacion,
+          ...saveInhumacion,
           huecoNicho: savedHuecoNicho,
           fallecido: personaFallecido,
+          nicho: nicho,
         };
       }
       // Si no fue realizada, solo retorna la inhumación y fallecido
       return {
-        inhumacion: saveInhumacion,
+        ...saveInhumacion,
         fallecido: personaFallecido,
+        nicho: nicho,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -137,7 +140,6 @@ export class InhumacionesService {
       const inhumaciones = await this.repo.find({
         relations: ['id_nicho', 'id_fallecido', 'id_nicho.huecos'],
       });
-      // Mapeo: separa cada objeto relacionado
       return inhumaciones.map(inh => ({
         ...inh,
         nicho: inh.id_nicho,
@@ -176,21 +178,69 @@ export class InhumacionesService {
    */
   async update(id: string, updateInhumacionDto: UpdateInhumacionDto) {
     try {
-      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id }, relations: ['id_requisitos_inhumacion', 'id_requisitos_inhumacion.id_hueco_nicho'] });
+      // Buscar la inhumación con relaciones usando QueryBuilder
+      const inhumacion = await this.repo
+        .createQueryBuilder('inhumacion')
+        .leftJoinAndSelect('inhumacion.id_requisitos_inhumacion', 'requisito')
+        .leftJoinAndSelect('requisito.id_hueco_nicho', 'huecoNicho')
+        .leftJoinAndSelect('inhumacion.id_fallecido', 'fallecido')
+        .leftJoinAndSelect('inhumacion.id_nicho', 'nicho')
+        .leftJoinAndSelect('nicho.huecos', 'huecos')
+        .where('inhumacion.id_inhumacion = :id', { id })
+        .getOne();
+
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
+
       this.repo.merge(inhumacion, updateInhumacionDto);
       const saveInhumacion = await this.repo.save(inhumacion);
-      
-      if(saveInhumacion.estado === 'Realizado') {
-        // Marcar hueco como ocupado y asignar fallecido
-        const huecoNicho = await this.huecosNichoRepo.findOne({ where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco} });
-        if (!huecoNicho) {
-          throw new NotFoundException('Hueco Nicho no encontrado');
+
+      if (saveInhumacion.estado === 'Realizado') {
+        let savedHuecoNicho: HuecosNicho | null = null;
+
+        // Si tiene requisito y hueco asociado, actualiza ese hueco
+        if (
+          saveInhumacion.id_requisitos_inhumacion &&
+          saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho
+        ) {
+          const idHueco = saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco;
+          const huecoNicho = await this.huecosNichoRepo
+            .createQueryBuilder('hueco')
+            .where('hueco.id_detalle_hueco = :id', { id: idHueco })
+            .getOne();
+
+          if (!huecoNicho) {
+            throw new NotFoundException('Hueco Nicho no encontrado');
+          }
+
+          const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, {
+            estado: 'Ocupado',
+            id_fallecido: saveInhumacion.id_fallecido,
+          });
+          savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
+        } else {
+          // Si no tiene requisito, busca huecos disponibles en el nicho y ocupa el primero
+          const huecosDisponibles = (inhumacion.id_nicho?.huecos || []).filter(
+            (h: any) => h.estado === 'Disponible'
+          );
+          if (!huecosDisponibles.length) {
+            throw new InternalServerErrorException('No hay huecos disponibles en el nicho');
+          }
+          const huecoAsignado = huecosDisponibles[0];
+          const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoAsignado, {
+            estado: 'Ocupado',
+            id_fallecido: saveInhumacion.id_fallecido,
+          });
+          savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
         }
-        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'Ocupado', id_fallecido: saveInhumacion.id_fallecido });
-        const savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
+
+        // Actualizar persona a fallecido
+        if (inhumacion.id_fallecido) {
+          inhumacion.id_fallecido.fallecido = true;
+          inhumacion.id_fallecido.fecha_inhumacion = saveInhumacion.fecha_inhumacion;
+          await this.personaRepo.save(inhumacion.id_fallecido);
+        }
 
         // Mapeo explícito de la respuesta
         return {
@@ -198,12 +248,13 @@ export class InhumacionesService {
           huecoNicho: savedHuecoNicho,
         };
       }
+
       // Si no fue realizada, solo retorna la inhumación
+      const fallecido = await this.personaRepo.findOne({ where: { id_persona: saveInhumacion.id_fallecido?.id_persona } });
+
       return {
-        inhumacion: saveInhumacion,
-        huecoNicho: saveInhumacion.id_requisitos_inhumacion?.id_hueco_nicho,
-        fallecido: saveInhumacion.id_fallecido,
-        solicitante: saveInhumacion.solicitante,
+        ...saveInhumacion,
+        fallecido: fallecido,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -236,7 +287,11 @@ export class InhumacionesService {
     try {
       const persona = await this.personaRepo.findOne({
         where: { cedula: cedula, fallecido: true },
-        relations: ['id_hueco_nicho', 'id_hueco_nicho.id_nicho', 'id_hueco_nicho.id_nicho.id_cementerio'],
+        relations: [
+          'huecos_nichos',
+          'huecos_nichos.id_nicho',
+          'huecos_nichos.id_nicho.id_cementerio',
+        ],
       });
       if (!persona) {
         throw new NotFoundException(`Fallecido con cédula ${cedula} no encontrado`);
