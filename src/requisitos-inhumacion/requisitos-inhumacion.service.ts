@@ -358,14 +358,12 @@ export class RequisitosInhumacionService {
     try {
       const persona = await this.personaRepo
         .createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.huecos_nichos', 'hueco')
-        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
-        .leftJoinAndSelect('nicho.id_cementerio', 'cementerio')
         .leftJoinAndSelect('persona.requisitos_inhumacion', 'requisito')
         .leftJoinAndSelect('requisito.id_cementerio', 'req_cementerio')
         .leftJoinAndSelect('requisito.id_solicitante', 'req_solicitante')
         .leftJoinAndSelect('requisito.id_hueco_nicho', 'req_hueco_nicho')
         .leftJoinAndSelect('requisito.id_fallecido', 'req_fallecido')
+        .leftJoinAndSelect('requisito.inhumacion', 'req_inhumacion')
         .leftJoinAndSelect('persona.inhumaciones', 'inhumacion')
         .where('persona.cedula = :cedula', { cedula })
         .andWhere('persona.fallecido = :fallecido', { fallecido: true })
@@ -378,10 +376,6 @@ export class RequisitosInhumacionService {
       }
 
       return {
-        ...persona,
-        huecos: persona.huecos_nichos,
-        nichos: persona.huecos_nichos?.map((h) => h.id_nicho),
-        cementerios: persona.huecos_nichos?.map((h) => h.id_nicho?.id_cementerio),
         requisitos_inhumacion: persona.requisitos_inhumacion?.map((req) => ({
           ...req,
           cementerio: req.id_cementerio,
@@ -405,14 +399,12 @@ export class RequisitosInhumacionService {
     try {
       const persona = await this.personaRepo
         .createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.huecos_nichos', 'hueco')
-        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
-        .leftJoinAndSelect('nicho.id_cementerio', 'cementerio')
         .leftJoinAndSelect('persona.requisitos_inhumacion_solicitante', 'requisito')
         .leftJoinAndSelect('requisito.id_cementerio', 'req_cementerio')
         .leftJoinAndSelect('requisito.id_solicitante', 'req_solicitante')
         .leftJoinAndSelect('requisito.id_hueco_nicho', 'req_hueco_nicho')
         .leftJoinAndSelect('requisito.id_fallecido', 'req_fallecido')
+        .leftJoinAndSelect('requisito.inhumacion', 'req_inhumacion')
         .leftJoinAndSelect('persona.inhumaciones', 'inhumacion')
         .where('persona.cedula = :cedula', { cedula })
         .andWhere('persona.fallecido = :fallecido', { fallecido: false })
@@ -424,14 +416,7 @@ export class RequisitosInhumacionService {
         );
       }
 
-      // Elimina la propiedad requisitos_inhumacion si existe
-      const { requisitos_inhumacion, ...rest } = persona;
-
       return {
-        ...rest,
-        huecos: persona.huecos_nichos,
-        nichos: persona.huecos_nichos?.map((h) => h.id_nicho),
-        cementerios: persona.huecos_nichos?.map((h) => h.id_nicho?.id_cementerio),
         requisitos_inhumacion: persona.requisitos_inhumacion_solicitante?.map((req) => ({
           ...req,
           cementerio: req.id_cementerio,

@@ -308,4 +308,45 @@ export class InhumacionesService {
       throw new InternalServerErrorException('Error al buscar por cédula de fallecido: ' + (error.message || error));
     }
   }
+
+  /**
+   * Busca inhumaciones por la cédula del solicitante,
+   * solo si la inhumación tiene un requisito vinculado a ese solicitante.
+   */
+  async findByCedulaSolicitante(cedula: string) {
+    try {
+      // Buscar la persona solicitante por cédula
+      const solicitante = await this.personaRepo.findOne({ where: { cedula } });
+      if (!solicitante) {
+        throw new NotFoundException(`Solicitante con cédula ${cedula} no encontrado`);
+      }
+
+      // Buscar inhumaciones con requisito vinculado al solicitante
+      const inhumaciones = await this.repo
+        .createQueryBuilder('inhumacion')
+        .leftJoinAndSelect('inhumacion.id_requisitos_inhumacion', 'requisito')
+        .leftJoinAndSelect('requisito.id_solicitante', 'solicitante')
+        .leftJoinAndSelect('inhumacion.id_fallecido', 'fallecido')
+        .leftJoinAndSelect('inhumacion.id_nicho', 'nicho')
+        .where('requisito.id_solicitante = :idSolicitante', { idSolicitante: solicitante.id_persona })
+        .getMany();
+
+      if (!inhumaciones.length) {
+        throw new NotFoundException(
+          `No inhumaciones encontradas para solicitante con cédula ${cedula} vinculadas a un requisito`
+        );
+      }
+
+      // Mapeo explícito de la respuesta
+      return inhumaciones.map(inh => ({
+        ...inh,
+        requisito: inh.id_requisitos_inhumacion,
+        fallecido: inh.id_fallecido,
+        nicho: inh.id_nicho,
+      }));
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al buscar por cédula de solicitante: ' + (error.message || error));
+    }
+  }
 }

@@ -64,6 +64,62 @@ async generarPDF(@Param('id') id: string, @Res() res: Response) {
     description: 'Datos del requisito en formato JSON',
     type: CreateRequisitosInhumacionDto,
     required: true,
+    examples: {
+      ejemploCompleto: {
+        summary: 'Requisito completo',
+        value: {
+          id_fallecido: "uuid-fallecido-1",
+          id_solicitante: "uuid-solicitante-1",
+          id_hueco_nicho: "uuid-hueco-1",
+          id_cementerio: "uuid-cementerio-1",
+          copiaCertificadoDefuncion: true,
+          observacionCertificadoDefuncion: "Certificado válido",
+          informeEstadisticoINEC: true,
+          observacionInformeEstadisticoINEC: "INEC entregado",
+          copiaCedula: true,
+          observacionCopiaCedula: "Copia legible",
+          pagoTasaInhumacion: true,
+          observacionPagoTasaInhumacion: "Pago realizado",
+          copiaTituloPropiedadNicho: true,
+          observacionCopiaTituloPropiedadNicho: "Título actualizado",
+          autorizacionDeMovilizacionDelCadaver: false,
+          observacionAutorizacionMovilizacion: "",
+          OficioDeSolicitud: true,
+          observacionOficioSolicitud: "Oficio firmado",
+          fechaInhumacion: "2024-06-26"
+        }
+      },
+      ejemploMinimo: {
+        summary: 'Requisito mínimo',
+        value: {
+          id_fallecido: "uuid-fallecido-2",
+          id_solicitante: "uuid-solicitante-2",
+          copiaCertificadoDefuncion: true,
+          informeEstadisticoINEC: false,
+          copiaCedula: true,
+          pagoTasaInhumacion: false,
+          copiaTituloPropiedadNicho: false,
+          autorizacionDeMovilizacionDelCadaver: false,
+          OficioDeSolicitud: false,
+          fechaInhumacion: "2024-06-26"
+        }
+      },
+      ejemploSoloObligatorios: {
+        summary: 'Solo campos obligatorios',
+        value: {
+          id_fallecido: "uuid-fallecido-3",
+          id_solicitante: "uuid-solicitante-3",
+          copiaCertificadoDefuncion: true,
+          informeEstadisticoINEC: true,
+          copiaCedula: true,
+          pagoTasaInhumacion: true,
+          copiaTituloPropiedadNicho: true,
+          autorizacionDeMovilizacionDelCadaver: false,
+          OficioDeSolicitud: true,
+          fechaInhumacion: "2024-06-26"
+        }
+      }
+    }
   })
   create(
     @Body() dto: CreateRequisitosInhumacionDto,

@@ -89,7 +89,6 @@ export class PropietariosNichosController {
     return this.propietariosService.findByPersona(cedula);
   }
     
-
   @Patch(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar propietario de nicho', description: 'Actualiza parcialmente un registro de propietario de nicho' })
