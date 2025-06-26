@@ -1,3 +1,4 @@
+import { Nicho } from './../nicho/entities/nicho.entity';
 import { CreateInhumacionDto } from './dto/create-inhumaciones.dto';
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +14,7 @@ export class InhumacionesService {
     @InjectRepository(Inhumacion) private readonly repo: Repository<Inhumacion>,
     @InjectRepository(HuecosNicho) private readonly huecosNichoRepo: Repository<HuecosNicho>,
     @InjectRepository(Persona) private readonly personaRepo: Repository<Persona>,
+    @InjectRepository(Nicho) private readonly nichoRepository: Repository<Nicho>,
   ) {}
 
   /**
@@ -20,17 +22,44 @@ export class InhumacionesService {
    */
   async create(CreateInhumacionDto: CreateInhumacionDto) {
     try {
-      if (typeof dto.id_fallecido=== 'string') {
-        dto.id_fallecido = { id_persona: dto.id_fallecido };
+
+      // Normalizar id_fallecido si llega como string
+      if (typeof CreateInhumacionDto.id_fallecido === 'string') {
+        CreateInhumacionDto.id_fallecido = { id_persona: CreateInhumacionDto.id_fallecido };
       }
 
-      if (typeof dto.id_nicho=== 'string') {
-        dto.id_nicho = { id_nicho: dto.id_nicho };
+      // Normalizar id_nicho si llega como string
+      if (typeof CreateInhumacionDto.id_nicho === 'string') {
+        CreateInhumacionDto.id_nicho = { id_nicho: CreateInhumacionDto.id_nicho };
       }
+
+      // Buscar la persona fallecida
+      const personaFallecido = await this.personaRepo
+        .createQueryBuilder('persona')
+        .where('persona.id_persona = :id', { id: CreateInhumacionDto.id_fallecido.id_persona })
+        .getOne();
+      if (!personaFallecido) {
+        throw new NotFoundException(
+          `Fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} no encontrado`,
+        );
+      }
+
+      // Buscar el nicho
+      const nicho = await this.nichoRepository
+        .createQueryBuilder('nicho')
+        .where('nicho.id_nicho = :id', { id: CreateInhumacionDto.id_nicho.id_nicho })
+        .getOne();
+      if (!nicho) {
+        throw new NotFoundException(
+          `Nicho con ID ${CreateInhumacionDto.id_nicho.id_nicho} no encontrado`,
+        );
+      }
+
       // Verificar si ya existe una inhumación para el fallecido
-      const existeInhumacion = await this.repo.findOne({
-        where: { id_fallecido: { id_persona: CreateInhumacionDto.id_fallecido.id_persona } },
-      });
+      const existeInhumacion = await this.repo
+        .createQueryBuilder('inhumacion')
+        .where('inhumacion.id_fallecido = :idFallecido', { idFallecido: personaFallecido.id_persona })
+        .getOne();
       if (existeInhumacion) {
         throw new InternalServerErrorException(
           `Ya existe una inhumación para el fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona}`,
@@ -38,9 +67,10 @@ export class InhumacionesService {
       }
 
       // Verificar si el fallecido ya está enterrado en algún hueco
-      const huecoOcupado = await this.huecosNichoRepo.findOne({
-        where: { id_fallecido: { id_persona: CreateInhumacionDto.id_fallecido.id_persona } },
-      });
+      const huecoOcupado = await this.huecosNichoRepo
+        .createQueryBuilder('hueco')
+        .where('hueco.id_fallecido = :idFallecido', { idFallecido: CreateInhumacionDto.id_fallecido.id_persona })
+        .getOne();
       if (huecoOcupado) {
         throw new InternalServerErrorException(
           `El fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} ya está enterrado en un nicho`,
@@ -48,12 +78,11 @@ export class InhumacionesService {
       }
 
       // Buscar huecos disponibles en el nicho
-      const huecosDisponibles = await this.huecosNichoRepo.find({
-        where: {
-          id_nicho: { id_nicho: CreateInhumacionDto.id_nicho.id_nicho },
-          estado: 'Disponible',
-        },
-      });
+      const huecosDisponibles = await this.huecosNichoRepo
+        .createQueryBuilder('hueco')
+        .where('hueco.id_nicho = :idNicho', { idNicho: CreateInhumacionDto.id_nicho.id_nicho })
+        .andWhere('hueco.estado = :estado', { estado: 'Disponible' })
+        .getMany();
 
       if (!huecosDisponibles.length) {
         throw new InternalServerErrorException('No hay huecos disponibles en el nicho');
@@ -65,15 +94,7 @@ export class InhumacionesService {
       // Crear la entidad de inhumación
       const inhumacion = this.repo.create(CreateInhumacionDto);
 
-      // Buscar la persona fallecida
-      const personaFallecido = await this.personaRepo.findOne({
-        where: { id_persona: CreateInhumacionDto.id_fallecido.id_persona },
-      });
-      if (!personaFallecido) {
-        throw new NotFoundException(
-          `Fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} no encontrado`,
-        );
-      }
+      
       // Guardar la inhumación
       const saveInhumacion = await this.repo.save(inhumacion);
 
@@ -180,6 +201,9 @@ export class InhumacionesService {
       // Si no fue realizada, solo retorna la inhumación
       return {
         inhumacion: saveInhumacion,
+        huecoNicho: saveInhumacion.id_requisitos_inhumacion?.id_hueco_nicho,
+        fallecido: saveInhumacion.id_fallecido,
+        solicitante: saveInhumacion.solicitante,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
@@ -219,11 +243,10 @@ export class InhumacionesService {
       }
       // Mapeo explícito de la respuesta
       return {
-        ...savedEntity,
-        inhumacion: savedEntity.inhumacion,
-        huecoNicho: savedEntity.id_hueco_nicho,
-        fallecido: savedEntity.id_fallecido,
-        solicitante: savedEntity.id_solicitante,
+        ...persona,
+        huecos: persona.huecos_nichos,
+        nichos: persona.huecos_nichos?.map(h => h.id_nicho),
+        cementerios: persona.huecos_nichos?.map(h => h.id_nicho?.id_cementerio),
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
