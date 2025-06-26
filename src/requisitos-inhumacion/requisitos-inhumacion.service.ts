@@ -111,7 +111,15 @@ export class RequisitosInhumacionService {
         throw new BadRequestException('El solicitante no puede ser el mismo que el fallecido y  viceversa');
       }
 
-
+      // Verificar si el fallecido ya está enterrado en algún hueco
+      const huecoOcupado = await this.huecosNichoRepo.findOne({
+        where: { id_fallecido: { id_persona: dto.id_fallecido.id_persona } },
+      });
+      if (huecoOcupado) {
+        throw new ConflictException(
+          `El fallecido con ID ${dto.id_fallecido.id_persona} ya está enterrado en un nicho`
+        );
+      }
 
       const entity = this.repo.create(dto);
       const savedEntity = await this.repo.save(entity);
@@ -293,8 +301,8 @@ export class RequisitosInhumacionService {
         }
       }
 
+      // Devuelve solo los datos requeridos, sin el requisito mapeado
       return {
-        requisito: savedEntity,
         inhumacion: savedEntity.inhumacion,
         huecoNicho: savedEntity.id_hueco_nicho,
         fallecido: savedEntity.id_fallecido,

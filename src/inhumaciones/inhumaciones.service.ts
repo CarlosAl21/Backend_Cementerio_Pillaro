@@ -28,6 +28,16 @@ export class InhumacionesService {
         );
       }
 
+      // Verificar si el fallecido ya está enterrado en algún hueco
+      const huecoOcupado = await this.huecosNichoRepo.findOne({
+        where: { id_fallecido: { id_persona: CreateInhumacionDto.id_fallecido.id_persona } },
+      });
+      if (huecoOcupado) {
+        throw new InternalServerErrorException(
+          `El fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} ya está enterrado en un nicho`,
+        );
+      }
+
       // Antes de crear la inhumación, buscar huecos disponibles en el nicho
       const huecosDisponibles = await this.huecosNichoRepo.find({
         where: {
