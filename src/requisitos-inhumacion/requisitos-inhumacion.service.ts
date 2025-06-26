@@ -107,6 +107,12 @@ export class RequisitosInhumacionService {
         );
       }
 
+      if(dto.id_fallecido == dto.id_solicitante || dto.id_solicitante == dto.id_fallecido) {
+        throw new BadRequestException('El solicitante no puede ser el mismo que el fallecido y  viceversa');
+      }
+
+
+
       const entity = this.repo.create(dto);
       const savedEntity = await this.repo.save(entity);
 

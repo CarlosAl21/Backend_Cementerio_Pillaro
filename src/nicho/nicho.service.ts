@@ -50,7 +50,7 @@ export class NichoService {
 
   async findAll() {
     try {
-      const nichos = await this.nichoRepository.find({
+      const nichos = await this.nichoRepository.find({where: {estado: 'Activo'},
         relations: [
           'id_cementerio',
           'inhumaciones',
@@ -140,10 +140,12 @@ export class NichoService {
 
   async remove(id: string) {
     try {
-      const result = await this.nichoRepository.delete(id);
-      if (result.affected === 0) {
+      const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
+      if (!nicho) {
         throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
       }
+      nicho.estado = 'Inactivo';
+      await this.nichoRepository.save(nicho);
       // Mapeo explícito de la respuesta
       return { deleted: true, id };
     } catch (error) {

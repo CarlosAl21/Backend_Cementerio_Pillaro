@@ -28,6 +28,21 @@ export class InhumacionesService {
         );
       }
 
+      // Antes de crear la inhumación, buscar huecos disponibles en el nicho
+      const huecosDisponibles = await this.huecosNichoRepo.find({
+        where: {
+          id_nicho: { id_nicho: CreateInhumacionDto.id_nicho.id_nicho },
+          estado: 'Disponible',
+        },
+      });
+
+      if (!huecosDisponibles.length) {
+        throw new InternalServerErrorException('No hay huecos disponibles en el nicho');
+      }
+
+      // Selecciona el primer hueco disponible
+      const huecoAsignado = huecosDisponibles[0];
+
       const inhumacion = this.repo.create(CreateInhumacionDto);
 
       const personaFallecido = await this.personaRepo.findOne({
@@ -45,13 +60,7 @@ export class InhumacionesService {
         await this.personaRepo.save(personaFallecido);
       }
       if (saveInhumacion.estado === 'Realizado') {
-        const huecoNicho = await this.huecosNichoRepo.findOne({
-          where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco },
-        });
-        if (!huecoNicho) {
-          throw new NotFoundException('Hueco Nicho no encontrado');
-        }
-        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, {
+        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoAsignado, {
           estado: 'Ocupado',
           id_fallecido: saveInhumacion.id_fallecido,
         });

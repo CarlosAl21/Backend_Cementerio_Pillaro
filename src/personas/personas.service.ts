@@ -80,6 +80,16 @@ export class PersonasService {
         throw new BadRequestException('Correo electrónico inválido');
       }
 
+      // Verificar si ya existe una persona con el mismo correo
+      if (createPersonaDto.correo) {
+        const existingCorreo = await this.personaRepo.findOne({
+          where: { correo: createPersonaDto.correo },
+        });
+        if (existingCorreo) {
+          throw new ConflictException('Ya existe una persona con este correo');
+        }
+      }
+
       // Validaciones según fallecido
       if (createPersonaDto.fallecido) {
         // Si es fallecido, los siguientes campos son obligatorios
