@@ -122,10 +122,6 @@ export class CreateRequisitosInhumacionDto {
   @IsNotEmpty()
   id_hueco_nicho: DeepPartial<HuecosNicho>;
 
-  @ApiProperty({ example: 'Firma digitalizada o nombre completo' })
-  @IsString()
-  firmaAceptacionSepulcro: string;
-
   // F) Datos del fallecido
   @ApiProperty({
     description: 'ID de la persona fallecida',

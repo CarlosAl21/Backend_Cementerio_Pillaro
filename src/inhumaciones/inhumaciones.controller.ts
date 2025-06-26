@@ -136,4 +136,13 @@ export class InhumacionesController {
   async remove(@Param('id') id: string) {
     return this.service.remove(id);
   }
+
+  @Get('/fallecido/cedula/:cedula')
+  @ApiOperation({ summary: 'Buscar información de fallecido, sus huecos, nichos y cementerios por cédula' })
+  @ApiParam({ name: 'cedula', description: 'Cédula del fallecido', example: '1234567890' })
+  @ApiOkResponse({ description: 'Información encontrada' })
+  @ApiNotFoundResponse({ description: 'Fallecido no encontrado' })
+  async findByCedulaFallecido(@Param('cedula') cedula: string) {
+    return this.service.findByCedulaFallecido(cedula);
+  }
 }

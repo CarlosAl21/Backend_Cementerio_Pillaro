@@ -12,9 +12,15 @@ export class CementerioService {
   }
   async create(createCementerioDto: CreateCementerioDto) {
     try {
+      // Verificar si ya existe un cementerio con el mismo nombre
+      const existente = await this.cementerioRepository.findOne({
+        where: { nombre: createCementerioDto.nombre },
+      });
+      if (existente) {
+        throw new InternalServerErrorException('Ya existe un cementerio con ese nombre');
+      }
       const cementerio = this.cementerioRepository.create(createCementerioDto);
       const savedCementerio = await this.cementerioRepository.save(cementerio);
-      // Mapeo explícito de la respuesta
       return { cementerio: savedCementerio };
     } catch (error) {
       throw new InternalServerErrorException('Error en la creacion');
@@ -43,13 +49,19 @@ export class CementerioService {
 
   async update(id: string, updateCementerioDto: UpdateCementerioDto) {
     try {
-      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      // Verificar si ya existe otro cementerio con el mismo nombre
+      const existente = await this.cementerioRepository.findOne({
+        where: { nombre: updateCementerioDto.nombre },
+      });
+      if (existente && existente.id_cementerio !== id) {
+        throw new InternalServerErrorException('Ya existe un cementerio con ese nombre');
+      }
+      const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
       this.cementerioRepository.merge(cementerio, updateCementerioDto);
       const savedCementerio = await this.cementerioRepository.save(cementerio);
-      // Mapeo explícito de la respuesta
       return { cementerio: savedCementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;

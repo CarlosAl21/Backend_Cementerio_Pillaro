@@ -18,25 +18,43 @@ export class InhumacionesService {
   // Crear inhumación
   async create(CreateInhumacionDto: CreateInhumacionDto) {
     try {
+      // Verificar si ya existe una inhumación para el fallecido
+      const existeInhumacion = await this.repo.findOne({
+        where: { id_fallecido: { id_persona: CreateInhumacionDto.id_fallecido.id_persona } },
+      });
+      if (existeInhumacion) {
+        throw new InternalServerErrorException(
+          `Ya existe una inhumación para el fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona}`,
+        );
+      }
+
       const inhumacion = this.repo.create(CreateInhumacionDto);
 
-      const personaFallecido = await this.personaRepo.findOne({ where: { id_persona: CreateInhumacionDto.id_fallecido.id_persona }
+      const personaFallecido = await this.personaRepo.findOne({
+        where: { id_persona: CreateInhumacionDto.id_fallecido.id_persona },
       });
       if (!personaFallecido) {
-        throw new NotFoundException(`Fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} no encontrado`);
+        throw new NotFoundException(
+          `Fallecido con ID ${CreateInhumacionDto.id_fallecido.id_persona} no encontrado`,
+        );
       }
       const saveInhumacion = await this.repo.save(inhumacion);
 
-      if(saveInhumacion.estado == 'Realizado') {
+      if (saveInhumacion.estado == 'Realizado') {
         personaFallecido.fecha_inhumacion = new Date(CreateInhumacionDto.fecha_inhumacion);
         await this.personaRepo.save(personaFallecido);
       }
-      if(saveInhumacion.estado === 'Realizado') {
-        const huecoNicho = await this.huecosNichoRepo.findOne({ where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco} });
+      if (saveInhumacion.estado === 'Realizado') {
+        const huecoNicho = await this.huecosNichoRepo.findOne({
+          where: { id_detalle_hueco: saveInhumacion.id_requisitos_inhumacion.id_hueco_nicho.id_detalle_hueco },
+        });
         if (!huecoNicho) {
           throw new NotFoundException('Hueco Nicho no encontrado');
         }
-        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, { estado: 'Ocupado', id_fallecido: saveInhumacion.id_fallecido });
+        const huecoNichoActualizado = this.huecosNichoRepo.merge(huecoNicho, {
+          estado: 'Ocupado',
+          id_fallecido: saveInhumacion.id_fallecido,
+        });
         const savedHuecoNicho = await this.huecosNichoRepo.save(huecoNichoActualizado);
 
         // Mapeo explícito de la respuesta
@@ -143,5 +161,27 @@ export class InhumacionesService {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(error.message || 'No se pudo eliminar la inhumación');
     }
+  }
+
+  async findByCedulaFallecido(cedula: string) {
+  try {
+    const persona = await this.personaRepo.findOne({
+      where: { cedula: cedula, fallecido: true },
+      relations: ['id_hueco_nicho', 'id_hueco_nicho.id_nicho', 'id_hueco_nicho.id_nicho.id_cementerio'],
+    });
+    if (!persona) {
+      throw new NotFoundException(`Fallecido con cédula ${cedula} no encontrado`);
+    }
+    // Mapeo explícito de la respuesta
+    return {
+      ...persona,
+      huecos: persona.huecos_nichos,
+      nichos: persona.huecos_nichos?.map(h => h.id_nicho),
+      cementerios: persona.huecos_nichos?.map(h => h.id_nicho?.id_cementerio),
+    };
+  } catch (error) {
+    if (error instanceof NotFoundException) throw error;
+    throw new InternalServerErrorException('Error al buscar por cédula');
+  }
   }
 }

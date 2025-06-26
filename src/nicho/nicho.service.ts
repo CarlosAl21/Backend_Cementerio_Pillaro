@@ -73,6 +73,22 @@ export class NichoService {
     }
   }
 
+  async findAllWithHuecosDisponibles() {
+    try {
+      const nichos = await this.nichoRepository.find({
+        relations: ['huecos', 'id_cementerio'],
+      });
+
+      // Filtra los huecos disponibles en cada nicho
+      return nichos.map((nicho) => ({
+        ...nicho,
+        huecos: nicho.huecos.filter((hueco) => hueco.estado === 'Disponible'),
+      }));
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los nichos');
+    }
+  }
+
   async findOne(id: string) {
     try {
       const nicho = await this.nichoRepository.findOne({

@@ -99,25 +99,52 @@ async generarPDF(@Param('id') id: string, @Res() res: Response) {
       type: 'object',
       properties: {
         copiaCertificadoDefuncion: { type: 'boolean', example: true },
+        observacionCertificadoDefuncion: { type: 'string', example: 'Observación sobre el certificado de defunción' },
         informeEstadisticoINEC: { type: 'boolean', example: false },
+        observacionInformeEstadisticoINEC: { type: 'string', example: 'Observación sobre el informe estadístico INEC' },
         copiaCedula: { type: 'boolean', example: true },
+        observacionCopiaCedula: { type: 'string', example: 'Observación sobre la copia de cédula' },
         pagoTasaInhumacion: { type: 'boolean', example: true },
+        observacionPagoTasaInhumacion: { type: 'string', example: 'Observación sobre el pago de tasa de inhumación' },
         copiaTituloPropiedadNicho: { type: 'boolean', example: false },
+        observacionCopiaTituloPropiedadNicho: { type: 'string', example: 'Observación sobre el título de propiedad del nicho' },
+        autorizacionDeMovilizacionDelCadaver: { type: 'boolean', example: false },
+        observacionAutorizacionMovilizacion: { type: 'string', example: 'Observación sobre la autorización de movilización del cadáver' },
+        OficioDeSolicitud: { type: 'boolean', example: false },
+        observacionOficioSolicitud: { type: 'string', example: 'Observación sobre el oficio de solicitud' },
         // Agrega aquí otros campos del DTO si es necesario
       },
       required: [
         'copiaCertificadoDefuncion',
+        'observacionCertificadoDefuncion',
         'informeEstadisticoINEC',
+        'observacionInformeEstadisticoINEC',
         'copiaCedula',
+        'observacionCopiaCedula',
         'pagoTasaInhumacion',
+        'observacionPagoTasaInhumacion',
         'copiaTituloPropiedadNicho',
+        'observacionCopiaTituloPropiedadNicho',
+        'autorizacionDeMovilizacionDelCadaver',
+        'observacionAutorizacionMovilizacion',
+        'OficioDeSolicitud',
+        'observacionOficioSolicitud',
       ],
       example: {
         copiaCertificadoDefuncion: true,
+        observacionCertificadoDefuncion: 'Observación sobre el certificado de defunción',
         informeEstadisticoINEC: false,
+        observacionInformeEstadisticoINEC: 'Observación sobre el informe estadístico INEC',
         copiaCedula: true,
+        observacionCopiaCedula: 'Observación sobre la copia de cédula',
         pagoTasaInhumacion: true,
+        observacionPagoTasaInhumacion: 'Observación sobre el pago de tasa de inhumación',
         copiaTituloPropiedadNicho: false,
+        observacionCopiaTituloPropiedadNicho: 'Observación sobre el título de propiedad del nicho',
+        autorizacionDeMovilizacionDelCadaver: false,
+        observacionAutorizacionMovilizacion: 'Observación sobre la autorización de movilización del cadáver',
+        OficioDeSolicitud: false,
+        observacionOficioSolicitud: 'Observación sobre el oficio de solicitud',
       },
     },
   })
@@ -158,4 +185,42 @@ async generarPDF(@Param('id') id: string, @Res() res: Response) {
     return this.requisitosInhumacionService.remove(id);
   }
 
+  @Get('/cedulaFallecido/:cedula')
+  @ApiOperation({ summary: 'Buscar requisitos de inhumación por cédula del fallecido' })
+  @ApiParam({ name: 'cedula', description: 'Cédula del fallecido' })
+  @ApiResponse({
+    status: 200,
+    description: 'Requisitos encontrados para el fallecido.',
+  })
+  @ApiResponse({ status: 404, description: 'Fallecido no encontrado.' })
+  findByCedulaFallecido(@Param('cedula') cedula: string) {
+    return this.requisitosInhumacionService.findByCedulaFallecido(cedula);
+  }
+
+  @Get('/cedulaSolicitante/:cedula')
+  @ApiOperation({ summary: 'Buscar requisitos de inhumación por cédula del solicitante' })
+  @ApiParam({ name: 'cedula', description: 'Cédula del solicitante' })
+  @ApiResponse({
+    status: 200,
+    description: 'Requisitos encontrados para el fallecido.',
+  })
+  @ApiResponse({ status: 404, description: 'Fallecido no encontrado.' })
+  findByCedulaSolicitante(@Param('cedula') cedula: string) {
+    return this.requisitosInhumacionService.findByCedulaSolicitante(cedula);
+  }
+
+  @Get('/nicho-huecos/:id_cementerio/:sector/:fila')
+  @ApiOperation({ summary: 'Buscar nicho por cementerio, sector y fila y mostrar huecos disponibles' })
+  @ApiParam({ name: 'id_cementerio', description: 'ID del cementerio', example: 'uuid-cementerio' })
+  @ApiParam({ name: 'sector', description: 'Sector del nicho', example: 'A' })
+  @ApiParam({ name: 'fila', description: 'Fila del nicho', example: '1' })
+  @ApiResponse({ status: 200, description: 'Nicho y huecos disponibles encontrados.' })
+  @ApiResponse({ status: 404, description: 'Nicho no encontrado.' })
+  async findByCementerioSectorFila(
+    @Param('id_cementerio') id_cementerio: string,
+    @Param('sector') sector: string,
+    @Param('fila') fila: string,
+  ) {
+    return this.requisitosInhumacionService.findByCementerioSectorFila(id_cementerio, sector, fila);
+  }
 }

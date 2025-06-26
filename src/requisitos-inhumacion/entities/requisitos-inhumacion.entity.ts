@@ -77,9 +77,6 @@ export class RequisitosInhumacion {
   @JoinColumn({ name: 'id_hueco_nicho' })
   id_hueco_nicho: HuecosNicho;
 
-  @Column()
-  firmaAceptacionSepulcro: string;
-
   // F) Datos del fallecido
   @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_fallecido' })

@@ -40,6 +40,22 @@ export class HuecosNichosService {
     }
   }
 
+  async findAllDisponibles() {
+    try {
+      const huecos = await this.huecoRepository.find({
+        where: { estado: 'Disponible' },
+        relations: ['id_nicho', 'id_fallecido'],
+      });
+      return huecos.map(h => ({
+        ...h,
+        nicho: h.id_nicho,
+        fallecido: h.id_fallecido,
+      }));
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los huecos disponibles');
+    }
+  }
+
   async findOne(id: string) {
     try {
       const hueco = await this.huecoRepository.findOne({ where: { id_detalle_hueco: id }, relations: ['id_nicho', 'id_fallecido'] });

@@ -85,4 +85,10 @@ export class HuecosNichosController {
   remove(@Param('id') id: string) {
     return this.huecosNichosService.remove(id);
   }
+
+  @Get('disponibles')
+  @ApiOperation({ summary: 'Obtener todos los huecos de nichos disponibles' })
+  findAllDisponibles() {
+    return this.huecosNichosService.findAllDisponibles();
+  }
 }
