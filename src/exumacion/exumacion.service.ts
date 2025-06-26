@@ -16,31 +16,42 @@ export class ExumacionService {
     private readonly nichoRepository: Repository<Nicho>,
   ) {}
 
+  /**
+   * Crea una nueva exhumación
+   */
   async create(createExumacionDto: CreateExumacionDto) {
     try {
+      // Buscar el nicho original por su ID
       const nichoOriginal = await this.nichoRepository.findOne({
         where: { id_nicho: createExumacionDto.nicho_original_id.id_nicho },
       });
 
+      // Lanzar error si el nicho original no existe
       if (!nichoOriginal) {
         throw new NotFoundException('Nicho original no encontrado');
       }
 
+      // Generar un código único para la exhumación
       const codigo = this.generarCodigoExumacion();
 
+      // Crear la entidad de exhumación con los datos y el código generado
       const exumacion = this.exumacionRepository.create({
         ...createExumacionDto,
         codigo,
         nichoOriginal,
       });
 
+      // Guardar la exhumación en la base de datos
       return await this.exumacionRepository.save(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al crear la exhumación');
+      throw new InternalServerErrorException('Error al crear la exhumación: ' + (error.message || error));
     }
   }
 
+  /**
+   * Genera un código único para la exhumación
+   */
   private generarCodigoExumacion(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -48,16 +59,22 @@ export class ExumacionService {
     return `${randomNum}-${year}-CMC-EXH`;
   }
 
+  /**
+   * Obtiene todas las exhumaciones con sus relaciones principales
+   */
   async findAll() {
     try {
       return await this.exumacionRepository.find({
         relations: ['id_inhumacion', 'id_nicho'],
       });
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener las exhumaciones');
+      throw new InternalServerErrorException('Error al obtener las exhumaciones: ' + (error.message || error));
     }
   }
 
+  /**
+   * Busca una exhumación por su ID
+   */
   async findOne(id: string) {
     try {
       const exumacion = await this.exumacionRepository.findOne({
@@ -72,10 +89,13 @@ export class ExumacionService {
       return exumacion;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al obtener la exhumación');
+      throw new InternalServerErrorException('Error al obtener la exhumación: ' + (error.message || error));
     }
   }
 
+  /**
+   * Actualiza una exhumación por su ID
+   */
   async update(id: string, updateExumacionDto: UpdateExumacionDto) {
     try {
       const exumacion = await this.findOne(id);
@@ -83,20 +103,26 @@ export class ExumacionService {
       return await this.exumacionRepository.save(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al actualizar la exhumación');
+      throw new InternalServerErrorException('Error al actualizar la exhumación: ' + (error.message || error));
     }
   }
 
+  /**
+   * Elimina una exhumación por su ID
+   */
   async remove(id: string) {
     try {
       const exumacion = await this.findOne(id);
       return await this.exumacionRepository.remove(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al eliminar la exhumación');
+      throw new InternalServerErrorException('Error al eliminar la exhumación: ' + (error.message || error));
     }
   }
 
+  /**
+   * Genera un formulario (PDF/HTML) para la exhumación por su ID
+   */
   async generarFormularioExumacion(id: string) {
     try {
       const exumacion = await this.findOne(id);
@@ -107,7 +133,7 @@ export class ExumacionService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al generar el formulario de exhumación');
+      throw new InternalServerErrorException('Error al generar el formulario de exhumación: ' + (error.message || error));
     }
   }
 }

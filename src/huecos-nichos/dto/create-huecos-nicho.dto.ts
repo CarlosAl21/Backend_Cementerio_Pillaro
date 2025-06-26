@@ -22,7 +22,7 @@ export class CreateHuecosNichoDto {
   })
   @IsInt()
   @IsNotEmpty()
-  numero_hueco: number;
+  num_hueco: number;
 
   @ApiProperty({
     description: 'Estado del hueco (Disponible, Ocupado, Reservado)',
@@ -30,7 +30,6 @@ export class CreateHuecosNichoDto {
     required: true
   })
   @IsString()
-  @IsNotEmpty()
   @MaxLength(20)
   estado: string;
 

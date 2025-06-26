@@ -18,6 +18,9 @@ export class PersonasService {
     private personaRepo: Repository<Persona>,
   ) {}
 
+  /**
+   * Valida si una cédula ecuatoriana es válida
+   */
   private validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
     const provincia = parseInt(cedula.substring(0, 2), 10);
@@ -37,7 +40,7 @@ export class PersonasService {
   }
 
   /**
-   * Validar un RUC ecuatoriano
+   * Valida si un RUC ecuatoriano es válido
    */
   private validarRuc(ruc: string): boolean {
     if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
@@ -45,11 +48,17 @@ export class PersonasService {
     return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
   }
 
+  /**
+   * Valida el formato de un correo electrónico
+   */
   private validarEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Crea una nueva persona en la base de datos
+   */
   async create(createPersonaDto: CreatePersonaDto) {
     try {
       // Validar cédula o RUC
@@ -80,7 +89,17 @@ export class PersonasService {
         throw new BadRequestException('Correo electrónico inválido');
       }
 
-      // Validaciones según fallecido
+      // Verificar si ya existe una persona con el mismo correo
+      if (createPersonaDto.correo) {
+        const existingCorreo = await this.personaRepo.findOne({
+          where: { correo: createPersonaDto.correo },
+        });
+        if (existingCorreo) {
+          throw new ConflictException('Ya existe una persona con este correo');
+        }
+      }
+
+      // Validaciones según si es fallecido o no
       if (createPersonaDto.fallecido) {
         // Si es fallecido, los siguientes campos son obligatorios
         if (
@@ -143,14 +162,24 @@ export class PersonasService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Error creating persona');
+      throw new InternalServerErrorException('Error al crear la persona: ' + (error.message || error));
     }
   }
 
+  /**
+   * Obtiene todas las personas de la base de datos
+   */
   findAll(): Promise<Persona[]> {
-    return this.personaRepo.find();
+    try {
+      return this.personaRepo.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener personas: ' + (error.message || error));
+    }
   }
 
+  /**
+   * Busca una persona por su ID
+   */
   async findOne(id: string) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -162,19 +191,19 @@ export class PersonasService {
       return persona;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error finding persona');
+      throw new InternalServerErrorException('Error al buscar la persona: ' + (error.message || error));
     }
   }
 
-  // METODO DE BUSQUEDA POR CEDULA O NOMBRES
+  /**
+   * Busca personas por cédula, nombres o apellidos (consulta flexible)
+   */
   async findBy(query?: string): Promise<Persona[]> {
     try {
       if (!query) {
         return this.personaRepo.find();
       }
-
       const searchTerm = `%${query}%`;
-
       return await this.personaRepo
         .createQueryBuilder('persona')
         .where(
@@ -183,10 +212,13 @@ export class PersonasService {
         )
         .getMany();
     } catch (error) {
-      throw new InternalServerErrorException('Error al buscar personas');
+      throw new InternalServerErrorException('Error al buscar personas: ' + (error.message || error));
     }
   }
 
+  /**
+   * Actualiza los datos de una persona por su ID
+   */
   async update(id: string, dto: UpdatePersonaDto) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -194,6 +226,11 @@ export class PersonasService {
       });
       if (!persona) {
         throw new NotFoundException('Persona not found');
+      }
+
+      // No permitir cambiar de fallecido:true a fallecido:false
+      if (persona.fallecido === true && dto.fallecido === false) {
+        throw new BadRequestException('No se puede cambiar una persona fallecida a viva');
       }
 
       // Validaciones si se actualiza a fallecido
@@ -244,14 +281,18 @@ export class PersonasService {
         }
       }
 
+      // Actualizar y guardar la persona
       this.personaRepo.merge(persona, dto);
       return await this.personaRepo.save(persona);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error updating persona');
+      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
+      throw new InternalServerErrorException('Error al actualizar la persona: ' + (error.message || error));
     }
   }
 
+  /**
+   * Elimina una persona por su ID
+   */
   async remove(id: string) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -263,7 +304,7 @@ export class PersonasService {
       return await this.personaRepo.remove(persona);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error removing persona');
+      throw new InternalServerErrorException('Error al eliminar la persona: ' + (error.message || error));
     }
   }
 }

@@ -57,7 +57,7 @@ export class PropietariosNichosController {
   }
 
   @Get('por-nicho/:idNicho')
-  @ApiOperation({ summary: 'Obtener propietarios de nicho por ID de nicho', description: 'Obtiene todos los registros de propietarios de nicho por ID de nicho' })
+  @ApiOperation({ summary: 'Obtener propietarios de nicho por ID de nicho, solo los que esten activos', description: 'Obtiene todos los registros de propietarios de nicho por ID de nicho que esten activos' })
   @ApiParam({ name: 'idNicho', description: 'ID del nicho', type: String })
   @ApiOkResponse({ 
     description: 'Lista de propietarios de nicho obtenida exitosamente',
@@ -67,6 +67,28 @@ export class PropietariosNichosController {
     return this.propietariosService.findByNicho(idNicho);
   }
 
+  @Get('historial/:idNicho')
+    @ApiOperation({ summary: 'Obtener propietarios de nicho por ID de nicho', description: 'Obtiene todos los registros de propietarios de nicho por ID' })
+    @ApiParam({ name: 'idNicho', description: 'ID del nicho', type: String })
+    @ApiOkResponse({ 
+      description: 'Lista de propietarios de nicho obtenida exitosamente',
+      type: [CreatePropietarioNichoDto]
+    })
+    historial(@Param('idNicho') idNicho: string) {
+      return this.propietariosService.historial(idNicho);
+    }
+
+  @Get('por-persona/:cedula')
+  @ApiOperation({ summary: 'Obtener propietarios de nicho por la cedula del propietario', description: 'Obtiene el registro del propietario que sea buscado por su cedula y el nicho al que es dueño' })
+  @ApiParam({ name: 'cedula', description: 'cedula del dueño', type: String })
+  @ApiOkResponse({ 
+    description: 'Lista de propietarios de nicho obtenida exitosamente',
+    type: [CreatePropietarioNichoDto]
+  })
+  findByPersona(@Param('cedula') cedula: string) {
+    return this.propietariosService.findByPersona(cedula);
+  }
+    
   @Patch(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar propietario de nicho', description: 'Actualiza parcialmente un registro de propietario de nicho' })

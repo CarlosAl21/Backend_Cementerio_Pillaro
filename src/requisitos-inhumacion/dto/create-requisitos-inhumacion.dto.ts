@@ -13,7 +13,7 @@ import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { DeepPartial } from 'typeorm';
 
 export enum MetodoSolicitud {
-  ESCRITA = 'escrita',
+  ESCRITA = 'Escrita',
 }
 
 export class CreateRequisitosInhumacionDto {
@@ -121,10 +121,6 @@ export class CreateRequisitosInhumacionDto {
   })
   @IsNotEmpty()
   id_hueco_nicho: DeepPartial<HuecosNicho>;
-
-  @ApiProperty({ example: 'Firma digitalizada o nombre completo' })
-  @IsString()
-  firmaAceptacionSepulcro: string;
 
   // F) Datos del fallecido
   @ApiProperty({

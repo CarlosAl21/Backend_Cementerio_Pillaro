@@ -59,22 +59,13 @@ export class CreatePropietarioNichoDto {
     numero_documento: string;
     
     @ApiProperty({
-        description: 'Estado actual de la propiedad',
-        example: 'Activo',
+        description: 'Razon de adquisición del nicho',
+        example: 'Adquisición por compra directa',
         required: true
     })
     @IsString()
     @IsNotEmpty()
-    estado: string;
-
-    @ApiProperty({
-        description: 'Observaciones adicionales sobre la propiedad',
-        example: 'Nicho familiar con capacidad para 4 urnas',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    observaciones: string;
+    razon: string;
 
     @ApiProperty({
         description: 'Tipo de propietario',

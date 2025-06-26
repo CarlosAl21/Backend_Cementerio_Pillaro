@@ -18,7 +18,7 @@ export class RequisitosInhumacion {
   pantoneroACargo: string;
 
   // B) Método de solicitud
-  @Column({ default: 'escrita' })
+  @Column({ default: 'Escrita' })
   metodoSolicitud: string;
 
   // C) Datos del solicitante
@@ -76,9 +76,6 @@ export class RequisitosInhumacion {
   @ManyToOne(() => HuecosNicho, (huecosNicho) => huecosNicho.requisitos_inhumacion, { eager: true })
   @JoinColumn({ name: 'id_hueco_nicho' })
   id_hueco_nicho: HuecosNicho;
-
-  @Column()
-  firmaAceptacionSepulcro: string;
 
   // F) Datos del fallecido
   @ManyToOne(() => Persona, (persona) => persona.requisitos_inhumacion, { eager: true })
