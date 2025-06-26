@@ -12,6 +12,9 @@ export class UserService {
     console.log('UserService initialized');
   }
 
+  /**
+   * Valida si una cédula ecuatoriana es válida
+   */
   private validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
     const provincia = parseInt(cedula.substring(0, 2), 10);
@@ -31,7 +34,7 @@ export class UserService {
   }
 
   /**
-   * Validar un RUC ecuatoriano
+   * Valida si un RUC ecuatoriano es válido
    */
   private validarRuc(ruc: string): boolean {
     if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
@@ -39,15 +42,22 @@ export class UserService {
     return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
   }
 
+  /**
+   * Valida el formato de un correo electrónico
+   */
   private validarEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Crea un nuevo usuario en la base de datos
+   */
   async create(createUserDto: CreateUserDto) {
     try {
       const { cedula, email } = createUserDto;
 
+      // Validar que se ingrese cédula o RUC
       if (!cedula) {
         throw new BadRequestException('Debe ingresar una cédula o un RUC');
       }
@@ -55,9 +65,11 @@ export class UserService {
       const esCedula = this.validarCedula(cedula);
       const esRuc = this.validarRuc(cedula);
 
+      // Validar formato de cédula o RUC
       if (!esCedula && !esRuc) {
         throw new BadRequestException('El número ingresado no es una cédula ni un RUC válido');
       }
+      // Verificar si el usuario ya existe
       if (
         await this.userRepository.findOne({
           where: { cedula: createUserDto.cedula },
@@ -66,10 +78,12 @@ export class UserService {
         throw new ConflictException('El usuario ya existe');
       }
 
+      // Validar correo electrónico
       if (!email || !this.validarEmail(email)) {
         throw new BadRequestException('Debe ingresar un correo electrónico válido');
       }
 
+      // Crear y guardar el usuario
       const Usuario = this.userRepository.create(createUserDto);
       return await this.userRepository.save(Usuario);
     } catch (error) {
@@ -83,6 +97,9 @@ export class UserService {
     }
   }
 
+  /**
+   * Obtiene todos los usuarios (sin contraseñas)
+   */
   findAll() {
     try {
       return this.userRepository.find().then(users =>
@@ -93,13 +110,16 @@ export class UserService {
     }
   }
 
+  /**
+   * Busca un usuario por su ID
+   */
   async findOne(id: string) {
     try {
       const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      // Excluir la contraseña
+      // Excluir la contraseña del resultado
       const { password, ...rest } = user;
       return rest;
     } catch (error) {
@@ -110,6 +130,9 @@ export class UserService {
     }
   }
 
+  /**
+   * Actualiza los datos de un usuario
+   */
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       const user = await this.userRepository.findOne({ where: { id_user: id } });
@@ -126,6 +149,9 @@ export class UserService {
     }
   }
 
+  /**
+   * Elimina un usuario por su ID
+   */
   async remove(id: string) {
     try {
       const user = await this.userRepository.findOne({ where: { id_user: id } });
@@ -141,6 +167,9 @@ export class UserService {
     }
   }
 
+  /**
+   * Valida las credenciales de un usuario (login)
+   */
   async validateUser(username: string, pass: string): Promise<User | any> {
     try {
       const user = await this.userRepository.findOne({ where: { cedula: username } });
@@ -153,13 +182,16 @@ export class UserService {
     }
   }
 
+  /**
+   * Busca un usuario por su cédula
+   */
   async findByCedula(cedula: string) {
     try {
       const user = await this.userRepository.findOne({ where: { cedula: cedula } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      // Excluir la contraseña
+      // Excluir la contraseña del resultado
       const { password, ...rest } = user;
       return rest;
     } catch (error) {

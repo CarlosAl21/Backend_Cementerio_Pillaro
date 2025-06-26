@@ -34,33 +34,30 @@ export class RequisitosInhumacionService {
     private cementerioRepo: Repository<Cementerio>,
   ) {}
 
+  /**
+   * Crea un nuevo registro de requisitos de inhumación
+   */
   async create(dto: CreateRequisitosInhumacionDto) {
     try {
-      // Normalizar id_fallecido si llega como string
+      // Normalizar los IDs si llegan como string
       if (typeof dto.id_fallecido === 'string') {
         dto.id_fallecido = { id_persona: dto.id_fallecido };
       }
-
-      // Normalizar id_solicitante si llega como string
       if (typeof dto.id_solicitante === 'string') {
         dto.id_solicitante = { id_persona: dto.id_solicitante };
       }
-
-      // Normalizar id_cementerio si llega como string
       if (typeof dto.id_cementerio === 'string') {
         dto.id_cementerio = { id_cementerio: dto.id_cementerio };
       }
-
-      // Normalizar id_hueco_nicho si llega como string
       if (typeof dto.id_hueco_nicho === 'string') {
         dto.id_hueco_nicho = { id_detalle_hueco: dto.id_hueco_nicho };
       }
 
+      // Buscar hueco de nicho y validar disponibilidad
       const huecoNicho = await this.huecosNichoRepo.findOne({
         where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco },
         relations: ['id_nicho', 'id_nicho.propietarios_nicho'],
       });
-
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
       }
@@ -70,24 +67,20 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Buscar persona fallecida
       const personaFallecido = await this.personaRepo.findOne({
         where: { id_persona: dto.id_fallecido.id_persona },
       });
-
       if (!personaFallecido) {
         throw new NotFoundException(
           `Fallecido con ID ${dto.id_fallecido.id_persona} no encontrado`,
         );
       }
-      // if (personaFallecido.fecha_inhumacion) {
-      //   throw new ConflictException('El fallecido ya tiene una inhumación registrada');
-      // }
 
-      // Verifica que el solicitante sea una persona válida
+      // Buscar solicitante y validar que no sea fallecido
       const solicitante = await this.personaRepo.findOne({
         where: { id_persona: dto.id_solicitante.id_persona },
       });
-
       if (!solicitante) {
         throw new NotFoundException(
           `Solicitante con ID ${dto.id_solicitante.id_persona} no encontrado`,
@@ -97,7 +90,7 @@ export class RequisitosInhumacionService {
         throw new ConflictException('El solicitante no puede ser un fallecido');
       }
 
-      // Verificar si ya existe un requisito de inhumación para el fallecido
+      // Validar que no exista ya un requisito para el fallecido
       const existeRequisito = await this.repo.findOne({
         where: { id_fallecido: { id_persona: dto.id_fallecido.id_persona } },
       });
@@ -107,11 +100,12 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Validar que solicitante y fallecido no sean la misma persona
       if(dto.id_fallecido == dto.id_solicitante || dto.id_solicitante == dto.id_fallecido) {
         throw new BadRequestException('El solicitante no puede ser el mismo que el fallecido y  viceversa');
       }
 
-      // Verificar si el fallecido ya está enterrado en algún hueco
+      // Validar que el fallecido no esté ya enterrado en un hueco
       const huecoOcupado = await this.huecosNichoRepo.findOne({
         where: { id_fallecido: { id_persona: dto.id_fallecido.id_persona } },
       });
@@ -121,6 +115,7 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Crear y guardar el requisito
       const entity = this.repo.create(dto);
       const savedEntity = await this.repo.save(entity);
 
@@ -133,7 +128,7 @@ export class RequisitosInhumacionService {
         savedEntity.copiaTituloPropiedadNicho === true &&
         savedEntity.OficioDeSolicitud === true;
 
-      // Obtener año actual y secuencial
+      // Generar código de inhumación secuencial por año
       const year = new Date().getFullYear();
       const count = await this.inhumacionRepo
         .createQueryBuilder('inhumacion')
@@ -146,6 +141,7 @@ export class RequisitosInhumacionService {
 
       const nomSolicitante = solicitante.nombres + ' ' + solicitante.apellidos;
 
+      // Crear la inhumación asociada
       const inhumacion = this.inhumacionRepo.create({
         id_nicho: huecoNicho.id_nicho,
         id_fallecido: savedEntity.id_fallecido,
@@ -159,6 +155,7 @@ export class RequisitosInhumacionService {
         id_requisitos_inhumacion: savedEntity,
       });
 
+      // Si cumple todos los requisitos, marcar hueco como ocupado y asignar fallecido
       if (allRequiredTrue) {
         const hueco = await this.huecosNichoRepo.findOne({
           where: { id_detalle_hueco: huecoNicho.id_detalle_hueco },
@@ -171,12 +168,15 @@ export class RequisitosInhumacionService {
         await this.huecosNichoRepo.save(hueco);
       }
 
+      // Marcar persona como fallecida y guardar fecha de inhumación
       personaFallecido.fecha_inhumacion = savedEntity.fechaInhumacion;
-      personaFallecido.fallecido = true; // Marcar como fallecido
+      personaFallecido.fallecido = true;
       await this.personaRepo.save(personaFallecido);
 
+      // Guardar la inhumación
       const savedInhumacion = await this.inhumacionRepo.save(inhumacion);
-      // Mapeo explícito de la respuesta
+
+      // Respuesta explícita
       return {
         ...savedEntity,
         inhumacion: savedInhumacion,
@@ -196,6 +196,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Obtiene todos los requisitos de inhumación
+   */
   async findAll() {
     try {
       const requisitos = await this.repo.find({
@@ -223,6 +226,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Obtiene un requisito de inhumación por su ID
+   */
   async findOne(id: string) {
     try {
       const record = await this.repo.findOne({
@@ -255,6 +261,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Actualiza un requisito de inhumación por su ID
+   */
   async update(id: string, dto: UpdateRequisitosInhumacionDto) {
     try {
       const requisito = await this.repo.findOne({
@@ -288,11 +297,12 @@ export class RequisitosInhumacionService {
           : 'Pendiente';
         await this.inhumacionRepo.save(savedEntity.inhumacion);
 
+        // Actualiza datos del fallecido
         savedEntity.id_fallecido.fecha_defuncion = savedEntity.fechaInhumacion;
-        savedEntity.id_fallecido.fallecido = true; // Marcar como fallecido
-
+        savedEntity.id_fallecido.fallecido = true;
         await this.personaRepo.save(savedEntity.id_fallecido);
 
+        // Si cumple todos los requisitos, marcar hueco como ocupado y asignar fallecido
         if (allRequiredTrue) {
           const huecoNicho = await this.huecosNichoRepo.findOne({
             where: {
@@ -321,6 +331,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Elimina un requisito de inhumación por su ID
+   */
   async remove(id: string) {
     try {
       const res = await this.repo.delete(id);
@@ -334,6 +347,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Busca requisitos de inhumación por la cédula del fallecido
+   */
   async findByCedulaFallecido(cedula: string) {
     try {
       const persona = await this.personaRepo
@@ -377,6 +393,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Busca requisitos de inhumación por la cédula del solicitante
+   */
   async findByCedulaSolicitante(cedula: string) {
     try {
       const persona = await this.personaRepo
@@ -423,6 +442,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Busca nichos y huecos disponibles por cementerio, sector y fila
+   */
   async findByCementerioSectorFila(
     id_cementerio: string,
     sector: string,

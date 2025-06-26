@@ -22,11 +22,16 @@ export class NichoService {
     private readonly personaRepository: Repository<Persona>,
   ) {}
 
+  /**
+   * Crea un nuevo nicho y sus huecos asociados
+   */
   async create(createNichoDto: CreateNichoDto) {
     try {
+      // Crear el nicho
       const nicho = this.nichoRepository.create(createNichoDto);
       const nichoGuardado = await this.nichoRepository.save(nicho);
 
+      // Crear los huecos asociados al nicho
       const huecos: HuecosNicho[] = [];
       for (let i = 1; i <= nichoGuardado.num_huecos; i++) {
         const hueco = this.huecosNichoRepository.create({
@@ -46,6 +51,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Obtiene todos los nichos activos con sus relaciones principales
+   */
   async findAll() {
     try {
       const nichos = await this.nichoRepository.find({
@@ -59,6 +67,7 @@ export class NichoService {
           'huecos.id_fallecido',
         ],
       });
+      // Mapeo para devolver relaciones con nombres más claros
       return nichos.map((nicho) => ({
         ...nicho,
         cementerio: nicho.id_cementerio,
@@ -71,11 +80,15 @@ export class NichoService {
     }
   }
 
+  /**
+   * Obtiene todos los nichos con solo los huecos disponibles
+   */
   async findAllWithHuecosDisponibles() {
     try {
       const nichos = await this.nichoRepository.find({
         relations: ['huecos', 'id_cementerio'],
       });
+      // Filtra solo los huecos disponibles
       return nichos.map((nicho) => ({
         ...nicho,
         huecos: nicho.huecos.filter((hueco) => hueco.estado === 'Disponible'),
@@ -85,6 +98,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Busca un nicho por su ID y retorna sus relaciones principales
+   */
   async findOne(id: string) {
     try {
       const nicho = await this.nichoRepository.findOne({
@@ -114,6 +130,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Actualiza los datos de un nicho por su ID
+   */
   async update(id: string, updateDto: UpdateNichoDto) {
     try {
       const nicho = await this.findOne(id);
@@ -132,6 +151,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Marca un nicho como inactivo (eliminación lógica)
+   */
   async remove(id: string) {
     try {
       const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
@@ -147,6 +169,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Obtiene los propietarios de un nicho por su ID
+   */
   async findPropietariosNicho(id: string) {
     try {
       const nicho = await this.nichoRepository.findOne({
@@ -166,6 +191,9 @@ export class NichoService {
     }
   }
 
+  /**
+   * Busca nichos y huecos por la cédula del fallecido
+   */
   async findByCedulaFallecido(cedula: string) {
     try {
       const persona = await this.personaRepository.findOne({

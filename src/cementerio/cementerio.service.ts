@@ -11,14 +11,19 @@ export class CementerioService {
     console.log('CementerioService initialized');
   }
 
+  /**
+   * Crea un nuevo cementerio en la base de datos
+   */
   async create(createCementerioDto: CreateCementerioDto) {
     try {
+      // Verifica si ya existe un cementerio con el mismo nombre
       const existente = await this.cementerioRepository.findOne({
         where: { nombre: createCementerioDto.nombre },
       });
       if (existente) {
         throw new InternalServerErrorException('Ya existe un cementerio con ese nombre');
       }
+      // Crea y guarda el cementerio
       const cementerio = this.cementerioRepository.create(createCementerioDto);
       const savedCementerio = await this.cementerioRepository.save(cementerio);
       return { cementerio: savedCementerio };
@@ -27,6 +32,9 @@ export class CementerioService {
     }
   }
 
+  /**
+   * Obtiene todos los cementerios
+   */
   async findAll() {
     try {
       const cementerios = await this.cementerioRepository.find();
@@ -36,6 +44,9 @@ export class CementerioService {
     }
   }
 
+  /**
+   * Busca un cementerio por su ID
+   */
   async findOne(id: string) {
     try {
       const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
@@ -49,18 +60,24 @@ export class CementerioService {
     }
   }
 
+  /**
+   * Actualiza los datos de un cementerio por su ID
+   */
   async update(id: string, updateCementerioDto: UpdateCementerioDto) {
     try {
+      // Verifica si ya existe otro cementerio con el mismo nombre
       const existente = await this.cementerioRepository.findOne({
         where: { nombre: updateCementerioDto.nombre },
       });
       if (existente && existente.id_cementerio !== id) {
         throw new InternalServerErrorException('Ya existe un cementerio con ese nombre');
       }
+      // Busca el cementerio a actualizar
       const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
+      // Actualiza y guarda los cambios
       this.cementerioRepository.merge(cementerio, updateCementerioDto);
       const savedCementerio = await this.cementerioRepository.save(cementerio);
       return { cementerio: savedCementerio };
@@ -70,12 +87,17 @@ export class CementerioService {
     }
   }
 
+  /**
+   * Elimina un cementerio por su ID
+   */
   async remove(id: string) {
     try {
+      // Busca el cementerio a eliminar
       const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
+      // Elimina el cementerio
       await this.cementerioRepository.remove(cementerio);
       return { deleted: true, id };
     } catch (error) {
@@ -84,6 +106,9 @@ export class CementerioService {
     }
   }
 
+  /**
+   * Busca un cementerio por nombre (búsqueda parcial)
+   */
   async findByName(name: string) {
     try {
       const cementerio = await this.cementerioRepository.findOne({ where: { nombre: Like(`%${name}%`) } });

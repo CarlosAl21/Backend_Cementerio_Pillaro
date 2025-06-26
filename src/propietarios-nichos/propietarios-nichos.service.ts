@@ -22,6 +22,9 @@ export class PropietariosNichosService {
     private personaRepo: Repository<Persona>,
   ) {}
 
+  /**
+   * Crea un nuevo propietario de nicho
+   */
   async create(dto: CreatePropietarioNichoDto) {
     try {
       // Normalizar si llegan como string
@@ -32,7 +35,7 @@ export class PropietariosNichosService {
         dto.id_nicho = { id_nicho: dto.id_nicho };
       }
 
-      // Validación de datos
+      // Validar que el nicho exista
       const nicho = await this.nichoRepo.findOne({
         where: { id_nicho: dto.id_nicho.id_nicho },
         relations: ['propietarios_nicho'],
@@ -43,6 +46,7 @@ export class PropietariosNichosService {
         );
       }
 
+      // Validar que la persona exista
       const persona = await this.personaRepo.findOne({
         where: { id_persona: dto.id_persona.id_persona },
       });
@@ -51,13 +55,14 @@ export class PropietariosNichosService {
           `Persona with id ${dto.id_persona.id_persona} not found`,
         );
       }
+      // No permitir asignar propietario a fallecido
       if (persona.fallecido == true) {
         throw new InternalServerErrorException(
           `No se puede asignar un propietario a un fallecido`,
         );
       }
 
-      // Verificar si ya existe un propietario para el nicho
+      // Verificar si ya existe un propietario activo para el nicho y persona
       const existingPropietario = await this.propietarioRepo
         .createQueryBuilder('propietario')
         .leftJoin('propietario.id_nicho', 'nicho')
@@ -72,6 +77,7 @@ export class PropietariosNichosService {
         );
       }
 
+      // Si el tipo es Heredero o Dueño, desactiva el propietario anterior activo del nicho
       if (dto.tipo == 'Heredero' || dto.tipo == 'Dueño') {
         const propietario = await this.propietarioRepo
           .createQueryBuilder('propietario')
@@ -85,6 +91,7 @@ export class PropietariosNichosService {
           await this.propietarioRepo.save(propietario);
         }
       }
+      // Crear y guardar el nuevo propietario
       const propietario = this.propietarioRepo.create(dto);
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
@@ -93,6 +100,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Obtiene todos los propietarios de nicho activos
+   */
   findAll() {
     try {
       return this.propietarioRepo.find({
@@ -104,6 +114,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Busca un propietario de nicho por su ID
+   */
   async findOne(id: string) {
     try {
       const propietario = await this.propietarioRepo.findOne({
@@ -120,6 +133,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Obtiene todos los propietarios activos de un nicho por su ID de nicho
+   */
   async findByNicho(idNicho: string) {
     try {
       return await this.propietarioRepo
@@ -134,6 +150,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Obtiene el historial de propietarios (activos e inactivos) de un nicho
+   */
   async historial(idNicho: string) {
     try {
       return await this.propietarioRepo
@@ -147,6 +166,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Busca propietarios de nicho por la cédula de la persona
+   */
   async findByPersona(cedula: string) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -175,6 +197,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Actualiza un propietario de nicho por su ID
+   */
   async update(id: string, dto: UpdatePropietarioNichoDto) {
     try {
       const propietario = await this.propietarioRepo.findOne({
@@ -191,6 +216,9 @@ export class PropietariosNichosService {
     }
   }
 
+  /**
+   * Elimina (borra) un propietario de nicho por su ID
+   */
   async remove(id: string) {
     try {
       const propietario = await this.propietarioRepo.findOne({

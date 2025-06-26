@@ -18,6 +18,9 @@ export class PersonasService {
     private personaRepo: Repository<Persona>,
   ) {}
 
+  /**
+   * Valida si una cédula ecuatoriana es válida
+   */
   private validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
     const provincia = parseInt(cedula.substring(0, 2), 10);
@@ -37,7 +40,7 @@ export class PersonasService {
   }
 
   /**
-   * Validar un RUC ecuatoriano
+   * Valida si un RUC ecuatoriano es válido
    */
   private validarRuc(ruc: string): boolean {
     if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
@@ -45,11 +48,17 @@ export class PersonasService {
     return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
   }
 
+  /**
+   * Valida el formato de un correo electrónico
+   */
   private validarEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Crea una nueva persona en la base de datos
+   */
   async create(createPersonaDto: CreatePersonaDto) {
     try {
       // Validar cédula o RUC
@@ -90,7 +99,7 @@ export class PersonasService {
         }
       }
 
-      // Validaciones según fallecido
+      // Validaciones según si es fallecido o no
       if (createPersonaDto.fallecido) {
         // Si es fallecido, los siguientes campos son obligatorios
         if (
@@ -157,6 +166,9 @@ export class PersonasService {
     }
   }
 
+  /**
+   * Obtiene todas las personas de la base de datos
+   */
   findAll(): Promise<Persona[]> {
     try {
       return this.personaRepo.find();
@@ -165,6 +177,9 @@ export class PersonasService {
     }
   }
 
+  /**
+   * Busca una persona por su ID
+   */
   async findOne(id: string) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -180,7 +195,9 @@ export class PersonasService {
     }
   }
 
-  // METODO DE BUSQUEDA POR CEDULA O NOMBRES
+  /**
+   * Busca personas por cédula, nombres o apellidos (consulta flexible)
+   */
   async findBy(query?: string): Promise<Persona[]> {
     try {
       if (!query) {
@@ -199,6 +216,9 @@ export class PersonasService {
     }
   }
 
+  /**
+   * Actualiza los datos de una persona por su ID
+   */
   async update(id: string, dto: UpdatePersonaDto) {
     try {
       const persona = await this.personaRepo.findOne({
@@ -261,6 +281,7 @@ export class PersonasService {
         }
       }
 
+      // Actualizar y guardar la persona
       this.personaRepo.merge(persona, dto);
       return await this.personaRepo.save(persona);
     } catch (error) {
@@ -269,6 +290,9 @@ export class PersonasService {
     }
   }
 
+  /**
+   * Elimina una persona por su ID
+   */
   async remove(id: string) {
     try {
       const persona = await this.personaRepo.findOne({
