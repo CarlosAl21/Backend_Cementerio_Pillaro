@@ -18,8 +18,8 @@ export class PropietarioNicho {
   @Column({ type: 'date' }) fecha_adquisicion: Date;
   @Column({ type: 'varchar', length: 100 }) tipo_documento: string;
   @Column({ type: 'varchar', length: 100 }) numero_documento: string;
-  @Column({ type: 'varchar', length: 100 }) estado: string;
-  @Column({ type: 'varchar', length: 255 }) observaciones: string;
+  @Column({ type: 'boolean', default: true}) activo: boolean;
+  @Column({ type: 'varchar', length: 255 }) razon: string;
   @Column({ type: 'timestamp' }) fecha_creacion: Date;
   @Column({ type: 'timestamp', nullable: true }) fecha_actualizacion: Date;
   @Column({ 
