@@ -290,6 +290,9 @@ export class RequisitosInhumacionService {
         savedEntity.copiaTituloPropiedadNicho === true &&
         savedEntity.OficioDeSolicitud === true;
 
+      let savedHuecoNicho: HuecosNicho | null = null;
+      let personaFallecido = savedEntity.id_fallecido;
+
       // Actualiza el estado de la inhumación asociada si existe
       if (savedEntity.inhumacion) {
         savedEntity.inhumacion.estado = allRequiredTrue
@@ -298,9 +301,9 @@ export class RequisitosInhumacionService {
         await this.inhumacionRepo.save(savedEntity.inhumacion);
 
         // Actualiza datos del fallecido
-        savedEntity.id_fallecido.fecha_defuncion = savedEntity.fechaInhumacion;
-        savedEntity.id_fallecido.fallecido = true;
-        await this.personaRepo.save(savedEntity.id_fallecido);
+        personaFallecido.fecha_defuncion = savedEntity.fechaInhumacion;
+        personaFallecido.fallecido = true;
+        await this.personaRepo.save(personaFallecido);
 
         // Si cumple todos los requisitos, marcar hueco como ocupado y asignar fallecido
         if (allRequiredTrue) {
@@ -314,15 +317,16 @@ export class RequisitosInhumacionService {
           }
           huecoNicho.estado = 'Ocupado';
           huecoNicho.id_fallecido = savedEntity.id_fallecido;
-          await this.huecosNichoRepo.save(huecoNicho);
+          savedHuecoNicho = await this.huecosNichoRepo.save(huecoNicho);
         }
       }
 
-      // Devuelve solo los datos requeridos, sin el requisito mapeado
+      // Mapeo explícito de la respuesta
       return {
+        ...savedEntity,
         inhumacion: savedEntity.inhumacion,
-        huecoNicho: savedEntity.id_hueco_nicho,
-        fallecido: savedEntity.id_fallecido,
+        huecoNicho: savedHuecoNicho ?? savedEntity.id_hueco_nicho,
+        fallecido: personaFallecido,
         solicitante: savedEntity.id_solicitante,
       };
     } catch (error) {
@@ -384,6 +388,7 @@ export class RequisitosInhumacionService {
           solicitante: req.id_solicitante,
           huecoNicho: req.id_hueco_nicho,
           fallecido: req.id_fallecido,
+          inhumacion: req.inhumacion,
         })),
         inhumaciones: persona.inhumaciones,
       };
@@ -433,6 +438,7 @@ export class RequisitosInhumacionService {
           solicitante: req.id_solicitante,
           huecoNicho: req.id_hueco_nicho,
           fallecido: req.id_fallecido,
+          inhumacion: req.inhumacion,
         })),
         inhumaciones: persona.inhumaciones,
       };
