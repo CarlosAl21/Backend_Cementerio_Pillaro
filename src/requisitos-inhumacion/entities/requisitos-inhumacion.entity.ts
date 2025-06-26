@@ -18,7 +18,7 @@ export class RequisitosInhumacion {
   pantoneroACargo: string;
 
   // B) Método de solicitud
-  @Column({ default: 'escrita' })
+  @Column({ default: 'Escrita' })
   metodoSolicitud: string;
 
   // C) Datos del solicitante
