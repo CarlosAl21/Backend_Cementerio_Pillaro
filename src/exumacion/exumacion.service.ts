@@ -37,7 +37,7 @@ export class ExumacionService {
       return await this.exumacionRepository.save(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al crear la exhumación');
+      throw new InternalServerErrorException('Error al crear la exhumación: ' + (error.message || error));
     }
   }
 
@@ -54,7 +54,7 @@ export class ExumacionService {
         relations: ['id_inhumacion', 'id_nicho'],
       });
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener las exhumaciones');
+      throw new InternalServerErrorException('Error al obtener las exhumaciones: ' + (error.message || error));
     }
   }
 
@@ -72,7 +72,7 @@ export class ExumacionService {
       return exumacion;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al obtener la exhumación');
+      throw new InternalServerErrorException('Error al obtener la exhumación: ' + (error.message || error));
     }
   }
 
@@ -83,7 +83,7 @@ export class ExumacionService {
       return await this.exumacionRepository.save(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al actualizar la exhumación');
+      throw new InternalServerErrorException('Error al actualizar la exhumación: ' + (error.message || error));
     }
   }
 
@@ -93,7 +93,7 @@ export class ExumacionService {
       return await this.exumacionRepository.remove(exumacion);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al eliminar la exhumación');
+      throw new InternalServerErrorException('Error al eliminar la exhumación: ' + (error.message || error));
     }
   }
 
@@ -107,7 +107,7 @@ export class ExumacionService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al generar el formulario de exhumación');
+      throw new InternalServerErrorException('Error al generar el formulario de exhumación: ' + (error.message || error));
     }
   }
 }

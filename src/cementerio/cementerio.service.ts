@@ -7,12 +7,12 @@ import { Like, Repository } from 'typeorm';
 
 @Injectable()
 export class CementerioService {
-  constructor(@InjectRepository (Cementerio) private readonly cementerioRepository: Repository<Cementerio>) {
+  constructor(@InjectRepository(Cementerio) private readonly cementerioRepository: Repository<Cementerio>) {
     console.log('CementerioService initialized');
   }
+
   async create(createCementerioDto: CreateCementerioDto) {
     try {
-      // Verificar si ya existe un cementerio con el mismo nombre
       const existente = await this.cementerioRepository.findOne({
         where: { nombre: createCementerioDto.nombre },
       });
@@ -23,33 +23,34 @@ export class CementerioService {
       const savedCementerio = await this.cementerioRepository.save(cementerio);
       return { cementerio: savedCementerio };
     } catch (error) {
-      throw new InternalServerErrorException('Error en la creacion');
+      throw new InternalServerErrorException('Error al crear el cementerio: ' + (error.message || error));
     }
   }
 
   async findAll() {
-    const cementerios = await this.cementerioRepository.find();
-    // Mapeo explícito de la respuesta
-    return cementerios.map(cementerio => ({ ...cementerio }));
+    try {
+      const cementerios = await this.cementerioRepository.find();
+      return cementerios.map(cementerio => ({ ...cementerio }));
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los cementerios: ' + (error.message || error));
+    }
   }
 
   async findOne(id: string) {
     try {
-      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      // Mapeo explícito de la respuesta
       return { ...cementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el cementerio: ' + (error.message || error));
     }
   }
 
   async update(id: string, updateCementerioDto: UpdateCementerioDto) {
     try {
-      // Verificar si ya existe otro cementerio con el mismo nombre
       const existente = await this.cementerioRepository.findOne({
         where: { nombre: updateCementerioDto.nombre },
       });
@@ -65,36 +66,34 @@ export class CementerioService {
       return { cementerio: savedCementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error en la actualizacion');
+      throw new InternalServerErrorException('Error al actualizar el cementerio: ' + (error.message || error));
     }
   }
 
   async remove(id: string) {
     try {
-      const cementerio = await this.cementerioRepository.findOne({where: {id_cementerio: id}});
+      const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
       await this.cementerioRepository.remove(cementerio);
-      // Mapeo explícito de la respuesta
       return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error en la eliminacion');
+      throw new InternalServerErrorException('Error al eliminar el cementerio: ' + (error.message || error));
     }
   }
 
   async findByName(name: string) {
     try {
-      const cementerio = await this.cementerioRepository.findOne({where: {nombre: Like(`%${name}%`)} });
+      const cementerio = await this.cementerioRepository.findOne({ where: { nombre: Like(`%${name}%`) } });
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      // Mapeo explícito de la respuesta
       return { cementerio };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el cementerio: ' + (error.message || error));
     }
   }
 }

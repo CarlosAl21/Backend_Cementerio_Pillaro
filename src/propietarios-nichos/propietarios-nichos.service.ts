@@ -88,17 +88,20 @@ export class PropietariosNichosService {
       const propietario = this.propietarioRepo.create(dto);
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Error creating PropietarioNicho: ${error.message}`,
-      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al crear el propietario de nicho: ' + (error.message || error));
     }
   }
 
   findAll() {
-    return this.propietarioRepo.find({
-      where: { activo: true },
-      relations: ['id_nicho', 'id_persona'],
-    });
+    try {
+      return this.propietarioRepo.find({
+        where: { activo: true },
+        relations: ['id_nicho', 'id_persona'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener propietarios de nicho: ' + (error.message || error));
+    }
   }
 
   async findOne(id: string) {
@@ -113,9 +116,7 @@ export class PropietariosNichosService {
       return propietario;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(
-        `Error finding PropietarioNicho: ${error.message}`,
-      );
+      throw new InternalServerErrorException('Error al buscar el propietario de nicho: ' + (error.message || error));
     }
   }
 
@@ -129,10 +130,7 @@ export class PropietariosNichosService {
         .andWhere('propietario.activo = :activo', { activo: true })
         .getMany();
     } catch (error) {
-      console.log('Error en findByNicho:', error);
-      throw new InternalServerErrorException(
-        'Error al buscar propietarios por nicho',
-      );
+      throw new InternalServerErrorException('Error al buscar propietarios por nicho: ' + (error.message || error));
     }
   }
 
@@ -145,10 +143,7 @@ export class PropietariosNichosService {
         .where('nicho.id_nicho = :idNicho', { idNicho })
         .getMany();
     } catch (error) {
-      console.log('Error en findByNicho:', error);
-      throw new InternalServerErrorException(
-        'Error al buscar propietarios por nicho',
-      );
+      throw new InternalServerErrorException('Error al buscar historial de propietarios por nicho: ' + (error.message || error));
     }
   }
 
@@ -175,10 +170,8 @@ export class PropietariosNichosService {
       }
       return propietarios;
     } catch (error) {
-      console.log('Error en findByPersona:', error);
-      throw new InternalServerErrorException(
-        'Error al buscar propietarios por persona',
-      );
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al buscar propietarios por persona: ' + (error.message || error));
     }
   }
 
@@ -194,9 +187,7 @@ export class PropietariosNichosService {
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(
-        `Error updating PropietarioNicho: ${error.message}`,
-      );
+      throw new InternalServerErrorException('Error al actualizar el propietario de nicho: ' + (error.message || error));
     }
   }
 
@@ -211,9 +202,7 @@ export class PropietariosNichosService {
       return await this.propietarioRepo.delete(id);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(
-        `Error removing PropietarioNicho: ${error.message}`,
-      );
+      throw new InternalServerErrorException('Error al eliminar el propietario de nicho: ' + (error.message || error));
     }
   }
 }

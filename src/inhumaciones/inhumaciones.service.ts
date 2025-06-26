@@ -89,7 +89,8 @@ export class InhumacionesService {
         fallecido: personaFallecido,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error.message || 'No se pudo crear la inhumación');
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Error al crear la inhumación: ' + (error.message || error));
     }
   }
 
@@ -108,7 +109,7 @@ export class InhumacionesService {
         huecos: inh.id_nicho?.huecos,
       }));
     } catch (error) {
-      throw new InternalServerErrorException(error.message || 'No se pudieron obtener las inhumaciones');
+      throw new InternalServerErrorException('Error al obtener las inhumaciones: ' + (error.message || error));
     }
   }
 
@@ -128,7 +129,7 @@ export class InhumacionesService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message || 'No se pudo obtener la inhumación');
+      throw new InternalServerErrorException('Error al buscar la inhumación: ' + (error.message || error));
     }
   }
 
@@ -162,7 +163,7 @@ export class InhumacionesService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message || 'No se pudo actualizar la inhumación');
+      throw new InternalServerErrorException('Error al actualizar la inhumación: ' + (error.message || error));
     }
   }
 
@@ -178,7 +179,7 @@ export class InhumacionesService {
       return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(error.message || 'No se pudo eliminar la inhumación');
+      throw new InternalServerErrorException('Error al eliminar la inhumación: ' + (error.message || error));
     }
   }
 
@@ -200,7 +201,7 @@ export class InhumacionesService {
     };
   } catch (error) {
     if (error instanceof NotFoundException) throw error;
-    throw new InternalServerErrorException('Error al buscar por cédula');
+    throw new InternalServerErrorException('Error al buscar por cédula de fallecido: ' + (error.message || error));
   }
   }
 }

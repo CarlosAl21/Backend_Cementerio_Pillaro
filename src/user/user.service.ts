@@ -70,9 +70,7 @@ export class UserService {
         throw new BadRequestException('Debe ingresar un correo electrónico válido');
       }
 
-      const Usuario = this.userRepository.create(
-        createUserDto,
-      );
+      const Usuario = this.userRepository.create(createUserDto);
       return await this.userRepository.save(Usuario);
     } catch (error) {
       if (
@@ -81,19 +79,23 @@ export class UserService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException('Error al crear el usuario: ' + (error.message || error));
     }
   }
 
   findAll() {
-    return this.userRepository.find().then(users =>
-      users.map(({ password, ...rest }) => rest)
-    );
+    try {
+      return this.userRepository.find().then(users =>
+        users.map(({ password, ...rest }) => rest)
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los usuarios: ' + (error.message || error));
+    }
   }
 
   async findOne(id: string) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -104,13 +106,13 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el usuario: ' + (error.message || error));
     }
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -120,13 +122,13 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la actualizacion');
+      throw new InternalServerErrorException('Error al actualizar el usuario: ' + (error.message || error));
     }
   }
 
   async remove(id: string) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -135,19 +137,19 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la eliminacion');
+      throw new InternalServerErrorException('Error al eliminar el usuario: ' + (error.message || error));
     }
   }
 
-  async validateUser(username: string, pass: string): Promise<User|any> {
+  async validateUser(username: string, pass: string): Promise<User | any> {
     try {
-      const user = await this.userRepository.findOne({ where: { cedula: username} });
+      const user = await this.userRepository.findOne({ where: { cedula: username } });
       if (user && (await bcrypt.compare(pass, user.password))) {
         return user;
       }
       return null;
     } catch (error) {
-      throw new InternalServerErrorException('Error en la validación de usuario');
+      throw new InternalServerErrorException('Error en la validación de usuario: ' + (error.message || error));
     }
   }
 
@@ -164,7 +166,7 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el usuario: ' + (error.message || error));
     }
   }
 }

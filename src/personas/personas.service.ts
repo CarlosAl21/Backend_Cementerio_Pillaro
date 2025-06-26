@@ -153,12 +153,16 @@ export class PersonasService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Error creating persona');
+      throw new InternalServerErrorException('Error al crear la persona: ' + (error.message || error));
     }
   }
 
   findAll(): Promise<Persona[]> {
-    return this.personaRepo.find();
+    try {
+      return this.personaRepo.find();
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener personas: ' + (error.message || error));
+    }
   }
 
   async findOne(id: string) {
@@ -172,7 +176,7 @@ export class PersonasService {
       return persona;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error finding persona');
+      throw new InternalServerErrorException('Error al buscar la persona: ' + (error.message || error));
     }
   }
 
@@ -182,9 +186,7 @@ export class PersonasService {
       if (!query) {
         return this.personaRepo.find();
       }
-
       const searchTerm = `%${query}%`;
-
       return await this.personaRepo
         .createQueryBuilder('persona')
         .where(
@@ -193,7 +195,7 @@ export class PersonasService {
         )
         .getMany();
     } catch (error) {
-      throw new InternalServerErrorException('Error al buscar personas');
+      throw new InternalServerErrorException('Error al buscar personas: ' + (error.message || error));
     }
   }
 
@@ -204,6 +206,11 @@ export class PersonasService {
       });
       if (!persona) {
         throw new NotFoundException('Persona not found');
+      }
+
+      // No permitir cambiar de fallecido:true a fallecido:false
+      if (persona.fallecido === true && dto.fallecido === false) {
+        throw new BadRequestException('No se puede cambiar una persona fallecida a viva');
       }
 
       // Validaciones si se actualiza a fallecido
@@ -257,8 +264,8 @@ export class PersonasService {
       this.personaRepo.merge(persona, dto);
       return await this.personaRepo.save(persona);
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error updating persona');
+      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
+      throw new InternalServerErrorException('Error al actualizar la persona: ' + (error.message || error));
     }
   }
 
@@ -273,7 +280,7 @@ export class PersonasService {
       return await this.personaRepo.remove(persona);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error removing persona');
+      throw new InternalServerErrorException('Error al eliminar la persona: ' + (error.message || error));
     }
   }
 }

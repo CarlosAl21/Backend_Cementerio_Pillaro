@@ -185,6 +185,13 @@ export class RequisitosInhumacionService {
         solicitante: solicitante,
       };
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Error al crear el requisito: ' + (error.message || error));
     }
   }

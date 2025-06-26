@@ -62,7 +62,7 @@ export class HuecosNichosService {
         }))
       );
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al obtener los huecos del nicho: ' + (error.message || error));
     }
   }
 
@@ -78,7 +78,7 @@ export class HuecosNichosService {
         fallecido: h.id_fallecido,
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al obtener los huecos disponibles del nicho: ' + (error.message || error));
     }
   }
 
@@ -99,7 +99,7 @@ export class HuecosNichosService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al buscar el hueco del nicho: ' + (error.message || error));
     }
   }
 
@@ -119,7 +119,7 @@ export class HuecosNichosService {
         fallecido: h.id_fallecido,
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al buscar los huecos por nicho: ' + (error.message || error));
     }
   }
 
@@ -135,7 +135,7 @@ export class HuecosNichosService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al actualizar el hueco del nicho: ' + (error.message || error));
     }
   }
 
@@ -148,7 +148,7 @@ export class HuecosNichosService {
       return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al crear el hueco del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException('Error al eliminar el hueco del nicho: ' + (error.message || error));
     }
   }
 }

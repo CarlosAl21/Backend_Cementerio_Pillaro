@@ -37,20 +37,19 @@ export class NichoService {
         huecos.push(hueco);
       }
       const huecosGuardados = await this.huecosNichoRepository.save(huecos);
-      console.log('create');
-      // Mapeo explícito de la respuesta
       return {
         ...nichoGuardado,
         huecos: huecosGuardados,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear el nicho');
+      throw new InternalServerErrorException('Error al crear el nicho: ' + (error.message || error));
     }
   }
 
   async findAll() {
     try {
-      const nichos = await this.nichoRepository.find({where: {estado: 'Activo'},
+      const nichos = await this.nichoRepository.find({
+        where: { estado: 'Activo' },
         relations: [
           'id_cementerio',
           'inhumaciones',
@@ -60,7 +59,6 @@ export class NichoService {
           'huecos.id_fallecido',
         ],
       });
-      // Mapeo: separa cada objeto relacionado
       return nichos.map((nicho) => ({
         ...nicho,
         cementerio: nicho.id_cementerio,
@@ -69,7 +67,7 @@ export class NichoService {
         huecos: nicho.huecos,
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los nichos');
+      throw new InternalServerErrorException('Error al obtener los nichos: ' + (error.message || error));
     }
   }
 
@@ -78,14 +76,12 @@ export class NichoService {
       const nichos = await this.nichoRepository.find({
         relations: ['huecos', 'id_cementerio'],
       });
-
-      // Filtra los huecos disponibles en cada nicho
       return nichos.map((nicho) => ({
         ...nicho,
         huecos: nicho.huecos.filter((hueco) => hueco.estado === 'Disponible'),
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los nichos');
+      throw new InternalServerErrorException('Error al obtener los nichos: ' + (error.message || error));
     }
   }
 
@@ -105,7 +101,6 @@ export class NichoService {
       if (!nicho) {
         throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
       }
-      // Mapeo: separa cada objeto relacionado
       return {
         ...nicho,
         cementerio: nicho.id_cementerio,
@@ -115,14 +110,13 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar el nicho');
+      throw new InternalServerErrorException('Error al buscar el nicho: ' + (error.message || error));
     }
   }
 
   async update(id: string, updateDto: UpdateNichoDto) {
     try {
       const nicho = await this.findOne(id);
-      // Solo actualiza el objeto nicho, no los relacionados
       Object.assign(nicho, updateDto);
       const nichoActualizado = await this.nichoRepository.save(nicho);
       return {
@@ -134,7 +128,7 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al actualizar el nicho');
+      throw new InternalServerErrorException('Error al actualizar el nicho: ' + (error.message || error));
     }
   }
 
@@ -146,11 +140,10 @@ export class NichoService {
       }
       nicho.estado = 'Inactivo';
       await this.nichoRepository.save(nicho);
-      // Mapeo explícito de la respuesta
       return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al eliminar el nicho');
+      throw new InternalServerErrorException('Error al eliminar el nicho: ' + (error.message || error));
     }
   }
 
@@ -163,16 +156,13 @@ export class NichoService {
       if (!nicho) {
         throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
       }
-      // Mapeo explícito de la respuesta
       return {
         nicho: { ...nicho, propietarios_nicho: undefined },
         propietarios: nicho.propietarios_nicho,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(
-        'Error al buscar los propietarios del nicho',
-      );
+      throw new InternalServerErrorException('Error al buscar los propietarios del nicho: ' + (error.message || error));
     }
   }
 
@@ -192,7 +182,6 @@ export class NichoService {
         relations: ['id_nicho', 'id_nicho.id_cementerio'],
       });
 
-      // Mapeo explícito de la respuesta
       return {
         fallecido: persona,
         huecos: hueco,
@@ -201,9 +190,7 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(
-        'Error al buscar los nichos por cédula del fallecido',
-      );
+      throw new InternalServerErrorException('Error al buscar los nichos por cédula del fallecido: ' + (error.message || error));
     }
   }
 }
