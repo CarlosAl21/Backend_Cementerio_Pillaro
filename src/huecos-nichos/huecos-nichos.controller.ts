@@ -13,19 +13,33 @@ export class HuecosNichosController {
 
   @Post()
   // @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOperation({ summary: 'Crear un nuevo hueco para el nicho' })
+  @ApiOperation({ 
+    summary: 'Crear un nuevo hueco para el nicho',
+    description: 'Crea un hueco automáticamente asignando el siguiente número disponible para el nicho. El estado por defecto es "Disponible".'
+  })
   @ApiBody({ 
     type: CreateHuecosNichoDto,
     examples: {
-      ejemplo1: {
+      soloRequerido: {
+        summary: 'Solo campo requerido',
+        value: {
+          id_nicho: "123e4567-e89b-12d3-a456-426614174001"
+        }
+      },
+      conOpcionales: {
+        summary: 'Con campos opcionales',
         value: {
           id_nicho: "123e4567-e89b-12d3-a456-426614174001",
-          num_hueco: 1,
+          estado: "Reservado",
+          id_fallecido: "123e4567-e89b-12d3-a456-426614174009"
         }
       }
     }
   })
-  @ApiResponse({ status: 201, description: 'Hueco creado exitosamente' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Hueco creado exitosamente. El número de hueco se asigna automáticamente basado en los huecos existentes.' 
+  })
   create(@Body() createHuecosNichoDto: CreateHuecosNichoDto) {
     return this.huecosNichosService.create(createHuecosNichoDto);
   }
