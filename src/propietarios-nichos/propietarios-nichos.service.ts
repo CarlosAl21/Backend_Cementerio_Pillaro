@@ -68,7 +68,7 @@ export class PropietariosNichosService {
 
       if (existingPropietario) {
         throw new InternalServerErrorException(
-          `Nicho con el id ${dto.id_nicho.id_nicho} ya tiene a este usuario como propietario`,
+          `Este usuario ya es propietario de este nicho`,
         );
       }
 
@@ -89,7 +89,7 @@ export class PropietariosNichosService {
       return await this.propietarioRepo.save(propietario);
     } catch (error) {
       throw new InternalServerErrorException(
-        `Error creating PropietarioNicho: ${error.message}`,
+        `${error.message}`,
       );
     }
   }

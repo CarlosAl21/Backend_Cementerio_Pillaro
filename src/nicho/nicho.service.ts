@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Nicho } from './entities/nicho.entity';
 import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
@@ -43,7 +43,7 @@ export class NichoService {
         ...nichoGuardado,
         huecos: huecosGuardados,
       };
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Error al crear el nicho');
     }
   }
@@ -114,6 +114,7 @@ export class NichoService {
         huecos: nicho.huecos,
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error al buscar el nicho');
     }
@@ -176,6 +177,65 @@ export class NichoService {
     }
   }
 
+  async findByBusquedaFallecido(busqueda: string) {
+    try {
+      const busquedaNormalizada = this.normalizarTexto(busqueda);
+      
+      const personas = await this.personaRepository
+        .createQueryBuilder('persona')
+        .where('persona.fallecido = :fallecido', { fallecido: true })
+        .andWhere(
+          `(
+            persona.cedula ILIKE :busqueda OR
+            persona.nombres ILIKE :busqueda OR
+            persona.apellidos ILIKE :busqueda
+          )`,
+          { busqueda: `%${busquedaNormalizada}%` },
+        )
+        .getMany();
+
+      if (!personas || personas.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      const resultados: any[] = [];
+      for (const persona of personas) {
+        const huecos = await this.huecosNichoRepository.find({
+          where: { id_fallecido: { id_persona: persona.id_persona } },
+          relations: ['id_nicho', 'id_nicho.id_cementerio'],
+        });
+
+        if (huecos && huecos.length > 0) {
+          resultados.push({
+            fallecido: persona,
+            huecos: huecos,
+            nichos: huecos.map((h) => h.id_nicho),
+            cementerios: huecos.map((h) => h.id_nicho?.id_cementerio),
+          });
+        }
+      }
+
+      if (resultados.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron nichos para fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      return {
+        termino_busqueda: busqueda,
+        total_encontrados: resultados.length,
+        fallecidos: resultados,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Error al buscar los nichos por término de búsqueda',
+      );
+    }
+  }
+
   async findByCedulaFallecido(cedula: string) {
     try {
       const persona = await this.personaRepository.findOne({
@@ -205,5 +265,16 @@ export class NichoService {
         'Error al buscar los nichos por cédula del fallecido',
       );
     }
+  }
+
+  /**
+   * Normaliza texto para búsqueda: convierte a minúsculas y remueve acentos
+   */
+  private normalizarTexto(texto: string): string {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remueve acentos/tildes
+      .trim();
   }
 }

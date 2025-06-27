@@ -88,7 +88,6 @@ export class PropietariosNichosController {
   findByPersona(@Param('cedula') cedula: string) {
     return this.propietariosService.findByPersona(cedula);
   }
-    
 
   @Patch(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
