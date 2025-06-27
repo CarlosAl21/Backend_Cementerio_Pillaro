@@ -183,4 +183,16 @@ export class InhumacionesController {
   async findByCedulaSolicitante(@Param('cedula') cedula: string) {
     return this.service.findByCedulaSolicitante(cedula);
   }
+
+  @Get('fallecidos/:busqueda')
+  @ApiOperation({ summary: 'Buscar fallecidos en inhumaciones por cédula, nombres o apellidos (búsqueda parcial)' })
+  @ApiParam({ 
+    name: 'busqueda', 
+    example: 'Pablo',
+    description: 'Término de búsqueda para cédula, nombres o apellidos del fallecido'
+  })
+  @ApiResponse({ status: 200, description: 'Lista de fallecidos encontrados en inhumaciones' })
+  findFallecidos(@Param('busqueda') busqueda: string) {
+    return this.service.findByBusquedaFallecido(busqueda);
+  }
 }

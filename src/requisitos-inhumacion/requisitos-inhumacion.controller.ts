@@ -279,4 +279,16 @@ async generarPDF(@Param('id') id: string, @Res() res: Response) {
   ) {
     return this.requisitosInhumacionService.findByCementerioSectorFila(id_cementerio, sector, fila);
   }
+
+  @Get('fallecidos/:busqueda')
+  @ApiOperation({ summary: 'Buscar fallecidos en requisitos de inhumación por cédula, nombres o apellidos (búsqueda parcial)' })
+  @ApiParam({ 
+    name: 'busqueda', 
+    example: 'Pablo',
+    description: 'Término de búsqueda para cédula, nombres o apellidos del fallecido'
+  })
+  @ApiResponse({ status: 200, description: 'Lista de fallecidos encontrados en requisitos de inhumación' })
+  findFallecidos(@Param('busqueda') busqueda: string) {
+    return this.requisitosInhumacionService.findByBusquedaFallecido(busqueda);
+  }
 }

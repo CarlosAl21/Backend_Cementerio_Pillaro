@@ -516,4 +516,78 @@ export class RequisitosInhumacionService {
       throw new InternalServerErrorException('Error al buscar el nicho: ' + (error.message || error));
     }
   }
+
+  /**
+   * Busca fallecidos en requisitos de inhumación por cédula, nombres o apellidos usando búsqueda parcial
+   * Normaliza el texto para ser case-insensitive y sin acentos
+   */
+  async findByBusquedaFallecido(busqueda: string) {
+    try {
+      const busquedaNormalizada = this.normalizarTexto(busqueda);
+      // Búsqueda parcial por cédula, nombres o apellidos (case-insensitive)
+      const personas = await this.personaRepo
+        .createQueryBuilder('persona')
+        .where('persona.fallecido = :fallecido', { fallecido: true })
+        .andWhere(
+          `(
+            persona.cedula ILIKE :busqueda OR
+            persona.nombres ILIKE :busqueda OR
+            persona.apellidos ILIKE :busqueda
+          )`,
+          { busqueda: `%${busquedaNormalizada}%` },
+        )
+        .getMany();
+
+      if (!personas || personas.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      // Buscar requisitos para todas las personas encontradas
+      const resultados: any[] = [];
+      for (const persona of personas) {
+        const requisitos = await this.repo.find({
+          where: { id_fallecido: { id_persona: persona.id_persona } },
+          relations: ['id_hueco_nicho', 'id_hueco_nicho.id_nicho', 'id_hueco_nicho.id_nicho.id_cementerio'],
+        });
+        if (requisitos && requisitos.length > 0) {
+          resultados.push({
+            fallecido: persona,
+            requisitos: requisitos,
+            nichos: requisitos.map((r) => r.id_hueco_nicho?.id_nicho),
+            cementerios: requisitos.map((r) => r.id_hueco_nicho?.id_nicho?.id_cementerio),
+          });
+        }
+      }
+
+      if (resultados.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron requisitos de inhumación para fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      return {
+        termino_busqueda: busqueda,
+        total_encontrados: resultados.length,
+        fallecidos: resultados,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Error al buscar los requisitos de inhumación por término de búsqueda: ' + (error.message || error),
+      );
+    }
+  }
+
+  /**
+   * Normaliza texto para búsqueda: convierte a minúsculas y remueve acentos
+   */
+  private normalizarTexto(texto: string): string {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
+  }
 }

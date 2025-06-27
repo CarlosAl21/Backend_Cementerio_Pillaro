@@ -55,6 +55,26 @@ export class NichosController {
     return this.nichosService.findAll();
   }
 
+  @Get('fallecidos/:busqueda')
+  @ApiOperation({ summary: 'Buscar fallecidos en nichos por cédula, nombres o apellidos (búsqueda parcial)' })
+  @ApiParam({ 
+    name: 'busqueda', 
+    example: 'Pablo',
+    description: 'Término de búsqueda para cédula, nombres o apellidos del fallecido'
+  })
+  @ApiResponse({ status: 200, description: 'Lista de fallecidos encontrados en nichos' })
+  findFallecidos(@Param('busqueda') busqueda: string) {
+    return this.nichosService.findByBusquedaFallecido(busqueda);
+  }
+
+  @Get('propietarios/:id')
+  @ApiOperation({ summary: 'Obtener propietarios de un nicho por ID del nicho' })
+  @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({ status: 200, description: 'Lista de propietarios del nicho' })
+  findPropietarios(@Param('id') id: string) {
+    return this.nichosService.findPropietariosNicho(id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un nicho por ID' })
   @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
@@ -96,20 +116,4 @@ export class NichosController {
     return this.nichosService.remove(id);
   }
 
-  @Get('propietarios/:id')
-  @ApiOperation({ summary: 'Obtener propietarios de un nicho por ID del nicho' })
-  @ApiParam({ name: 'id', example: '123e4567-e89b-12d3-a456-426614174000' })
-  @ApiResponse({ status: 200, description: 'Lista de propietarios del nicho' })
-  findPropietarios(@Param('id') id: string) {
-    return this.nichosService.findPropietariosNicho(id);
-  }
-
-  @Get('fallecidos/:cedula')
-  @ApiOperation({ summary: 'Obtener fallecidos de un nicho por la cedula del fallecido' })
-  @ApiParam({ name: 'cedula', example: '1234567890' })
-  @ApiResponse({ status: 200, description: 'Lista de fallecidos del nicho' })
-  findFallecidos(@Param('cedula') cedula: string) {
-    return this.nichosService.findByCedulaFallecido(cedula);
-  }
-  
 }
