@@ -34,6 +34,7 @@ export class InhumacionesController {
     type: CreateInhumacionDto,
     examples: {
       ejemplo1: {
+        summary: 'Inhumación básica',
         value: {
           id_nicho: "123e4567-e89b-12d3-a456-426614174000",
           id_fallecido: "123e4567-e89b-12d3-a456-426614174001",
@@ -43,6 +44,34 @@ export class InhumacionesController {
           responsable_inhumacion: "Carlos Gómez",
           observaciones: "Requiere traslado desde otro cementerio",
           codigo_inhumacion: "INH-2023-001",
+          estado: "Pendiente"
+        }
+      },
+      ejemplo2: {
+        summary: 'Inhumación realizada con observaciones',
+        value: {
+          id_nicho: "223e4567-e89b-12d3-a456-426614174002",
+          id_fallecido: "223e4567-e89b-12d3-a456-426614174003",
+          fecha_inhumacion: "2024-01-10",
+          hora_inhumacion: "10:00",
+          solicitante: "María López",
+          responsable_inhumacion: "Pedro Ruiz",
+          observaciones: "Familiares presentes",
+          codigo_inhumacion: "INH-2024-002",
+          estado: "Realizado"
+        }
+      },
+      ejemplo3: {
+        summary: 'Inhumación pendiente sin observaciones',
+        value: {
+          id_nicho: "323e4567-e89b-12d3-a456-426614174004",
+          id_fallecido: "323e4567-e89b-12d3-a456-426614174005",
+          fecha_inhumacion: "2024-07-20",
+          hora_inhumacion: "09:00",
+          solicitante: "Carlos Torres",
+          responsable_inhumacion: "Ana Martínez",
+          observaciones: "",
+          codigo_inhumacion: "INH-2024-003",
           estado: "Pendiente"
         }
       }
@@ -144,5 +173,14 @@ export class InhumacionesController {
   @ApiNotFoundResponse({ description: 'Fallecido no encontrado' })
   async findByCedulaFallecido(@Param('cedula') cedula: string) {
     return this.service.findByCedulaFallecido(cedula);
+  }
+
+  @Get('/solicitante/cedula/:cedula')
+  @ApiOperation({ summary: 'Buscar inhumaciones por cédula del solicitante, solo si la inhumación tiene un requisito vinculado' })
+  @ApiParam({ name: 'cedula', description: 'Cédula del solicitante', example: '1234567890' })
+  @ApiOkResponse({ description: 'Inhumaciones encontradas' })
+  @ApiNotFoundResponse({ description: 'Solicitante o inhumaciones no encontradas' })
+  async findByCedulaSolicitante(@Param('cedula') cedula: string) {
+    return this.service.findByCedulaSolicitante(cedula);
   }
 }

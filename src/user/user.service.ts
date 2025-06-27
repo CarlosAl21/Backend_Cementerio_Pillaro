@@ -12,6 +12,9 @@ export class UserService {
     console.log('UserService initialized');
   }
 
+  /**
+   * Valida si una cédula ecuatoriana es válida
+   */
   private validarCedula(cedula: string): boolean {
     if (!/^\d{10}$/.test(cedula)) return false; // Debe tener 10 dígitos
     const provincia = parseInt(cedula.substring(0, 2), 10);
@@ -31,7 +34,7 @@ export class UserService {
   }
 
   /**
-   * Validar un RUC ecuatoriano
+   * Valida si un RUC ecuatoriano es válido
    */
   private validarRuc(ruc: string): boolean {
     if (!/^\d{13}$/.test(ruc)) return false; // Debe tener 13 dígitos
@@ -39,15 +42,22 @@ export class UserService {
     return this.validarCedula(ruc.substring(0, 10)); // Los primeros 10 dígitos deben ser una cédula válida
   }
 
+  /**
+   * Valida el formato de un correo electrónico
+   */
   private validarEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   }
 
+  /**
+   * Crea un nuevo usuario en la base de datos
+   */
   async create(createUserDto: CreateUserDto) {
     try {
       const { cedula, email } = createUserDto;
 
+      // Validar que se ingrese cédula o RUC
       if (!cedula) {
         throw new BadRequestException('Debe ingresar una cédula o un RUC');
       }
@@ -55,9 +65,11 @@ export class UserService {
       const esCedula = this.validarCedula(cedula);
       const esRuc = this.validarRuc(cedula);
 
+      // Validar formato de cédula o RUC
       if (!esCedula && !esRuc) {
         throw new BadRequestException('El número ingresado no es una cédula ni un RUC válido');
       }
+      // Verificar si el usuario ya existe
       if (
         await this.userRepository.findOne({
           where: { cedula: createUserDto.cedula },
@@ -66,13 +78,13 @@ export class UserService {
         throw new ConflictException('El usuario ya existe');
       }
 
+      // Validar correo electrónico
       if (!email || !this.validarEmail(email)) {
         throw new BadRequestException('Debe ingresar un correo electrónico válido');
       }
 
-      const Usuario = this.userRepository.create(
-        createUserDto,
-      );
+      // Crear y guardar el usuario
+      const Usuario = this.userRepository.create(createUserDto);
       return await this.userRepository.save(Usuario);
     } catch (error) {
       if (
@@ -81,36 +93,49 @@ export class UserService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException(error.message);
+      throw new InternalServerErrorException('Error al crear el usuario: ' + (error.message || error));
     }
   }
 
+  /**
+   * Obtiene todos los usuarios (sin contraseñas)
+   */
   findAll() {
-    return this.userRepository.find().then(users =>
-      users.map(({ password, ...rest }) => rest)
-    );
+    try {
+      return this.userRepository.find().then(users =>
+        users.map(({ password, ...rest }) => rest)
+      );
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los usuarios: ' + (error.message || error));
+    }
   }
 
+  /**
+   * Busca un usuario por su ID
+   */
   async findOne(id: string) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      // Excluir la contraseña
+      // Excluir la contraseña del resultado
       const { password, ...rest } = user;
       return rest;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el usuario: ' + (error.message || error));
     }
   }
 
+  /**
+   * Actualiza los datos de un usuario
+   */
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -120,13 +145,16 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la actualizacion');
+      throw new InternalServerErrorException('Error al actualizar el usuario: ' + (error.message || error));
     }
   }
 
+  /**
+   * Elimina un usuario por su ID
+   */
   async remove(id: string) {
     try {
-      const user = await this.userRepository.findOne({where: {id_user: id} });
+      const user = await this.userRepository.findOne({ where: { id_user: id } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -135,36 +163,42 @@ export class UserService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la eliminacion');
+      throw new InternalServerErrorException('Error al eliminar el usuario: ' + (error.message || error));
     }
   }
 
-  async validateUser(username: string, pass: string): Promise<User|any> {
+  /**
+   * Valida las credenciales de un usuario (login)
+   */
+  async validateUser(username: string, pass: string): Promise<User | any> {
     try {
-      const user = await this.userRepository.findOne({ where: { cedula: username} });
+      const user = await this.userRepository.findOne({ where: { cedula: username } });
       if (user && (await bcrypt.compare(pass, user.password))) {
         return user;
       }
       return null;
     } catch (error) {
-      throw new InternalServerErrorException('Error en la validación de usuario');
+      throw new InternalServerErrorException('Error en la validación de usuario: ' + (error.message || error));
     }
   }
 
+  /**
+   * Busca un usuario por su cédula
+   */
   async findByCedula(cedula: string) {
     try {
       const user = await this.userRepository.findOne({ where: { cedula: cedula } });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      // Excluir la contraseña
+      // Excluir la contraseña del resultado
       const { password, ...rest } = user;
       return rest;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Error en la busqueda');
+      throw new InternalServerErrorException('Error al buscar el usuario: ' + (error.message || error));
     }
   }
 }

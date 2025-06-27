@@ -157,15 +157,15 @@ const docDefinition = {
         { text: 'Cementerio:', bold: true, valign: 'middle' , border:[false,true,true,true]},
         requisitos?.cementerio?.nombre?.toUpperCase()||'', 
         { text: 'Escrita', bold: true, valign: 'middle' },
-        requisitos?.requisito?.metodoSolicitud === 'escrita' ? 'X' : ''
+        { text: requisitos?.metodoSolicitud === 'Escrita' ? 'X' : '', alignment: 'center' }
       ],
 
       [
         {border: [false, false, false, true], text: ' '},
         { text: 'Panteonero a cargo:', bold: true, valign: 'middle' , border:[false,true,true,true]},
-        requisitos?.requisito?.pantoneroACargo?.toUpperCase()||'',
+        requisitos?.pantoneroACargo?.toUpperCase()||'',
         { text: 'Verbal (solo en caso de emergencia)', bold: true , valign: 'middle'},
-        requisitos?.requisito?.metodoSolicitud === 'verbal' ? 'X' : ''
+        { text: requisitos?.metodoSolicitud === 'Verbal' ? 'X' : '', alignment: 'center' }
       ],
       [
   {

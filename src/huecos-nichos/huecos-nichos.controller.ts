@@ -105,4 +105,12 @@ export class HuecosNichosController {
   findAllDisponibles() {
     return this.huecosNichosService.findAllDisponibles();
   }
+
+  @Get('Cementerio/nichos/:idCementerio')
+  @ApiOperation({ summary: 'Obtener todos los huecos de nichos disponibles por ID de cementerio' })
+  @ApiParam({ name: 'idCementerio', example: '789e0123-a456-78b9-c012-345678901234' })
+  @ApiResponse({ status: 200, description: 'Lista de huecos disponibles por cementerio' })
+  findAllDisponiblesByCementerio(@Param('idCementerio') idCementerio: string) {
+    return this.huecosNichosService.findAllDisponiblesByCementerio(idCementerio);
+  }
 }

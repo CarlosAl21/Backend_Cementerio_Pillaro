@@ -34,33 +34,30 @@ export class RequisitosInhumacionService {
     private cementerioRepo: Repository<Cementerio>,
   ) {}
 
+  /**
+   * Crea un nuevo registro de requisitos de inhumación
+   */
   async create(dto: CreateRequisitosInhumacionDto) {
     try {
-      // Normalizar id_fallecido si llega como string
+      // Normalizar los IDs si llegan como string
       if (typeof dto.id_fallecido === 'string') {
         dto.id_fallecido = { id_persona: dto.id_fallecido };
       }
-
-      // Normalizar id_solicitante si llega como string
       if (typeof dto.id_solicitante === 'string') {
         dto.id_solicitante = { id_persona: dto.id_solicitante };
       }
-
-      // Normalizar id_cementerio si llega como string
       if (typeof dto.id_cementerio === 'string') {
         dto.id_cementerio = { id_cementerio: dto.id_cementerio };
       }
-
-      // Normalizar id_hueco_nicho si llega como string
       if (typeof dto.id_hueco_nicho === 'string') {
         dto.id_hueco_nicho = { id_detalle_hueco: dto.id_hueco_nicho };
       }
 
+      // Buscar hueco de nicho y validar disponibilidad
       const huecoNicho = await this.huecosNichoRepo.findOne({
         where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco },
         relations: ['id_nicho', 'id_nicho.propietarios_nicho'],
       });
-
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
       }
@@ -70,24 +67,20 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Buscar persona fallecida
       const personaFallecido = await this.personaRepo.findOne({
         where: { id_persona: dto.id_fallecido.id_persona },
       });
-
       if (!personaFallecido) {
         throw new NotFoundException(
           `Fallecido con ID ${dto.id_fallecido.id_persona} no encontrado`,
         );
       }
-      // if (personaFallecido.fecha_inhumacion) {
-      //   throw new ConflictException('El fallecido ya tiene una inhumación registrada');
-      // }
 
-      // Verifica que el solicitante sea una persona válida
+      // Buscar solicitante y validar que no sea fallecido
       const solicitante = await this.personaRepo.findOne({
         where: { id_persona: dto.id_solicitante.id_persona },
       });
-
       if (!solicitante) {
         throw new NotFoundException(
           `Solicitante con ID ${dto.id_solicitante.id_persona} no encontrado`,
@@ -97,7 +90,7 @@ export class RequisitosInhumacionService {
         throw new ConflictException('El solicitante no puede ser un fallecido');
       }
 
-      // Verificar si ya existe un requisito de inhumación para el fallecido
+      // Validar que no exista ya un requisito para el fallecido
       const existeRequisito = await this.repo.findOne({
         where: { id_fallecido: { id_persona: dto.id_fallecido.id_persona } },
       });
@@ -107,11 +100,12 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Validar que solicitante y fallecido no sean la misma persona
       if(dto.id_fallecido == dto.id_solicitante || dto.id_solicitante == dto.id_fallecido) {
         throw new BadRequestException('El solicitante no puede ser el mismo que el fallecido y  viceversa');
       }
 
-      // Verificar si el fallecido ya está enterrado en algún hueco
+      // Validar que el fallecido no esté ya enterrado en un hueco
       const huecoOcupado = await this.huecosNichoRepo.findOne({
         where: { id_fallecido: { id_persona: dto.id_fallecido.id_persona } },
       });
@@ -121,6 +115,7 @@ export class RequisitosInhumacionService {
         );
       }
 
+      // Crear y guardar el requisito
       const entity = this.repo.create(dto);
       const savedEntity = await this.repo.save(entity);
 
@@ -133,7 +128,7 @@ export class RequisitosInhumacionService {
         savedEntity.copiaTituloPropiedadNicho === true &&
         savedEntity.OficioDeSolicitud === true;
 
-      // Obtener año actual y secuencial
+      // Generar código de inhumación secuencial por año
       const year = new Date().getFullYear();
       const count = await this.inhumacionRepo
         .createQueryBuilder('inhumacion')
@@ -146,6 +141,7 @@ export class RequisitosInhumacionService {
 
       const nomSolicitante = solicitante.nombres + ' ' + solicitante.apellidos;
 
+      // Crear la inhumación asociada
       const inhumacion = this.inhumacionRepo.create({
         id_nicho: huecoNicho.id_nicho,
         id_fallecido: savedEntity.id_fallecido,
@@ -159,6 +155,7 @@ export class RequisitosInhumacionService {
         id_requisitos_inhumacion: savedEntity,
       });
 
+      // Si cumple todos los requisitos, marcar hueco como ocupado y asignar fallecido
       if (allRequiredTrue) {
         const hueco = await this.huecosNichoRepo.findOne({
           where: { id_detalle_hueco: huecoNicho.id_detalle_hueco },
@@ -171,12 +168,15 @@ export class RequisitosInhumacionService {
         await this.huecosNichoRepo.save(hueco);
       }
 
+      // Marcar persona como fallecida y guardar fecha de inhumación
       personaFallecido.fecha_inhumacion = savedEntity.fechaInhumacion;
-      personaFallecido.fallecido = true; // Marcar como fallecido
+      personaFallecido.fallecido = true;
       await this.personaRepo.save(personaFallecido);
 
+      // Guardar la inhumación
       const savedInhumacion = await this.inhumacionRepo.save(inhumacion);
-      // Mapeo explícito de la respuesta
+
+      // Respuesta explícita
       return {
         ...savedEntity,
         inhumacion: savedInhumacion,
@@ -185,10 +185,20 @@ export class RequisitosInhumacionService {
         solicitante: solicitante,
       };
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
+        throw error;
+      }
       throw new InternalServerErrorException('Error al crear el requisito: ' + (error.message || error));
     }
   }
 
+  /**
+   * Obtiene todos los requisitos de inhumación
+   */
   async findAll() {
     try {
       const requisitos = await this.repo.find({
@@ -207,8 +217,8 @@ export class RequisitosInhumacionService {
         cementerio: req.id_cementerio,
         solicitante: req.id_solicitante,
         huecoNicho: req.id_hueco_nicho,
-        nicho: req.id_hueco_nicho.id_nicho,
-        propietarioNicho: req.id_hueco_nicho.id_nicho.propietarios_nicho,
+        nicho: req.id_hueco_nicho?.id_nicho,
+        propietarioNicho: req.id_hueco_nicho?.id_nicho?.propietarios_nicho,
         fallecido: req.id_fallecido,
       }));
     } catch (error) {
@@ -216,6 +226,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Obtiene un requisito de inhumación por su ID
+   */
   async findOne(id: string) {
     try {
       const record = await this.repo.findOne({
@@ -237,8 +250,8 @@ export class RequisitosInhumacionService {
         cementerio: record.id_cementerio,
         solicitante: record.id_solicitante,
         huecoNicho: record.id_hueco_nicho,
-        nicho: record.id_hueco_nicho.id_nicho,
-        propietarioNicho: record.id_hueco_nicho.id_nicho.propietarios_nicho,
+        nicho: record.id_hueco_nicho?.id_nicho,
+        propietarioNicho: record.id_hueco_nicho?.id_nicho?.propietarios_nicho,
         fallecido: record.id_fallecido,
         inhumacion: record.inhumacion,
       };
@@ -248,6 +261,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Actualiza un requisito de inhumación por su ID
+   */
   async update(id: string, dto: UpdateRequisitosInhumacionDto) {
     try {
       const requisito = await this.repo.findOne({
@@ -274,6 +290,9 @@ export class RequisitosInhumacionService {
         savedEntity.copiaTituloPropiedadNicho === true &&
         savedEntity.OficioDeSolicitud === true;
 
+      let savedHuecoNicho: HuecosNicho | null = null;
+      let personaFallecido = savedEntity.id_fallecido;
+
       // Actualiza el estado de la inhumación asociada si existe
       if (savedEntity.inhumacion) {
         savedEntity.inhumacion.estado = allRequiredTrue
@@ -281,11 +300,12 @@ export class RequisitosInhumacionService {
           : 'Pendiente';
         await this.inhumacionRepo.save(savedEntity.inhumacion);
 
-        savedEntity.id_fallecido.fecha_defuncion = savedEntity.fechaInhumacion;
-        savedEntity.id_fallecido.fallecido = true; // Marcar como fallecido
+        // Actualiza datos del fallecido
+        personaFallecido.fecha_defuncion = savedEntity.fechaInhumacion;
+        personaFallecido.fallecido = true;
+        await this.personaRepo.save(personaFallecido);
 
-        await this.personaRepo.save(savedEntity.id_fallecido);
-
+        // Si cumple todos los requisitos, marcar hueco como ocupado y asignar fallecido
         if (allRequiredTrue) {
           const huecoNicho = await this.huecosNichoRepo.findOne({
             where: {
@@ -297,15 +317,16 @@ export class RequisitosInhumacionService {
           }
           huecoNicho.estado = 'Ocupado';
           huecoNicho.id_fallecido = savedEntity.id_fallecido;
-          await this.huecosNichoRepo.save(huecoNicho);
+          savedHuecoNicho = await this.huecosNichoRepo.save(huecoNicho);
         }
       }
 
-      // Devuelve solo los datos requeridos, sin el requisito mapeado
+      // Mapeo explícito de la respuesta
       return {
+        ...savedEntity,
         inhumacion: savedEntity.inhumacion,
-        huecoNicho: savedEntity.id_hueco_nicho,
-        fallecido: savedEntity.id_fallecido,
+        huecoNicho: savedHuecoNicho ?? savedEntity.id_hueco_nicho,
+        fallecido: personaFallecido,
         solicitante: savedEntity.id_solicitante,
       };
     } catch (error) {
@@ -314,31 +335,84 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Elimina un requisito de inhumación por su ID
+   */
   async remove(id: string) {
     try {
-      const res = await this.repo.delete(id);
+      // Buscar el requisito y su inhumación vinculada usando QueryBuilder
+      const requisito = await this.repo.createQueryBuilder('requisito')
+        .leftJoinAndSelect('requisito.inhumacion', 'inhumacion')
+        .where('requisito.id_requsitoInhumacion = :id', { id })
+        .getOne();
+
+      if (!requisito) {
+        throw new NotFoundException(`Requisito ${id} no encontrado`);
+      }
+
+      // Verifica todos los booleanos requeridos (excepto autorizacionDeMovilizacionDelCadaver)
+      const allRequiredTrue =
+        requisito.copiaCedula === true &&
+        requisito.copiaCertificadoDefuncion === true &&
+        requisito.informeEstadisticoINEC === true &&
+        requisito.pagoTasaInhumacion === true &&
+        requisito.copiaTituloPropiedadNicho === true &&
+        requisito.OficioDeSolicitud === true;
+
+      // Si todos los documentos están en true (excepto autorizacionDeMovilizacionDelCadaver)
+      // y la inhumación está en 'Realizada', NO permitir eliminar
+      if (
+        allRequiredTrue &&
+        requisito.inhumacion &&
+        requisito.inhumacion.estado === 'Realizada'
+      ) {
+        throw new ConflictException(
+          'No se puede eliminar el requisito porque todos los documentos están completos y la inhumación está en estado Realizada.'
+        );
+      }
+
+      // Si tiene inhumación vinculada en estado 'Pendiente', eliminar en cascada la inhumación
+      if (
+        requisito.inhumacion &&
+        requisito.inhumacion.estado === 'Pendiente'
+      ) {
+        await this.inhumacionRepo.createQueryBuilder()
+          .delete()
+          .from(Inhumacion)
+          .where('id_inhumacion = :id', { id: requisito.inhumacion.id_inhumacion })
+          .execute();
+      }
+
+      // Eliminar el requisito
+      const res = await this.repo.createQueryBuilder()
+        .delete()
+        .from(RequisitosInhumacion)
+        .where('id_requsitoInhumacion = :id', { id })
+        .execute();
+
       if (!res.affected)
         throw new NotFoundException(`Requisito ${id} no encontrado`);
-      // Mapeo explícito de la respuesta
+
       return { deleted: true, id };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
       throw new InternalServerErrorException('Error al eliminar el requisito: ' + (error.message || error));
     }
   }
 
+  /**
+   * Busca requisitos de inhumación por la cédula del fallecido
+   */
   async findByCedulaFallecido(cedula: string) {
     try {
       const persona = await this.personaRepo
         .createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.huecos_nichos', 'hueco')
-        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
-        .leftJoinAndSelect('nicho.id_cementerio', 'cementerio')
         .leftJoinAndSelect('persona.requisitos_inhumacion', 'requisito')
         .leftJoinAndSelect('requisito.id_cementerio', 'req_cementerio')
         .leftJoinAndSelect('requisito.id_solicitante', 'req_solicitante')
         .leftJoinAndSelect('requisito.id_hueco_nicho', 'req_hueco_nicho')
         .leftJoinAndSelect('requisito.id_fallecido', 'req_fallecido')
+        .leftJoinAndSelect('requisito.inhumacion', 'req_inhumacion')
         .leftJoinAndSelect('persona.inhumaciones', 'inhumacion')
         .where('persona.cedula = :cedula', { cedula })
         .andWhere('persona.fallecido = :fallecido', { fallecido: true })
@@ -351,16 +425,13 @@ export class RequisitosInhumacionService {
       }
 
       return {
-        ...persona,
-        huecos: persona.huecos_nichos,
-        nichos: persona.huecos_nichos?.map((h) => h.id_nicho),
-        cementerios: persona.huecos_nichos?.map((h) => h.id_nicho?.id_cementerio),
         requisitos_inhumacion: persona.requisitos_inhumacion?.map((req) => ({
           ...req,
           cementerio: req.id_cementerio,
           solicitante: req.id_solicitante,
           huecoNicho: req.id_hueco_nicho,
           fallecido: req.id_fallecido,
+          inhumacion: req.inhumacion,
         })),
         inhumaciones: persona.inhumaciones,
       };
@@ -370,18 +441,19 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Busca requisitos de inhumación por la cédula del solicitante
+   */
   async findByCedulaSolicitante(cedula: string) {
     try {
       const persona = await this.personaRepo
         .createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.huecos_nichos', 'hueco')
-        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
-        .leftJoinAndSelect('nicho.id_cementerio', 'cementerio')
         .leftJoinAndSelect('persona.requisitos_inhumacion_solicitante', 'requisito')
         .leftJoinAndSelect('requisito.id_cementerio', 'req_cementerio')
         .leftJoinAndSelect('requisito.id_solicitante', 'req_solicitante')
         .leftJoinAndSelect('requisito.id_hueco_nicho', 'req_hueco_nicho')
         .leftJoinAndSelect('requisito.id_fallecido', 'req_fallecido')
+        .leftJoinAndSelect('requisito.inhumacion', 'req_inhumacion')
         .leftJoinAndSelect('persona.inhumaciones', 'inhumacion')
         .where('persona.cedula = :cedula', { cedula })
         .andWhere('persona.fallecido = :fallecido', { fallecido: false })
@@ -393,20 +465,14 @@ export class RequisitosInhumacionService {
         );
       }
 
-      // Elimina la propiedad requisitos_inhumacion si existe
-      const { requisitos_inhumacion, ...rest } = persona;
-
       return {
-        ...rest,
-        huecos: persona.huecos_nichos,
-        nichos: persona.huecos_nichos?.map((h) => h.id_nicho),
-        cementerios: persona.huecos_nichos?.map((h) => h.id_nicho?.id_cementerio),
         requisitos_inhumacion: persona.requisitos_inhumacion_solicitante?.map((req) => ({
           ...req,
           cementerio: req.id_cementerio,
           solicitante: req.id_solicitante,
           huecoNicho: req.id_hueco_nicho,
           fallecido: req.id_fallecido,
+          inhumacion: req.inhumacion,
         })),
         inhumaciones: persona.inhumaciones,
       };
@@ -416,6 +482,9 @@ export class RequisitosInhumacionService {
     }
   }
 
+  /**
+   * Busca nichos y huecos disponibles por cementerio, sector y fila
+   */
   async findByCementerioSectorFila(
     id_cementerio: string,
     sector: string,
