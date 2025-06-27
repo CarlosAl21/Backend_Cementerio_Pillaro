@@ -32,7 +32,7 @@ export class RequisitosInhumacionService {
     private nichoRepo: Repository<Nicho>,
     @InjectRepository(Cementerio)
     private cementerioRepo: Repository<Cementerio>,
-  ) {}
+  ) { }
 
   /**
    * Crea un nuevo registro de requisitos de inhumación
@@ -110,7 +110,7 @@ export class RequisitosInhumacionService {
       }
 
       // Validar que solicitante y fallecido no sean la misma persona
-      if(dto.id_fallecido == dto.id_solicitante || dto.id_solicitante == dto.id_fallecido) {
+      if (dto.id_fallecido == dto.id_solicitante || dto.id_solicitante == dto.id_fallecido) {
         throw new BadRequestException('El solicitante no puede ser el mismo que el fallecido y  viceversa');
       }
 
@@ -254,6 +254,7 @@ export class RequisitosInhumacionService {
       });
       if (!record) throw new NotFoundException(`Requisito ${id} no encontrado`);
       // Mapeo: separa cada objeto relacionado
+
       return {
         ...record,
         cementerio: record.id_cementerio,
