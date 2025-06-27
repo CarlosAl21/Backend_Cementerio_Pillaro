@@ -56,7 +56,7 @@ export class RequisitosInhumacionService {
       // Buscar hueco de nicho y validar disponibilidad
       const huecoNicho = await this.huecosNichoRepo.findOne({
         where: { id_detalle_hueco: dto.id_hueco_nicho.id_detalle_hueco },
-        relations: ['id_nicho', 'id_nicho.propietarios_nicho'],
+        relations: ['id_nicho', 'id_nicho.propietarios_nicho', 'id_nicho.id_cementerio'],
       });
       if (!huecoNicho) {
         throw new NotFoundException('Hueco de nicho no encontrado');
@@ -65,6 +65,15 @@ export class RequisitosInhumacionService {
         throw new ConflictException(
           'El hueco del nicho seleccionado no está disponible',
         );
+      }
+
+      // Control: Validar que el hueco pertenezca al cementerio indicado
+      if (
+        !huecoNicho.id_nicho ||
+        !huecoNicho.id_nicho.id_cementerio ||
+        (typeof dto.id_cementerio === 'object' && dto.id_cementerio.id_cementerio !== huecoNicho.id_nicho.id_cementerio.id_cementerio)
+      ) {
+        throw new BadRequestException('El hueco seleccionado no pertenece al cementerio indicado');
       }
 
       // Buscar persona fallecida
