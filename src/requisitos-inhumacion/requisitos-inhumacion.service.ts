@@ -340,13 +340,62 @@ export class RequisitosInhumacionService {
    */
   async remove(id: string) {
     try {
-      const res = await this.repo.delete(id);
+      // Buscar el requisito y su inhumación vinculada usando QueryBuilder
+      const requisito = await this.repo.createQueryBuilder('requisito')
+        .leftJoinAndSelect('requisito.inhumacion', 'inhumacion')
+        .where('requisito.id_requsitoInhumacion = :id', { id })
+        .getOne();
+
+      if (!requisito) {
+        throw new NotFoundException(`Requisito ${id} no encontrado`);
+      }
+
+      // Verifica todos los booleanos requeridos (excepto autorizacionDeMovilizacionDelCadaver)
+      const allRequiredTrue =
+        requisito.copiaCedula === true &&
+        requisito.copiaCertificadoDefuncion === true &&
+        requisito.informeEstadisticoINEC === true &&
+        requisito.pagoTasaInhumacion === true &&
+        requisito.copiaTituloPropiedadNicho === true &&
+        requisito.OficioDeSolicitud === true;
+
+      // Si todos los documentos están en true (excepto autorizacionDeMovilizacionDelCadaver)
+      // y la inhumación está en 'Realizada', NO permitir eliminar
+      if (
+        allRequiredTrue &&
+        requisito.inhumacion &&
+        requisito.inhumacion.estado === 'Realizada'
+      ) {
+        throw new ConflictException(
+          'No se puede eliminar el requisito porque todos los documentos están completos y la inhumación está en estado Realizada.'
+        );
+      }
+
+      // Si tiene inhumación vinculada en estado 'Pendiente', eliminar en cascada la inhumación
+      if (
+        requisito.inhumacion &&
+        requisito.inhumacion.estado === 'Pendiente'
+      ) {
+        await this.inhumacionRepo.createQueryBuilder()
+          .delete()
+          .from(Inhumacion)
+          .where('id_inhumacion = :id', { id: requisito.inhumacion.id_inhumacion })
+          .execute();
+      }
+
+      // Eliminar el requisito
+      const res = await this.repo.createQueryBuilder()
+        .delete()
+        .from(RequisitosInhumacion)
+        .where('id_requsitoInhumacion = :id', { id })
+        .execute();
+
       if (!res.affected)
         throw new NotFoundException(`Requisito ${id} no encontrado`);
-      // Mapeo explícito de la respuesta
+
       return { deleted: true, id };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
       throw new InternalServerErrorException('Error al eliminar el requisito: ' + (error.message || error));
     }
   }

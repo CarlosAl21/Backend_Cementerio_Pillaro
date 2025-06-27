@@ -1,6 +1,6 @@
 import { Nicho } from './../nicho/entities/nicho.entity';
 import { CreateInhumacionDto } from './dto/create-inhumaciones.dto';
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Inhumacion } from './entities/inhumacion.entity';
@@ -267,15 +267,36 @@ export class InhumacionesService {
    */
   async remove(id: string) {
     try {
-      const inhumacion = await this.repo.findOne({ where: { id_inhumacion: id } });
+      // Buscar la inhumación con su requisito asociado
+      const inhumacion = await this.repo.createQueryBuilder('inhumacion')
+        .leftJoinAndSelect('inhumacion.id_requisitos_inhumacion', 'requisito')
+        .where('inhumacion.id_inhumacion = :id', { id })
+        .getOne();
+
       if (!inhumacion) {
         throw new NotFoundException(`Inhumación con ID ${id} no encontrada`);
       }
-      await this.repo.remove(inhumacion);
-      // Mapeo explícito de la respuesta
+
+      // Solo permitir eliminar si la inhumación está en Pendiente
+      if (inhumacion.estado !== 'Pendiente') {
+        throw new ConflictException('No se puede eliminar una inhumación que ya fue realizada.');
+      }
+
+      // Si tiene requisito de inhumación, eliminarlo también
+      if (inhumacion.id_requisitos_inhumacion) {
+        await this.repo.manager.getRepository('RequisitosInhumacion')
+          .createQueryBuilder()
+          .delete()
+          .where('id_requsitoInhumacion = :id', { id: inhumacion.id_requisitos_inhumacion.id_requsitoInhumacion })
+          .execute();
+      }
+
+      // Eliminar la inhumación
+      await this.repo.delete(id);
+
       return { deleted: true, id };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof NotFoundException || error instanceof ConflictException) throw error;
       throw new InternalServerErrorException('Error al eliminar la inhumación: ' + (error.message || error));
     }
   }

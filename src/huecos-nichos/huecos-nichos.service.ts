@@ -175,4 +175,21 @@ export class HuecosNichosService {
       throw new InternalServerErrorException('Error al eliminar el hueco del nicho: ' + (error.message || error));
     }
   }
+
+  async findAllDisponiblesByCementerio(id_cementerio: string) {
+    try {
+      const huecos = await this.huecoRepository
+        .createQueryBuilder('hueco')
+        .leftJoinAndSelect('hueco.id_nicho', 'nicho')
+        .where('nicho.id_cementerio = :id_cementerio', { id_cementerio })
+        .andWhere('hueco.estado = :estado', { estado: 'Disponible' })
+        .getMany();
+      return huecos.map(h => ({
+        ...h,
+        nicho: h.id_nicho,
+      }));
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los huecos disponibles por cementerio: ' + (error.message || error));
+    }
+  }
 }
