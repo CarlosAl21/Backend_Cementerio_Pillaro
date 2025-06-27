@@ -196,21 +196,36 @@ export class PersonasService {
   }
 
   /**
-   * Busca personas por cédula, nombres o apellidos (consulta flexible)
+   * Busca personas por cédula, nombres o apellidos con filtro opcional por estado vivo/fallecido
    */
-  async findBy(query?: string): Promise<Persona[]> {
+  async findBy(query?: string, vivos?: boolean): Promise<Persona[]> {
     try {
-      if (!query) {
-        return this.personaRepo.find();
-      }
-      const searchTerm = `%${query}%`;
-      return await this.personaRepo
-        .createQueryBuilder('persona')
-        .where(
+      const queryBuilder = this.personaRepo.createQueryBuilder('persona');
+
+      // Filtro por término de búsqueda
+      if (query) {
+        const searchTerm = `%${query}%`;
+        queryBuilder.where(
           '(persona.cedula ILIKE :searchTerm OR persona.nombres ILIKE :searchTerm OR persona.apellidos ILIKE :searchTerm)',
           { searchTerm },
-        )
-        .getMany();
+        );
+      }
+
+      // Filtro por estado vivo/fallecido
+      if (vivos !== undefined) {
+        const fallecido = !vivos; // Si vivos=true, entonces fallecido=false
+        if (query) {
+          queryBuilder.andWhere('persona.fallecido = :fallecido', {
+            fallecido,
+          });
+        } else {
+          queryBuilder.where('persona.fallecido = :fallecido', {
+            fallecido,
+          });
+        }
+      }
+
+      return await queryBuilder.getMany();
     } catch (error) {
       throw new InternalServerErrorException('Error al buscar personas: ' + (error.message || error));
     }
