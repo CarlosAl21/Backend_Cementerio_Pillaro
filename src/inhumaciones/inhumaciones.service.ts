@@ -173,6 +173,8 @@ export class InhumacionesService {
     }
   }
 
+
+  
   /**
    * Actualiza una inhumación por su ID
    */
@@ -369,5 +371,79 @@ export class InhumacionesService {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Error al buscar por cédula de solicitante: ' + (error.message || error));
     }
+  }
+
+  /**
+   * Busca fallecidos en inhumaciones por cédula, nombres o apellidos usando búsqueda parcial
+   * Normaliza el texto para ser case-insensitive y sin acentos
+   */
+  async findByBusquedaFallecido(busqueda: string) {
+    try {
+      const busquedaNormalizada = this.normalizarTexto(busqueda);
+      // Búsqueda parcial por cédula, nombres o apellidos (case-insensitive)
+      const personas = await this.personaRepo
+        .createQueryBuilder('persona')
+        .where('persona.fallecido = :fallecido', { fallecido: true })
+        .andWhere(
+          `(
+            persona.cedula ILIKE :busqueda OR
+            persona.nombres ILIKE :busqueda OR
+            persona.apellidos ILIKE :busqueda
+          )`,
+          { busqueda: `%${busquedaNormalizada}%` },
+        )
+        .getMany();
+
+      if (!personas || personas.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      // Buscar inhumaciones para todas las personas encontradas
+      const resultados: any[] = [];
+      for (const persona of personas) {
+        const inhumaciones = await this.repo.find({
+          where: { id_fallecido: { id_persona: persona.id_persona } },
+          relations: ['id_nicho', 'id_nicho.id_cementerio'],
+        });
+        if (inhumaciones && inhumaciones.length > 0) {
+          resultados.push({
+            fallecido: persona,
+            inhumaciones: inhumaciones,
+            nichos: inhumaciones.map((i) => i.id_nicho),
+            cementerios: inhumaciones.map((i) => i.id_nicho?.id_cementerio),
+          });
+        }
+      }
+
+      if (resultados.length === 0) {
+        throw new NotFoundException(
+          `No se encontraron inhumaciones para fallecidos que coincidan con: ${busqueda}`,
+        );
+      }
+
+      return {
+        termino_busqueda: busqueda,
+        total_encontrados: resultados.length,
+        fallecidos: resultados,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException(
+        'Error al buscar las inhumaciones por término de búsqueda: ' + (error.message || error),
+      );
+    }
+  }
+
+  /**
+   * Normaliza texto para búsqueda: convierte a minúsculas y remueve acentos
+   */
+  private normalizarTexto(texto: string): string {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim();
   }
 }
