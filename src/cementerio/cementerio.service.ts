@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { CreateCementerioDto } from './dto/create-cementerio.dto';
 import { UpdateCementerioDto } from './dto/update-cementerio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -92,16 +92,28 @@ export class CementerioService {
    */
   async remove(id: string) {
     try {
-      // Busca el cementerio a eliminar
-      const cementerio = await this.cementerioRepository.findOne({ where: { id_cementerio: id } });
+      // Busca el cementerio a eliminar con sus nichos asociados
+      const cementerio = await this.cementerioRepository.findOne({ 
+        where: { id_cementerio: id },
+        relations: ['nichos']
+      });
+      
       if (!cementerio) {
         throw new NotFoundException('No se encontro el cementerio');
       }
-      // Elimina el cementerio
+
+      // Verifica si el cementerio tiene nichos asociados
+      if (cementerio.nichos && cementerio.nichos.length > 0) {
+        throw new BadRequestException(
+          `No se puede eliminar el cementerio "${cementerio.nombre}" porque tiene ${cementerio.nichos.length} nicho(s) asociado(s). Primero debe eliminar o reubicar los nichos.`
+        );
+      }
+
+      // Elimina el cementerio solo si no tiene nichos asociados
       await this.cementerioRepository.remove(cementerio);
-      return { deleted: true, id };
+      return { deleted: true, id, mensaje: `Cementerio "${cementerio.nombre}" eliminado exitosamente` };
     } catch (error) {
-      if (error instanceof NotFoundException) throw error;
+      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
       throw new InternalServerErrorException('Error al eliminar el cementerio: ' + (error.message || error));
     }
   }

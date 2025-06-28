@@ -236,6 +236,24 @@ export class PersonasService {
    */
   async update(id: string, dto: UpdatePersonaDto) {
     try {
+
+      // Validar cédula o RUC
+      if (
+        !dto.cedula ||
+        !this.validarCedula(dto.cedula)
+      ) {
+        throw new BadRequestException('Cédula inválida');
+      }
+
+      const duplicatedCedula = await this.personaRepo.findOne({
+        where: { cedula: dto.cedula },
+      });
+
+      if (duplicatedCedula && duplicatedCedula.id_persona !== id) {
+        throw new ConflictException('Ya existe una persona con esta cédula');
+      }
+
+
       const persona = await this.personaRepo.findOne({
         where: { id_persona: id },
       });

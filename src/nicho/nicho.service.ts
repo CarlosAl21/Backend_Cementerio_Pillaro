@@ -310,10 +310,14 @@ export class NichoService {
         );
       }
 
+      const sinDuplicados = resultados.filter((resultado, index, self) =>
+        index === self.findIndex((t) => t.fallecido.id_persona === resultado.fallecido.id_persona),
+      );
+
       return {
         termino_busqueda: busqueda,
-        total_encontrados: resultados.length,
-        fallecidos: resultados,
+        total_encontrados: sinDuplicados.length,
+        fallecidos: sinDuplicados,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
