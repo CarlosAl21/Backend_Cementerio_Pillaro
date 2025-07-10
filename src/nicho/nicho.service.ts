@@ -10,6 +10,7 @@ import { CreateNichoDto } from './dto/create-nicho.dto';
 import { UpdateNichoDto } from './dto/update-nicho.dto';
 import { HuecosNicho } from 'src/huecos-nichos/entities/huecos-nicho.entity';
 import { Persona } from 'src/personas/entities/persona.entity';
+import { PropietarioNicho } from 'src/propietarios-nichos/entities/propietarios-nicho.entity';
 
 @Injectable()
 export class NichoService {
@@ -20,6 +21,8 @@ export class NichoService {
     private readonly huecosNichoRepository: Repository<HuecosNicho>,
     @InjectRepository(Persona)
     private readonly personaRepository: Repository<Persona>,
+    @InjectRepository(PropietarioNicho)
+    private readonly nichoPropietarioRepository: Repository<PropietarioNicho>,
   ) {}
 
   /**
@@ -47,7 +50,9 @@ export class NichoService {
         huecos: huecosGuardados,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Error al crear el nicho: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al crear el nicho: ' + (error.message || error),
+      );
     }
   }
 
@@ -76,7 +81,9 @@ export class NichoService {
         huecos: nicho.huecos,
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los nichos: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al obtener los nichos: ' + (error.message || error),
+      );
     }
   }
 
@@ -94,7 +101,9 @@ export class NichoService {
         huecos: nicho.huecos.filter((hueco) => hueco.estado === 'Disponible'),
       }));
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los nichos: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al obtener los nichos: ' + (error.message || error),
+      );
     }
   }
 
@@ -127,7 +136,9 @@ export class NichoService {
     } catch (error) {
       console.log(error);
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar el nicho: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al buscar el nicho: ' + (error.message || error),
+      );
     }
   }
 
@@ -148,7 +159,9 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al actualizar el nicho: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al actualizar el nicho: ' + (error.message || error),
+      );
     }
   }
 
@@ -157,7 +170,9 @@ export class NichoService {
    */
   async remove(id: string) {
     try {
-      const nicho = await this.nichoRepository.findOne({ where: { id_nicho: id } });
+      const nicho = await this.nichoRepository.findOne({
+        where: { id_nicho: id },
+      });
       if (!nicho) {
         throw new NotFoundException(`Nicho con ID ${id} no encontrado`);
       }
@@ -166,7 +181,9 @@ export class NichoService {
       return { deleted: true, id };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al eliminar el nicho: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al eliminar el nicho: ' + (error.message || error),
+      );
     }
   }
 
@@ -188,7 +205,10 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar los propietarios del nicho: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al buscar los propietarios del nicho: ' +
+          (error.message || error),
+      );
     }
   }
 
@@ -203,7 +223,7 @@ export class NichoService {
       // Búsqueda parcial por cédula, nombres o apellidos (case-insensitive)
       const personas = await this.personaRepository
         .createQueryBuilder('persona')
-        .where('persona.fallecido = :fallecido', { fallecido: true })
+        // .where('persona.fallecido = :fallecido', { fallecido: true })
         .andWhere(
           `(
             persona.cedula ILIKE :busqueda OR
@@ -222,6 +242,7 @@ export class NichoService {
 
       // Buscar huecos para todas las personas encontradas
       const resultados: any[] = [];
+
       for (const persona of personas) {
         const huecos = await this.huecosNichoRepository.find({
           where: { id_fallecido: { id_persona: persona.id_persona } },
@@ -236,6 +257,51 @@ export class NichoService {
             cementerios: huecos.map((h) => h.id_nicho?.id_cementerio),
           });
         }
+
+        
+
+        const nichosDuenos = await this.nichoRepository
+          .createQueryBuilder('nicho')
+          .leftJoinAndSelect('nicho.propietarios_nicho', 'propietario')
+          .leftJoinAndSelect('nicho.huecos', 'huecos')
+          .leftJoinAndSelect('huecos.id_nicho', 'hueco_nicho')
+          .leftJoinAndSelect('huecos.id_fallecido', 'fallecido')
+          .leftJoinAndSelect('nicho.id_cementerio', 'cementerio')
+          .where('propietario.id_persona = :personaId', {
+            personaId: persona.id_persona,
+          })
+          .andWhere('propietario.activo = :activo', { activo: true })
+          .getMany();
+
+        for (const nichoDueno of nichosDuenos) {
+          // Ya tienes los huecos del nicho desde la consulta anterior
+
+          const huecosDuenos = nichoDueno.huecos;
+
+          // console.log(huecosDuenos);
+
+          for (const huecoDueno of huecosDuenos) {
+
+            const huecos = await this.huecosNichoRepository.find({
+              where: { id_detalle_hueco: huecoDueno.id_detalle_hueco },
+              relations: ['id_nicho', 'id_nicho.id_cementerio'],
+            });
+    
+            let fallecido1: Persona | null = null;
+            if (huecoDueno.id_fallecido) {
+              fallecido1 = await this.personaRepository.findOne({
+                where: { id_persona: huecoDueno.id_fallecido.id_persona },
+              });
+              resultados.push({
+                fallecido: fallecido1,
+                huecos: huecos,
+            nichos: huecos.map((h) => h.id_nicho),
+            cementerios: huecos.map((h) => h.id_nicho?.id_cementerio),
+              });
+            }
+            }
+           
+        }
       }
 
       if (resultados.length === 0) {
@@ -244,15 +310,20 @@ export class NichoService {
         );
       }
 
+      const sinDuplicados = resultados.filter((resultado, index, self) =>
+        index === self.findIndex((t) => t.fallecido.id_persona === resultado.fallecido.id_persona),
+      );
+
       return {
         termino_busqueda: busqueda,
-        total_encontrados: resultados.length,
-        fallecidos: resultados,
+        total_encontrados: sinDuplicados.length,
+        fallecidos: sinDuplicados,
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
-        'Error al buscar los nichos por término de búsqueda: ' + (error.message || error),
+        'Error al buscar los nichos por término de búsqueda: ' +
+          (error.message || error),
       );
     }
   }
@@ -284,7 +355,10 @@ export class NichoService {
       };
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Error al buscar los nichos por cédula del fallecido: ' + (error.message || error));
+      throw new InternalServerErrorException(
+        'Error al buscar los nichos por cédula del fallecido: ' +
+          (error.message || error),
+      );
     }
   }
 

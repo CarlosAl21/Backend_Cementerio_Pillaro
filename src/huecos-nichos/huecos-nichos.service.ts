@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class HuecosNichosService {
   @InjectRepository(HuecosNicho)
   private readonly huecoRepository: Repository<HuecosNicho>
-    constructor() {}
+  constructor() { }
 
   /**
    * Crea un nuevo hueco para un nicho
@@ -182,7 +182,6 @@ export class HuecosNichosService {
         .createQueryBuilder('hueco')
         .leftJoinAndSelect('hueco.id_nicho', 'nicho')
         .where('nicho.id_cementerio = :id_cementerio', { id_cementerio })
-        .andWhere('hueco.estado = :estado', { estado: 'Disponible' })
         .getMany();
       return huecos.map(h => ({
         ...h,

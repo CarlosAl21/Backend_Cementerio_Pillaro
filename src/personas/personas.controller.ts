@@ -80,14 +80,36 @@ export class PersonasController {
   }
 
   @Get('search')
-  @ApiOperation({ summary: 'Buscar personas', description: 'Busca personas por cédula, nombres o apellidos. Si no se proporciona query, devuelve todas las personas.' })
-  @ApiQuery({ name: 'query', required: false, description: 'Término de búsqueda (cédula, nombres o apellidos)' })
+  @ApiOperation({ 
+    summary: 'Buscar personas', 
+    description: 'Busca personas por cédula, nombres o apellidos. Opcionalmente filtra por estado vivo/fallecido.' 
+  })
+  @ApiQuery({ 
+    name: 'query', 
+    required: false, 
+    description: 'Término de búsqueda (cédula, nombres o apellidos)' 
+  })
+  @ApiQuery({ 
+    name: 'vivos', 
+    required: false, 
+    type: Boolean,
+    description: 'Filtrar por estado: true=vivos, false=fallecidos, sin especificar=todos' 
+  })
   @ApiOkResponse({ 
     description: 'Resultados de la búsqueda',
     type: [Persona]
   })
-  async search(@Query('query') query?: string): Promise<Persona[]> {
-    return this.personasService.findBy(query);
+  async search(
+    @Query('query') query?: string,
+    @Query('vivos') vivosParam?: string
+  ): Promise<Persona[]> {
+    // Convertir string a boolean correctamente
+    let vivos: boolean | undefined;
+    if (vivosParam !== undefined) {
+      vivos = vivosParam === 'true';
+    }
+    
+    return this.personasService.findBy(query, vivos);
   }
 
   @Get(':id')
