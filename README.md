@@ -26,74 +26,80 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+**Descripción del Proyecto**
 
-```bash
-$ npm install
+Este repositorio contiene el backend del sistema de gestión del Cementerio de Píllaro. Es una API REST construida con `NestJS` y `TypeORM` para gestionar entidades como inhumaciones, exhumaciones, nichos, propietarios y otros recursos relacionados.
+
+**Estructura de carpetas (resumen)**
+
+- **`/src`**: Código fuente principal.
+  - **`auth/`**: Autenticación y autorización (JWT, roles).
+  - **`cementerio/`**, **`exumacion/`**, **`inhumaciones/`**, **`nicho/`**, **`personas/`**, **`propietarios-nichos/`**, **`requisitos-inhumacion/`**, **`huecos-nichos/`**: Módulos principales del dominio.
+  - **`common/`**, **`shared/`**: DTOs, interceptores, utilidades y generadores (ej. PDF).
+  - **`database/`**: Configuración y scripts de seeds (`/src/database/seeds`).
+  - **`main.ts`**, **`app.module.ts`**, **`app.controller.ts`**, **`app.service.ts`**: Entrada y wiring de la aplicación.
+- **`assets/`**: Fuentes e imágenes usadas por el proyecto.
+- **`test/`**: Pruebas e2e y configuración de Jest.
+- `package.json`, `tsconfig.json`, `docker-compose.yml`, etc.: Configuración del proyecto.
+
+**Instalación**
+
+- **Requisitos**: Node.js (recomendado v16+ o v18+), `npm` o `pnpm`.
+- **Instalar dependencias**: ejecutar en la raíz del repositorio:
+
+```
+npm install
 ```
 
-## Compile and run the project
+- **Variables de entorno**: configurar las variables necesarias (base de datos, credenciales AWS S3, JWT_SECRET, etc.). Se recomienda crear un archivo `.env` o usar `@nestjs/config` según la configuración del proyecto.
 
-```bash
-# development
-$ npm run start
+**Dependencias principales**
 
-# watch mode
-$ npm run start:dev
+- **Framework y utilidades**: `@nestjs/core`, `@nestjs/common`, `@nestjs/platform-express`, `@nestjs/config`, `rxjs`, `reflect-metadata`.
+- **ORM / BD**: `typeorm` (soporta drivers `pg` y `oracledb` según configuración). Dependencias incluidas: `pg`, `oracledb`.
+- **Autenticación**: `@nestjs/jwt`, `passport`, `passport-jwt`, `@nestjs/passport`, `bcrypt`, `bcryptjs`.
+- **Almacenamiento / archivos**: `multer`, `multer-s3`, `@aws-sdk/client-s3`.
+- **Documentación / utilidades**: `@nestjs/swagger`, `pdfmake`.
 
-# production mode
-$ npm run start:prod
+DevDependencies importantes:
+
+- `typescript`, `ts-node`, `ts-jest`, `jest`, `eslint`, `prettier`, `@nestjs/cli`.
+
+Si prefieres la lista completa, se encuentran en `package.json` bajo `dependencies` y `devDependencies`.
+
+**Ejecución**
+
+- **Modo desarrollo (watch)**:
+
+```
+npm run dev
 ```
 
-## Run tests
+- **Iniciar en modo producción** (compilar luego ejecutar):
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+npm run build
+npm run start:prod
 ```
 
-## Deployment
+- **Otros scripts disponibles** (ver `package.json`):
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- **`npm run start`**: iniciar sin watch.
+- **`npm run lint`**: ejecutar ESLint y arreglar donde sea posible.
+- **`npm run test`**, **`npm run test:e2e`**, **`npm run test:cov`**: pruebas unitarias, e2e y cobertura.
+- **`npm run seed`**: ejecutar seeds (`src/database/seeds/*`).
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+**Notas y recomendaciones**
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+- Mantén las variables de entorno seguras y fuera del control de versiones.
+- Para desarrollo con Oracle use la configuración y credenciales adecuadas; si usas Postgres asegúrate de ajustar `ormconfig` o `TypeOrmModule` en `app.module`.
+- Considera usar `docker-compose.yml` incluido para levantar dependencias (BD) en desarrollo.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Si quieres, puedo:
 
-## Resources
+- Añadir ejemplos de `.env` y `.env.example`.
+- Crear instrucciones para desplegar con `docker-compose`.
 
-Check out a few resources that may come in handy when working with NestJS:
+---
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Archivo actualizado: `README.md` — Si quieres cambios de estilo o más detalles (ej. ejemplo de llamadas a la API), dime y lo añado.
